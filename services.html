@@ -28,18 +28,16 @@
             <p class="text-center note">الأيام الملونة بالأحمر ممتلئة تماماً. اضغط على أي يوم آخر لعرض المواعيد المتاحة.</p>
         </section>
 
-        <!-- Time Slots Modal (نافذة المواعيد) -->
+        <!-- Time Slots Modal -->
         <div id="time-slots-modal" class="modal">
             <div class="modal-content">
                 <span class="close-button" id="close-slots-modal">×</span>
                 <h3 id="slots-modal-title">المواعيد المتاحة ليوم</h3>
-                <div id="time-slots-container">
-                    <!-- سيتم ملء المواعيد هنا عبر جافاسكريبت -->
-                </div>
+                <div id="time-slots-container"></div>
             </div>
         </div>
 
-        <!-- Booking Form Modal (نافذة نموذج الحجز) -->
+        <!-- Booking Form Modal -->
         <div id="booking-modal" class="modal">
             <div class="modal-content">
                 <span class="close-button" id="close-booking-modal">×</span>
@@ -50,7 +48,6 @@
                     <input type="text" id="fullName" required>
                     <label for="phone">رقم الهاتف:</label>
                     <input type="tel" id="phone" required>
-                    <!-- حقول مخفية لحفظ التاريخ والوقت -->
                     <input type="hidden" id="selected-date">
                     <input type="hidden" id="selected-time">
                     <button type="submit" class="btn">إرسال طلب الحجز</button>
@@ -58,19 +55,16 @@
             </div>
         </div>
     </main>
-
-    <!-- فوتر واحد فقط -->
+    
     <footer>
         <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
     </footer>
 
-    <!-- Firebase Libraries -->
+    <!-- Firebase Libraries (يتم استدعاؤها مرة واحدة فقط) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
-    <!-- Main Script -->
+    <!-- Main Script (يتم استدعاؤه مرة واحدة فقط) -->
     <script src="js/main.js"></script>
 </body>
-</html>```
-
-بعد استبدال الكود، احفظ الملف وارفعه على GitHub، وافتح الموقع واضغط `Ctrl + Shift + R`. أنا واثق تماماً أن مشكلة الفوتر المزدوج ستختفي من صفحة الخدمات هذه المرة. أعتذر مرة أخرى عن هذا الإغفال.
+</html>
