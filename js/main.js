@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // الخطوة 2: تهيئة التطبيق بالطريقة الصحيحة (Compat/v8)
-    // تم حذف أسطر الاتصال الخاطئة الخاصة بالإصدار 9 من هنا
     firebase.initializeApp(firebaseConfig);
 
     // الخطوة 3: إنشاء متغيرات الاتصال الأساسية
@@ -56,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
 
-    // تم تغيير اسم الدالة من initializeApp إلى startBookingSystem لتجنب التضارب
     function startBookingSystem() {
         const settingsRef = db.ref('settings').once('value');
         const servicesRef = db.ref('services').once('value');
@@ -104,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupUIForBookingModel() {
         if (!calendarSection || !calendarTitle) return;
         calendarSection.style.display = 'block';
-        const serviceSection = document.getElementById('service-selection-section'); // Check for element inside function
-        if(serviceSection) serviceSection.style.display = 'none'; // This makes the code safer
+        const serviceSection = document.getElementById('service-selection-section');
+        if(serviceSection) serviceSection.style.display = 'none';
 
         if (settings.bookingModel === 'capacity') {
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
@@ -159,8 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
                          const availableCount = capacity - approvedBookingsCount;
                          dayDiv.innerHTML += `<br><small>متاح: ${availableCount}</small>`;
                     }
-                } else { // This handles the 'slots' model implicitly
-                    dayDiv.classList.add('available'); // Mark day as generally available for slot picking
+                } else {
+                    dayDiv.classList.add('available');
                 }
             }
             calendarView.appendChild(dayDiv);
@@ -279,7 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dayFormatted = date.split('-').slice(1).join('');
                 const counterRef = db.ref(`dayCounters/${date}`);
                 counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
-                    const bookingCode = dayFormatted + transactionResult.snapshot.val();
+                    // **** هذا هو التعديل الأساسي والنهائي لمشكلة الكود ****
+                    // يضمن أن يكون العداد دائما من رقمين (01, 02, .. 10)
+                    const bookingCode = dayFormatted + String(transactionResult.snapshot.val()).padStart(2, '0');
+                    
                     ref.update({ bookingCode: bookingCode });
                     showConfirmationModal(bookingCode, newBooking.paymentMethod);
                 });
