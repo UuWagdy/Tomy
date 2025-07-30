@@ -1,12 +1,14 @@
-/* --- ستايل صفحة الخدمات والتقويم (النسخة الكاملة والمحدثة) --- */
+/* --- ستايل صفحة الخدمات (تصميم داكن ومحسن) --- */
 
 /* General Body Styles */
 body {
     font-family: 'Tajawal', sans-serif;
     margin: 0;
-    background-color: #f9f9f9;
-    color: #333;
+    /* نفس خلفية الصفحة الرئيسية */
+    background-color: #112A2A;
+    color: #f0f0f0;
     direction: rtl;
+    font-size: 16px;
 }
 .container {
     max-width: 1100px;
@@ -23,10 +25,13 @@ body {
 
 /* Header & Navigation */
 header {
-    background: #222;
+    background: #1d1d1d;
     color: #fff;
     padding: 1rem 0;
     border-bottom: 3px solid #d4af37;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 header nav {
     display: flex;
@@ -36,22 +41,18 @@ header nav {
 .logo-link img.logo {
     max-height: 50px;
 }
-header ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+header ul { list-style: none; padding: 0; margin: 0; }
+header ul li { display: inline; margin-left: 25px; }
+header a { color: #fff; text-decoration: none; transition: color 0.3s; }
+header a:hover { color: #d4af37; }
+
+/* Titles */
+h2, h3 {
+    font-family: 'Cairo', sans-serif;
 }
-header ul li {
-    display: inline;
-    margin-left: 25px;
-}
-header a {
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-header a:hover {
+#calendar-title, #slots-modal-title {
     color: #d4af37;
+    font-size: 2rem;
 }
 
 /* Buttons */
@@ -60,24 +61,24 @@ header a:hover {
     padding: 12px 25px;
     background: #333;
     color: #fff;
-    border: none;
+    border: 1px solid #555;
     border-radius: 5px;
     cursor: pointer;
-    text-decoration: none;
-    transition: background-color 0.3s;
-    font-size: 16px;
-    margin-left: 5px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
 }
 .btn:hover {
-    background: #555;
+    background: #444;
 }
 .btn-primary {
     background: #d4af37;
-    color: #222;
+    color: #111;
     font-weight: bold;
+    border: none;
 }
 .btn:disabled {
-    background-color: #ccc;
+    background-color: #555;
+    color: #888;
     cursor: not-allowed;
 }
 
@@ -87,6 +88,9 @@ header a:hover {
     justify-content: space-between;
     align-items: center;
     margin: 2rem 0;
+}
+#current-week-display {
+    font-size: 1.5rem;
 }
 .week-view {
     display: grid;
@@ -98,45 +102,44 @@ header a:hover {
     background: #fff;
     border: 1px solid #ddd;
     padding: 15px;
-    border-radius: 5px;
+    border-radius: 8px;
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
-    min-height: 80px;
+    min-height: 90px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* لون النص داخل الأيام بالداكن */
+    color: #333;
+    font-weight: 700;
+}
+.day-slot small {
+    font-size: 0.9rem;
+    font-weight: 400;
 }
 .day-slot:hover {
     background-color: #f0f0f0;
     transform: translateY(-2px);
 }
 .day-slot.full {
-    background-color: #ffebee;
-    border-color: #ef9a9a;
-    color: #c62828;
-    font-weight: bold;
+    background-color: #753d3d;
+    color: #ffcccc;
     cursor: not-allowed;
 }
 .day-slot.disabled {
-    background-color: #f5f5f5;
-    color: #bdbdbd;
+    background-color: #333;
+    color: #777;
     cursor: not-allowed;
 }
 
-/* Modal Styles */
+/* Modal Styles (Pop-ups) */
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7);
 }
 .modal-content {
     background: #fff;
+    color: #333; /* النص داخل المودال داكن */
     margin: 10% auto;
     padding: 25px;
     border-radius: 8px;
@@ -145,21 +148,18 @@ header a:hover {
     position: relative;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
+.modal-content h3 {
+    font-family: 'Cairo', sans-serif;
+    color: #333;
+}
 .close-button {
-    position: absolute;
-    right: auto;
-    left: 15px;
-    top: 10px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #aaa;
-    cursor: pointer;
+    position: absolute; right: auto; left: 15px; top: 10px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer;
 }
 
 /* Time Slots Modal Styles */
 #time-slots-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     gap: 10px;
     margin-top: 20px;
 }
@@ -167,85 +167,49 @@ header a:hover {
     padding: 15px 10px;
     border-radius: 5px;
     text-align: center;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 1.1rem;
     cursor: pointer;
+    transition: transform 0.2s;
 }
-.time-slot.available {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
+.time-slot:hover {
+    transform: scale(1.05);
 }
-
-/* ====== هذا هو الجزء الذي تم إصلاحه ====== */
-
-/* المواعيد المعلقة (باللون الأصفر/البرتقالي) */
-.time-slot.pending {
-    background-color: #fffde7; /* خلفية صفراء فاتحة */
-    color: #f9a825; /* نص برتقالي داكن */
-    cursor: not-allowed;
-    text-decoration: line-through;
-    border: 1px solid #fdd835; /* إطار أصفر */
-}
-
-/* المواعيد الموافق عليها (باللون الأحمر) */
-.time-slot.approved {
-    background-color: #ffebee; /* خلفية حمراء فاتحة */
-    color: #c62828; /* نص أحمر داكن */
-    cursor: not-allowed;
-    text-decoration: line-through;
-    border: 1px solid #ef9a9a; /* إطار أحمر */
-}
-
-/* ====== نهاية الجزء الذي تم إصلاحه ====== */
-
+.time-slot.available { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.time-slot.pending { background-color: #fffde7; color: #f9a825; cursor: not-allowed; text-decoration: line-through; border: 1px solid #fdd835; }
+.time-slot.approved { background-color: #ffebee; color: #c62828; cursor: not-allowed; text-decoration: line-through; border: 1px solid #ef9a9a; }
 
 /* Form Styles */
 form label {
     display: block;
     margin-top: 15px;
-    font-weight: bold;
+    font-weight: 700; /* Bold */
+    font-size: 1.1rem;
 }
 form input, form select {
     width: 100%;
-    padding: 10px;
-    margin-top: 5px;
+    padding: 12px;
+    margin-top: 8px;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
-}
-form button {
-    margin-top: 20px;
-    width: 100%;
+    font-size: 1rem;
 }
 #selected-slot-display {
     background-color: #eee;
-    padding: 10px;
+    padding: 12px;
     border-radius: 4px;
     margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
 }
-
-/* User-facing booking specifics */
 .booking-code {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #d4af37;
-    background: #f5f5f5;
-    padding: 10px;
-    border-radius: 8px;
+    font-size: 2.5rem; font-weight: 700; color: #d4af37; background: #333; padding: 10px 20px; border-radius: 8px; border: 2px dashed #d4af37;
 }
-#payment-info-display {
-    margin-top: 1rem;
-    padding: 15px;
-    background: #fffde7;
-    border: 1px solid #fff59d;
-    border-radius: 5px;
-}
+#payment-info-display { margin-top: 1rem; padding: 15px; background: #fffde7; border: 1px solid #fff59d; border-radius: 5px; color: #5d4037; }
+#payment-info-display h4 { color: #333; }
 
 /* Footer */
 footer {
-    text-align: center;
-    padding: 2rem 0;
-    margin-top: 2rem;
-    background: #222;
-    color: #fff;
+    text-align: center; padding: 2rem 0; margin-top: 2rem; background: #111; color: #888;
 }
