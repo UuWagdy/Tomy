@@ -4,75 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
         apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
         authDomain: "tomy-barber-shop.firebaseapp.com",
         projectId: "tomy-barber-shop",
-        storageBucket: "tomy-barber-shop.appspot.com", // Corrected storage bucket URL
+        storageBucket: "tomy-barber-shop.firebasestorage.app",
         messagingSenderId: "693769920483",
         appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
         measurementId: "G-HNW5F8YJE3"
     };
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- Check if we are on the services.html page ---
-    const isBookingPage = document.getElementById('booking-container');
-    if (isBookingPage) {
-        initializeBookingPage(db);
-    }
-
-    // --- Check if we are on the index.html page ---
-    const isHomePage = document.getElementById('gallery-section');
-    if (isHomePage) {
-        initializeHomePage(db);
-    }
-});
-
-function initializeHomePage(db) {
-    const galleryGrid = document.querySelector('.gallery-grid');
-    const headerLogo = document.getElementById('header-logo');
-    
-    // Load Logo
-    db.ref('settings/logoUrl').once('value').then(snapshot => {
-        const logoUrl = snapshot.val();
-        if (logoUrl && headerLogo) {
-            headerLogo.src = logoUrl;
-        }
-    });
-
-    // Load Gallery Images
-    if(galleryGrid) {
-        const galleryRef = db.ref('gallery');
-        galleryRef.on('value', (snapshot) => {
-            galleryGrid.innerHTML = ''; // Clear existing images
-            const images = snapshot.val();
-            if (images) {
-                Object.entries(images).forEach(([key, imageData], index) => {
-                    const galleryItem = document.createElement('div');
-                    galleryItem.className = 'gallery-item animate-on-scroll';
-                    galleryItem.style.transitionDelay = `${index * 0.1}s`;
-                    galleryItem.innerHTML = `<img src="${imageData.url}" alt="Barbershop gallery image">`;
-                    galleryGrid.appendChild(galleryItem);
-                });
-                // Re-observe newly added animated elements
-                const animationObserver = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.1 });
-                document.querySelectorAll('.animate-on-scroll').forEach(el => animationObserver.observe(el));
-            } else {
-                galleryGrid.innerHTML = '<p class="text-center" style="grid-column: 1 / -1;">لا توجد صور في المعرض حاليًا.</p>';
-            }
-        });
-    }
-}
-
-
-function initializeBookingPage(db) {
     let currentDate = new Date();
     let settings = {};
     let services = {};
@@ -112,33 +52,34 @@ function initializeBookingPage(db) {
         const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
         return `${adjustedHour}:${String(minute).padStart(2, '0')} ${period}`;
     }
-    
-    const settingsRef = db.ref('settings').once('value');
-    const servicesRef = db.ref('services').once('value');
-    const bookingsRef = db.ref('bookings').once('value');
 
-    Promise.all([settingsRef, servicesRef, bookingsRef]).then(([settingsSnap, servicesSnap, bookingsSnap]) => {
-        settings = settingsSnap.val() || {};
-        services = servicesSnap.val() || {};
-        bookings = bookingsSnap.val() || {};
+    function initializeApp() {
+        const settingsRef = db.ref('settings').once('value');
+        const servicesRef = db.ref('services').once('value');
+        const bookingsRef = db.ref('bookings').once('value');
 
-        if(loader) loader.style.display = 'none';
-        if(bookingContainer) bookingContainer.style.display = 'block';
-        
-        headerLogo.src = settings.logoUrl || 'logo.png';
-        
-        populatePaymentMethods();
-        setupUIForBookingModel();
-        
-        db.ref('bookings').on('value', snap => {
-            bookings = snap.val() || {};
-            if (calendarSection.style.display !== 'none') renderCalendar();
+        Promise.all([settingsRef, servicesRef, bookingsRef]).then(([settingsSnap, servicesSnap, bookingsSnap]) => {
+            settings = settingsSnap.val() || {};
+            services = servicesSnap.val() || {};
+            bookings = bookingsSnap.val() || {};
+
+            loader.style.display = 'none';
+            bookingContainer.style.display = 'block';
+            
+            headerLogo.src = settings.logoUrl || 'logo.png';
+            
+            populatePaymentMethods();
+            setupUIForBookingModel();
+            
+            db.ref('bookings').on('value', snap => {
+                bookings = snap.val() || {};
+                if (calendarSection.style.display !== 'none') renderCalendar();
+            });
+
+        }).catch(err => {
+            loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
         });
-
-    }).catch(err => {
-        console.error(err);
-        if(loader) loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
-    });
+    }
     
     function populatePaymentMethods() {
         paymentMethodSelect.innerHTML = '<option value="عند تمام العمل" selected>الدفع عند تمام العمل</option>';
@@ -147,21 +88,27 @@ function initializeBookingPage(db) {
             if (settings.paymentDetails.vodafoneCash) paymentMethodSelect.innerHTML += '<option value="Vodafone Cash">فودافون كاش</option>';
         }
     }
-    
+
+    // UPDATED FUNCTION
     function setupUIForBookingModel() {
-        calendarSection.style.display = 'block';
+        calendarSection.style.display = 'block'; // Show calendar for all models
+        
+        // Check the booking model from settings
         if (settings.bookingModel === 'capacity') {
-            serviceSection.style.display = 'none';
+            serviceSection.style.display = 'none'; // Hide service selection
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
-        } else {
-            serviceSection.style.display = 'none';
+        } else { // 'slots' model
+            serviceSection.style.display = 'none'; // Also hide service selection for slots model now
             calendarTitle.textContent = "الخطوة 1: اختر اليوم والموعد";
         }
+        
+        // We still populate services in the background in case they are needed for the booking record
         populateServices(); 
         renderCalendar();
     }
 
     function populateServices() {
+        // This function now just prepares the service data without showing it
         serviceSelect.innerHTML = '<option value="" selected>-- خدمة عامة --</option>';
         for (const id in services) {
             serviceSelect.innerHTML += `<option value="${id}">${services[id].name}</option>`;
@@ -177,10 +124,8 @@ function initializeBookingPage(db) {
     function renderCalendar() {
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
-        const dayOfWeek = weekStart.getDay();
-        weekStart.setDate(weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) -1 ); // Start week on Saturday
-        
-        currentWeekDisplay.textContent = `الأسبوع من ${new Date(weekStart).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
+        weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
+        currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
         
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -195,7 +140,7 @@ function initializeBookingPage(db) {
             dayDiv.className = 'day-slot';
             dayDiv.dataset.date = dayString;
             
-            const dayBookings = Object.values(bookings).filter(b => b.date === dayString && b.status === 'approved');
+            const dayBookings = Object.values(bookings).filter(b => b.date === dayString);
             
             dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
 
@@ -222,8 +167,6 @@ function initializeBookingPage(db) {
     function renderTimeSlots(dateString) {
         slotsContainer.innerHTML = '';
         const schedule = getDaySchedule(new Date(dateString));
-        if(!schedule || !schedule.open || !schedule.close) return;
-
         const slotDuration = parseInt(settings.slotDuration, 10) || 30;
         
         const timeToMinutes = (t) => t.split(':').map(Number).reduce((h, m) => h * 60 + m);
@@ -285,7 +228,8 @@ function initializeBookingPage(db) {
         
         let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
         if(time) display += ` - الساعة ${formatTo12Hour(time)}`;
-        
+
+        // This part is now optional and won't show anything unless a service is manually selected
         const selectedServiceId = serviceSelect.value;
         if(selectedServiceId && services[selectedServiceId]){
             display += ` (خدمة: ${services[selectedServiceId].name})`;
@@ -301,6 +245,7 @@ function initializeBookingPage(db) {
         const date = hiddenDateInput.value;
         const paymentMethod = paymentMethodSelect.value;
         const dayFormatted = date.split('-').slice(1).join('');
+
         const counterRef = db.ref(`dayCounters/${date}`);
         let newId;
         try {
@@ -314,7 +259,7 @@ function initializeBookingPage(db) {
         
         const bookingCode = dayFormatted + newId;
         const selectedServiceId = serviceSelect.value;
-        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : "حجز موعد";
+        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : "حجز موعد"; // Default service name
 
         const newBooking = {
             fullName: document.getElementById('fullName').value,
@@ -366,4 +311,6 @@ function initializeBookingPage(db) {
         if (event.target == slotsModal) slotsModal.style.display = "none";
         if (event.target == confirmationModal) confirmationModal.style.display = "none";
     };
-}
+
+    initializeApp();
+});
