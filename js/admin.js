@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
         authDomain: "tomy-barber-shop.firebaseapp.com",
         projectId: "tomy-barber-shop",
-        storageBucket: "tomy-barber-shop.firebasestorage.app", // This can stay, it doesn't hurt
+        storageBucket: "tomy-barber-shop.firebasestorage.app",
         messagingSenderId: "693769920483",
         appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
         measurementId: "G-HNW5F8YJE3"
@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const auth = firebase.auth();
-    // We no longer need the storage service
-    // const storage = firebase.storage(); 
 
     const adminContent = document.getElementById('admin-content');
     const headerLogo = document.getElementById('header-logo');
@@ -42,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const telegramContactInput = document.getElementById('telegram-contact');
         const bookingModelForm = document.getElementById('booking-model-form');
         const bookingModelSelect = document.getElementById('booking-model-select');
+        const capacityInputContainer = document.getElementById('capacity-input-container');
+        const dailyCapacityInput = document.getElementById('daily-capacity');
         const scheduleForm = document.getElementById('schedule-form');
         const pendingList = document.getElementById('pending-bookings-list');
         const pendingCount = document.getElementById('pending-count');
@@ -60,8 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 vodafoneCashInput.value = settings.paymentDetails.vodafoneCash || '';
                 telegramContactInput.value = settings.paymentDetails.telegramContact || '';
             }
-            // Load Booking Model
+            // Load Booking Model and Capacity
             bookingModelSelect.value = settings.bookingModel || 'slots';
+            dailyCapacityInput.value = settings.dailyCapacity || 15; // Default value of 15
+            
+            // Show/hide capacity input based on the loaded model
+            if (settings.bookingModel === 'capacity') {
+                capacityInputContainer.style.display = 'block';
+            } else {
+                capacityInputContainer.style.display = 'none';
+            }
+
             // Load Schedule
             renderSchedule(settings.schedule);
         });
@@ -79,17 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const days = { monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد' };
             
             for (const day in days) {
-                const dayData = scheduleData[day] || { active: true, open: '09:00', close: '21:00', capacity: 10 };
+                const dayData = scheduleData[day] || { active: true, open: '09:00', close: '21:00' };
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'day-schedule-item';
+                // Removed capacity input from here
                 dayDiv.innerHTML = `
                     <h4>${days[day]}</h4>
                     <label><input type="checkbox" data-day="${day}" class="active-checkbox" ${dayData.active ? 'checked' : ''}> يوم عمل</label>
                     <div class="day-inputs" style="display:${dayData.active ? 'block' : 'none'}">
                         <label>من:</label><input type="time" class="form-control" value="${dayData.open}" ${!dayData.active ? 'disabled' : ''}>
                         <label>إلى:</label><input type="time" class="form-control" value="${dayData.close}" ${!dayData.active ? 'disabled' : ''}>
-                        <label>الطاقة الاستيعابية (للنموذج العددي):</label>
-                        <input type="number" class="form-control" value="${dayData.capacity}" min="1" ${!dayData.active ? 'disabled' : ''}>
                     </div>
                 `;
                 scheduleContainer.appendChild(dayDiv);
@@ -148,8 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         logoForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const newLogoUrl = logoUrlInput.value;
-            db.ref('settings/logoUrl').set(newLogoUrl)
+            db.ref('settings/logoUrl').set(logoUrlInput.value)
                 .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'))
                 .catch(err => showNotification('فشل تحديث الشعار: ' + err.message, 'error'));
         });
@@ -164,10 +171,24 @@ document.addEventListener('DOMContentLoaded', () => {
             db.ref('settings/paymentDetails').set(data)
                 .then(() => showNotification('تم حفظ بيانات الدفع.', 'success'));
         });
+
+        // NEW: Event listener to show/hide capacity input
+        bookingModelSelect.addEventListener('change', () => {
+            if (bookingModelSelect.value === 'capacity') {
+                capacityInputContainer.style.display = 'block';
+            } else {
+                capacityInputContainer.style.display = 'none';
+            }
+        });
         
+        // UPDATED: Save both model and capacity
         bookingModelForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            db.ref('settings/bookingModel').set(bookingModelSelect.value)
+            const dataToUpdate = {
+                bookingModel: bookingModelSelect.value,
+                dailyCapacity: parseInt(dailyCapacityInput.value, 10)
+            };
+            db.ref('settings').update(dataToUpdate)
               .then(() => showNotification('تم حفظ نموذج الحجز.', 'success'));
         });
         
@@ -182,8 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 scheduleData[day] = {
                     active: isActive,
                     open: inputs[1].value,
-                    close: inputs[2].value,
-                    capacity: parseInt(inputs[3].value, 10)
+                    close: inputs[2].value
+                    // Removed capacity from here
                 };
             });
             db.ref('settings/schedule').set(scheduleData)
