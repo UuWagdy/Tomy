@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let settings = {};
     let services = {};
     let bookings = {};
-    let selectedService = null;
     
     const loader = document.getElementById('loader');
     const bookingContainer = document.getElementById('booking-container');
@@ -46,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
-    // NEW Helper to format time to 12-hour format with Arabic AM/PM
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
         const [hour, minute] = timeString.split(':').map(Number);
@@ -92,12 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupUIForBookingModel() {
-        // FIXED: Show calendar for both models initially
         calendarSection.style.display = 'block';
         if (settings.bookingModel === 'capacity') {
             serviceSection.style.display = 'none';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
-        } else { // 'slots' model
+        } else {
             serviceSection.style.display = 'block';
             calendarTitle.textContent = "الخطوة 2: اختر يوماً من التقويم";
             populateServices();
@@ -106,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateServices() {
-        serviceSelect.innerHTML = '<option value="" selected>-- خدمة عامة --</option>'; // Default option
+        serviceSelect.innerHTML = '<option value="" selected>-- خدمة عامة --</option>';
         for (const id in services) {
             serviceSelect.innerHTML += `<option value="${id}">${services[id].name}</option>`;
         }
@@ -181,10 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const slotDiv = document.createElement('div');
             slotDiv.className = 'time-slot';
-            // UPDATED: Display 12-hour format
             slotDiv.textContent = formatTo12Hour(timeStr);
             slotDiv.dataset.date = dateString;
-            slotDiv.dataset.time = timeStr; // Keep 24-hour format in data
+            slotDiv.dataset.time = timeStr;
 
             const isPast = dateString === todayString && time < currentTimeMinutes;
             const booking = Object.values(bookings).find(b => b.date === dateString && b.time === timeStr);
@@ -225,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hiddenTimeInput.value = time;
         
         let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
-        if(time) display += ` - الساعة ${formatTo12Hour(time)}`; // Use 12-hour format here too
+        if(time) display += ` - الساعة ${formatTo12Hour(time)}`;
 
         const selectedServiceId = serviceSelect.value;
         if(selectedServiceId && services[selectedServiceId]){
@@ -285,7 +281,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
             if (paymentMethod === 'InstaPay' && details.instapayName) html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
             if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
-            if (details.telegramContact) html += `<p><strong>أرسل إثبات التحويل إلى تليجرام رقم:</strong> ${details.telegramContact}</p>`;
+            
+            // UPDATED: Display dynamic contact info
+            if (details.contactInfo) {
+                let platform = details.contactPlatform === 'other' ? details.contactOther : (details.contactPlatform || 'واتساب');
+                platform = platform.charAt(0).toUpperCase() + platform.slice(1); // Capitalize first letter
+                html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
+            }
             paymentInfoDisplay.innerHTML = html;
         }
         confirmationModal.style.display = 'block';
