@@ -65,7 +65,23 @@ section h2 {
     margin-bottom: 1.5rem;
     color: #d4af37; /* لون العنوان ذهبي */
 }
+/* ستايل خاص بعناوين التواريخ في قائمة الحجوزات القادمة */
+.date-header {
+    background-color: #f0f0f0;
+    padding: 8px 15px;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    color: #333;
+    border-right: 5px solid #d4af37;
+    font-size: 1.2rem;
+}
 
+.booking-item .note {
+    color: #777;
+    font-size: 0.9rem;
+    text-align: center;
+}
 /* Grids */
 .dashboard-grid, .management-grid, .schedule-grid {
     display: grid;
