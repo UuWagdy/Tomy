@@ -352,40 +352,42 @@ footer {
 /* =============================================== */
 
 /* سيتم تطبيق هذا الكود فقط على الشاشات التي عرضها 768 بكسل أو أقل */
+/* =============================================== */
+/* === Media Queries for Mobile Responsiveness === */
+/* =============================================== */
+
+/* سيتم تطبيق هذا الكود فقط على الشاشات التي عرضها 768 بكسل أو أقل */
 @media (max-width: 768px) {
 
     /* 1. تعديل حجم الخطوط الرئيسية لتناسب الشاشة */
     h1, .hero h1 {
-        font-size: 2.2rem; /* تصغير حجم العنوان الرئيسي */
+        font-size: 2rem;
     }
     h2 {
-        font-size: 1.8rem; /* تصغير حجم العناوين الفرعية */
+        font-size: 1.6rem;
     }
 
     /* 2. تعديل القائمة العلوية لتكون رأسية */
     header nav {
-        flex-direction: column; /* جعل اللوجو والقائمة تحت بعض */
-        gap: 15px; /* مسافة بين اللوجو والقائمة */
+        flex-direction: column;
+        gap: 15px;
     }
-    
     header ul {
         padding: 0;
-        text-align: center; /* توسيط القائمة */
+        text-align: center;
     }
-    
     header ul li {
-        display: block; /* جعل كل عنصر في القائمة يأخذ سطراً كاملاً */
-        margin: 10px 0; /* مسافة رأسية بين عناصر القائمة */
+        display: block;
+        margin: 10px 0;
     }
 
-    /* 3. تعديل التقويم ليصبح عمودين فقط بدلاً من 7 */
+    /* 3. تعديل التقويم ليصبح عموداً واحداً لسهولة القراءة */
     .week-view {
-        grid-template-columns: repeat(2, 1fr); /* أهم تعديل: عمودين فقط */
-        gap: 15px; /* زيادة المسافة بين الأيام */
+        grid-template-columns: 1fr; /* عمود واحد فقط للأيام */
+        gap: 10px;
     }
-    
     .day-slot {
-        padding: 20px 10px; /* زيادة المساحة الداخلية لسهولة الضغط */
+        padding: 15px;
     }
 
     /* 4. تعديل أزرار التحكم بالتقويم لتكون رأسية */
@@ -394,26 +396,29 @@ footer {
         gap: 1rem;
     }
     
-    /* 5. تعديل النوافذ المنبثقة لتناسب الشاشة */
+    /* 5. (الحل الرئيسي لمشكلتك) تعديل النافذة المنبثقة */
     .modal-content {
-        width: 95%; /* جعل النافذة تأخذ معظم عرض الشاشة */
-        margin: 25% auto; /* تعديل المسافة من الأعلى */
-        padding: 20px;
+        width: 90%; /* تأخذ 90% من عرض الشاشة */
+        margin: 20% auto; /* توسيط النافذة مع مسافة من الأعلى */
+        padding: 15px;
+        box-sizing: border-box; /* مهم جداً لمنع الخروج عن الحدود */
     }
 
+    /* 6. (الحل الرئيسي لمشكلتك) تعديل ترتيب المواعيد */
     #time-slots-container {
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* تصغير حجم المواعيد قليلاً */
+        grid-template-columns: 1fr; /* أهم تعديل: جعل المواعيد في عمود واحد رأسي */
+        gap: 12px;
     }
     
-    /* 6. تعديل جداول الأدمن */
+    /* 7. تعديل جداول الأدمن لتكون مناسبة */
     .booking-item {
-        flex-direction: column; /* جعل محتويات حجز الأدمن تحت بعض */
-        align-items: flex-start; /* محاذاة لليمين */
+        flex-direction: column;
+        align-items: flex-start;
         gap: 15px;
     }
     .reports-table th,
     .reports-table td {
-        padding: 8px 5px; /* تصغير المساحة الداخلية للجدول */
+        padding: 8px 5px;
         font-size: 14px;
     }
 }
