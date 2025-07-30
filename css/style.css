@@ -1,93 +1,227 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tomy Barber Shop - الرئيسية</title>
-    <!-- المسار الصحيح: ابحث عن مجلد "css" ثم ملف "style.css" -->
-    <link rel="stylesheet" href="css/style.css">
-    
-    <!-- خطوط جوجل لتحسين المظهر -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header>
-        <nav class="container">
-            <a href="index.html" class="logo-link">
-                <!-- هذا هو الشعار الصغير في الأعلى -->
-                <img id="header-logo" src="logo.png" alt="Tomy Barber Shop Logo" class="logo">
-            </a>
-            <ul>
-                <li><a href="index.html">الرئيسية</a></li>
-                <li><a href="services.html">الخدمات والحجز</a></li>
-            </ul>
-        </nav>
-    </header>
+/* --- استبدل كل محتوى ملف style.css بهذا الكود --- */
 
-    <main>
-        <!-- قسم البداية (Hero) -->
-        <section class="hero">
-            <div class="hero-content">
-                <!--  **** هذا هو الشعار الكبير الذي يظهر في المنتصف ****  -->
-                <!--  **** غيّر 'images/logo-main.png' إلى مسار الشعار الخاص بك ****  -->
-                <img src="images/logo-main.png" alt="Tomy Barber Shop Main Logo" class="hero-main-logo">
-                
-                <h1 class="hero-title">Tomy Barber Shop</h1>
-                <p class="hero-subtitle">أناقتك تبدأ من هنا. أفضل تجربة حلاقة في المدينة.</p>
-                <a href="services.html" class="btn btn-primary btn-hero">احجز موعدك الآن</a>
-            </div>
-        </section>
+/* General Body Styles */
+body {
+    font-family: 'Tajawal', sans-serif;
+    margin: 0;
+    /* اللون الداكن الرئيسي للخلفية */
+    background-color: #112A2A;
+    /* اللون الافتراضي للنص ليكون فاتحًا */
+    color: #f0f0f0;
+    direction: rtl;
+}
 
-        <!-- قسم "من نحن؟" (بتصميم داكن) -->
-        <section class="container page-padding text-center fade-in">
-            <h2>من نحن؟</h2>
-            <p class="section-lead">في Tomy Barber Shop، نحن لا نقدم مجرد قصة شعر، بل نقدم تجربة متكاملة. نحن نجمع بين التقنيات الكلاسيكية والأساليب العصرية لنمنحك المظهر الذي تستحقه، في أجواء مريحة ومميزة.</p>
-        </section>
+h1, h2, h3, .btn {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+}
 
-        <!-- قسم المميزات (بتصميم داكن) -->
-        <section class="features-section fade-in">
-            <div class="container">
-                <h2 class="text-center">لماذا تختارنا؟</h2>
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <!-- ملاحظة: استخدم أيقونات بيضاء أو فاتحة اللون لتبدو أفضل على الخلفية الداكنة -->
-                        <img src="images/icon-barber-white.png" alt="ايقونة حلاق" class="feature-icon">
-                        <h3>حلاقون محترفون</h3>
-                        <p>فريقنا من الحلاقين يمتلك خبرة واسعة وشغفًا بمهنتهم لضمان أفضل النتائج.</p>
-                    </div>
-                    <div class="feature-item">
-                        <img src="images/icon-products-white.png" alt="ايقونة منتجات" class="feature-icon">
-                        <h3>منتجات عالية الجودة</h3>
-                        <p>نستخدم فقط أفضل المنتجات العالمية للعناية بالشعر واللحية للحفاظ على صحة مظهرك.</p>
-                    </div>
-                    <div class="feature-item">
-                        <img src="images/icon-relax-white.png" alt="ايقونة استرخاء" class="feature-icon">
-                        <h3>أجواء مريحة</h3>
-                        <p>استمتع بتجربة حلاقة هادئة ومريحة في مساحة مصممة خصيصًا لراحتك.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- قسم معرض الأعمال (بتصميم داكن) -->
-        <section class="container page-padding fade-in">
-            <h2 class="text-center">من أعمالنا</h2>
-            <div class="gallery-grid">
-                <div class="gallery-item"><img src="images/gallery-1.jpg" alt="صورة من أعمالنا 1"></div>
-                <div class="gallery-item"><img src="images/gallery-2.jpg" alt="صورة من أعمالنا 2"></div>
-                <div class="gallery-item"><img src="images/gallery-3.jpg" alt="صورة من أعمالنا 3"></div>
-                <div class="gallery-item"><img src="images/gallery-4.jpg" alt="صورة من أعمالنا 4"></div>
-            </div>
-        </section>
-    </main>
-    
-    <footer>
-        <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
-    </footer>
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 0 20px;
+}
+.page-padding {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+.text-center {
+    text-align: center;
+}
 
-    <!-- ملف الجافاسكريبت للأنيميشن (لا تغيير هنا) -->
-    <script src="js/utils.js"></script>
-</body>
-</html>
+/* Header & Navigation */
+header {
+    background: #1d1d1d; /* لون داكن للهيدر */
+    color: #fff;
+    padding: 1rem 0;
+    border-bottom: 3px solid #d4af37; /* الخط الذهبي */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo-link img.logo {
+    max-height: 50px;
+}
+header ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+header ul li {
+    display: inline;
+    margin-left: 25px;
+}
+header a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+header a:hover {
+    color: #d4af37;
+}
+
+/* Hero Section */
+.hero {
+    /* يأخذ لون الخلفية من الـ body */
+    height: 100vh; /* يملأ الشاشة بالكامل */
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.hero-content {
+    animation: fadeInDown 1.5s ease-out;
+}
+
+/* الشعار الكبير في المنتصف */
+.hero-main-logo {
+    max-width: 180px; /* يمكنك تعديل حجم الشعار من هنا */
+    margin-bottom: 1rem;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+    color: #ffffff; /* لون أبيض واضح */
+}
+.hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #ccc; /* لون أفتح قليلاً من النص العادي */
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s ease;
+    font-size: 16px;
+}
+.btn:hover {
+    transform: translateY(-3px);
+}
+.btn-primary {
+    background: #d4af37;
+    color: #111; /* نص داكن على الزر الذهبي للوضوح */
+    font-weight: bold;
+}
+.btn-primary:hover {
+    background: #c8a02b;
+}
+.btn-hero {
+    padding: 15px 35px;
+    font-size: 1.2rem;
+}
+
+/* Keyframe Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Section Styles */
+.section-lead {
+    max-width: 700px;
+    margin: 1rem auto;
+    font-size: 1.1rem;
+    color: #ccc; /* لون فاتح مناسب للخلفية الداكنة */
+    line-height: 1.7;
+}
+h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #d4af37; /* عناوين الأقسام باللون الذهبي */
+}
+
+/* Features Section */
+.features-section {
+    background-color: #0d2222; /* لون أغمق قليلاً من الخلفية الرئيسية للتمييز */
+    padding: 4rem 0;
+}
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+    text-align: center;
+}
+.feature-item {
+    padding: 1.5rem;
+}
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+}
+.feature-item h3 {
+    color: #fff; /* عناوين المميزات باللون الأبيض */
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+/* Gallery Section */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 3px solid transparent;
+    transition: transform 0.4s ease, border-color 0.4s ease;
+}
+.gallery-item img:hover {
+    transform: scale(1.05);
+    border-color: #d4af37; /* إطار ذهبي يظهر عند مرور الماوس */
+}
+
+/* Animation Fade-in on Scroll */
+.fade-in {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    background: #111;
+    color: #888;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .hero-title { font-size: 2.8rem; }
+    .hero-subtitle { font-size: 1.2rem; }
+    .hero-main-logo { max-width: 140px; }
+    h2 { font-size: 2rem; }
+    header nav { flex-direction: column; gap: 15px; }
+}
