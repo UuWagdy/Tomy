@@ -1,0 +1,14 @@
+/* --- ستايل صفحة تسجيل الدخول --- */
+body { font-family: 'Tajawal', sans-serif; margin: 0; background-color: #f9f9f9; color: #333; direction: rtl; }
+.container { max-width: 1100px; margin: auto; padding: 0 20px; }
+.page-padding { padding-top: 2rem; padding-bottom: 2rem; }
+header { background: #222; color: #fff; padding: 1rem 0; border-bottom: 3px solid #d4af37; }
+header nav { display: flex; justify-content: space-between; align-items: center; }
+.logo-link img.logo { max-height: 50px; }
+header h2 { margin: 0; }
+.modal-content { background: #fff; margin: 5% auto; padding: 25px; border-radius: 8px; max-width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+form label { display: block; margin-top: 15px; font-weight: bold; }
+form input { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+.btn-primary { display: block; width: 100%; padding: 12px; background: #d4af37; color: #222; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 20px; }
+.notification.error { color: #fff; background-color: #c62828; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #222; color: #fff; }
