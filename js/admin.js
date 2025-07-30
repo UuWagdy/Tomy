@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   const firebaseConfig = {
-    apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", // استخدم بياناتك الصحيحة
+    apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
     authDomain: "tomy-barber-shop.firebaseapp.com",
     databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
     projectId: "tomy-barber-shop",
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
             const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
-            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode}`; // لا داعي للتحقق، لأنه لن يتم عرض الحجز إلا إذا كان الكود موجودًا
+            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'غير محدد'}`;
             let actionButtons = '';
             if (booking.status === 'pending') {
                 actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
@@ -123,10 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function renderPendingBookings(bookings) {
             if(!pendingList) return;
             pendingList.innerHTML = '';
-            // **** هذا هو الإصلاح النهائي والمهم ****
-            // نعرض فقط الحجوزات المعلقة التي تم إنشاء كود لها بالفعل
-            const pending = bookings.filter(b => b.status === 'pending' && b.bookingCode);
-            
+            const pending = bookings.filter(b => b.status === 'pending');
             if (pending.length === 0) {
                 pendingList.innerHTML = '<p class="note">لا توجد حجوزات معلقة.</p>';
                 return;
