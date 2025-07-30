@@ -1,33 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
-  authDomain: "tomy-barber-shop.firebaseapp.com",
-  databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
-  projectId: "tomy-barber-shop",
-  storageBucket: "tomy-barber-shop.firebasestorage.app",
-  messagingSenderId: "693769920483",
-  appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
-  measurementId: "G-HNW5F8YJE3"
-};
+    // الخطوة 1: تعريف بيانات الاتصال
+    const firebaseConfig = {
+      apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", // استخدم بياناتك الصحيحة
+      authDomain: "tomy-barber-shop.firebaseapp.com",
+      databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
+      projectId: "tomy-barber-shop",
+      storageBucket: "tomy-barber-shop.firebasestorage.app",
+      messagingSenderId: "693769920483",
+      appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
+      measurementId: "G-HNW5F8YJE3"
+    };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
+    // الخطوة 2: تهيئة التطبيق بالطريقة الصحيحة (Compat/v8)
+    // تم حذف أسطر الاتصال الخاطئة الخاصة بالإصدار 9 من هنا
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
 
+    // الخطوة 3: إنشاء متغيرات الاتصال الأساسية
+    const db = firebase.database();
+    
+    // ==========================================================
+    // الآن كل شيء جاهز للعمل
+    // ==========================================================
+    
+    // تعريف متغيرات عامة
     let currentDate = new Date();
     let settings = {};
     let services = {};
     let bookings = {};
     
+    // تعريف كل عناصر HTML التي تحتاجها
     const loader = document.getElementById('loader');
     const bookingContainer = document.getElementById('booking-container');
     const headerLogo = document.getElementById('header-logo');
-    const serviceSection = document.getElementById('service-selection-section');
-    const serviceSelect = document.getElementById('service-selection');
     const calendarSection = document.getElementById('calendar-section');
     const calendarTitle = document.getElementById('calendar-title');
     const calendarView = document.getElementById('calendar-view');
@@ -50,7 +55,9 @@ const analytics = getAnalytics(app);
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
-    function initializeApp() {
+
+    // تم تغيير اسم الدالة من initializeApp إلى startBookingSystem لتجنب التضارب
+    function startBookingSystem() {
         const settingsRef = db.ref('settings').once('value');
         const servicesRef = db.ref('services').once('value');
 
@@ -59,6 +66,7 @@ const analytics = getAnalytics(app);
             services = servicesSnap.val() || {};
 
             if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
+            
             populatePaymentMethods();
             setupUIForBookingModel(); 
 
@@ -75,8 +83,6 @@ const analytics = getAnalytics(app);
             loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
         });
     }
-
-    // --- (باقي الدوال تبقى كما هي) ---
     
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
@@ -87,6 +93,7 @@ const analytics = getAnalytics(app);
     }
     
     function populatePaymentMethods() {
+        if (!paymentMethodSelect) return;
         paymentMethodSelect.innerHTML = '<option value="عند تمام العمل" selected>الدفع عند تمام العمل</option>';
         if (settings.paymentDetails) {
             if (settings.paymentDetails.instapayName) paymentMethodSelect.innerHTML += '<option value="InstaPay">انستا باي</option>';
@@ -95,12 +102,14 @@ const analytics = getAnalytics(app);
     }
 
     function setupUIForBookingModel() {
+        if (!calendarSection || !calendarTitle) return;
         calendarSection.style.display = 'block';
+        const serviceSection = document.getElementById('service-selection-section'); // Check for element inside function
+        if(serviceSection) serviceSection.style.display = 'none'; // This makes the code safer
+
         if (settings.bookingModel === 'capacity') {
-            serviceSection.style.display = 'none';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
         } else {
-            serviceSection.style.display = 'none';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم والموعد";
         }
     }
@@ -112,7 +121,7 @@ const analytics = getAnalytics(app);
     }
 
     function renderCalendar() {
-        if (!calendarView) return; // التأكد من وجود العنصر قبل استخدامه
+        if (!calendarView || !currentWeekDisplay || !prevWeekBtn) return;
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
         weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
@@ -131,7 +140,7 @@ const analytics = getAnalytics(app);
             dayDiv.className = 'day-slot';
             dayDiv.dataset.date = dayString;
             
-            const dayBookings = Object.values(bookings).filter(b => b.date === dayString);
+            const dayBookings = bookings ? Object.values(bookings).filter(b => b.date === dayString) : [];
             
             dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
 
@@ -150,17 +159,19 @@ const analytics = getAnalytics(app);
                          const availableCount = capacity - approvedBookingsCount;
                          dayDiv.innerHTML += `<br><small>متاح: ${availableCount}</small>`;
                     }
+                } else { // This handles the 'slots' model implicitly
+                    dayDiv.classList.add('available'); // Mark day as generally available for slot picking
                 }
             }
             calendarView.appendChild(dayDiv);
         }
     }
 
-    // ... باقي الدوال كما هي ...
      function renderTimeSlots(dateString) {
+        if (!slotsContainer || !slotsModal) return;
         slotsContainer.innerHTML = '';
         const schedule = getDaySchedule(new Date(dateString));
-        if (!schedule || !schedule.open || !schedule.close) return; // Safety check
+        if (!schedule || !schedule.open || !schedule.close) return;
         const slotDuration = parseInt(settings.slotDuration, 10) || 30;
         
         const timeToMinutes = (t) => t.split(':').map(Number).reduce((h, m) => h * 60 + m);
@@ -183,7 +194,7 @@ const analytics = getAnalytics(app);
             slotDiv.dataset.time = timeStr;
 
             const isPast = dateString === todayString && time < currentTimeMinutes;
-            const booking = Object.values(bookings).find(b => b.date === dateString && b.time === timeStr);
+            const booking = bookings ? Object.values(bookings).find(b => b.date === dateString && b.time === timeStr) : null;
 
             if (isPast) {
                 slotDiv.classList.add('disabled');
@@ -196,25 +207,9 @@ const analytics = getAnalytics(app);
         }
         slotsModal.style.display = 'block';
     }
-
-    calendarView.addEventListener('click', (e) => {
-        const daySlot = e.target.closest('.day-slot');
-        if (!daySlot || daySlot.classList.contains('disabled') || daySlot.classList.contains('full')) return;
-        const date = daySlot.dataset.date;
-        if (settings.bookingModel === 'slots') {
-            slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
-            renderTimeSlots(date);
-        } else {
-            openBookingModal(date);
-        }
-    });
-    
-    slotsContainer.addEventListener('click', (e) => {
-        const slot = e.target.closest('.time-slot.available');
-        if(slot) openBookingModal(slot.dataset.date, slot.dataset.time);
-    });
     
     function openBookingModal(date, time = null) {
+        if(!hiddenDateInput || !hiddenTimeInput || !selectedSlotDisplay || !slotsModal || !bookingModal) return;
         hiddenDateInput.value = date;
         hiddenTimeInput.value = time;
         let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
@@ -223,41 +218,17 @@ const analytics = getAnalytics(app);
         slotsModal.style.display = 'none';
         bookingModal.style.display = 'block';
     }
-
-    bookingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newBooking = {
-            fullName: document.getElementById('fullName').value,
-            phone: document.getElementById('phone').value,
-            date: hiddenDateInput.value,
-            time: hiddenTimeInput.value || null,
-            serviceName: "حجز موعد",
-            paymentMethod: paymentMethodSelect.value,
-            status: 'pending'
-        };
-        db.ref('bookings').push(newBooking).then((ref) => {
-            const date = newBooking.date;
-            const dayFormatted = date.split('-').slice(1).join('');
-            const counterRef = db.ref(`dayCounters/${date}`);
-            counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
-                const bookingCode = dayFormatted + transactionResult.snapshot.val();
-                ref.update({ bookingCode: bookingCode });
-                showConfirmationModal(bookingCode, newBooking.paymentMethod);
-            });
-        });
-        bookingModal.style.display = 'none';
-        bookingForm.reset();
-    });
-
+    
     function showConfirmationModal(code, paymentMethod) {
+        if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
         bookingCodeDisplay.textContent = code;
         paymentInfoDisplay.innerHTML = '';
         if(paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash') {
             const details = settings.paymentDetails;
             let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
-            if (paymentMethod === 'InstaPay' && details.instapayName) html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
-            if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
-            if (details.contactInfo) {
+            if (details && details.instapayName) html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
+            if (details && details.vodafoneCash) html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
+            if (details && details.contactInfo) {
                 let platform = details.contactPlatform === 'other' ? details.contactOther : (details.contactPlatform || 'واتساب');
                 platform = platform.charAt(0).toUpperCase() + platform.slice(1);
                 html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
@@ -269,16 +240,67 @@ const analytics = getAnalytics(app);
 
     const toYYYYMMDD = (date) => date.toISOString().split('T')[0];
 
-    prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
-    nextWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 7); renderCalendar(); });
-    closeBookingModalBtn.onclick = () => bookingModal.style.display = "none";
-    closeSlotsModalBtn.onclick = () => slotsModal.style.display = "none";
-    closeConfirmationModalBtn.onclick = () => confirmationModal.style.display = "none";
+    // إضافة مستمعي الأحداث مع التحقق من وجود العناصر أولاً
+    if(calendarView) {
+        calendarView.addEventListener('click', (e) => {
+            const daySlot = e.target.closest('.day-slot');
+            if (!daySlot || daySlot.classList.contains('disabled') || daySlot.classList.contains('full')) return;
+            const date = daySlot.dataset.date;
+            if (settings.bookingModel === 'slots') {
+                if(slotsModalTitle) slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
+                renderTimeSlots(date);
+            } else {
+                openBookingModal(date);
+            }
+        });
+    }
+    
+    if(slotsContainer) {
+        slotsContainer.addEventListener('click', (e) => {
+            const slot = e.target.closest('.time-slot.available');
+            if(slot) openBookingModal(slot.dataset.date, slot.dataset.time);
+        });
+    }
+    
+    if(bookingForm) {
+        bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newBooking = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                date: hiddenDateInput.value,
+                time: hiddenTimeInput.value || null,
+                serviceName: "حجز موعد",
+                paymentMethod: paymentMethodSelect.value,
+                status: 'pending'
+            };
+            db.ref('bookings').push(newBooking).then((ref) => {
+                const date = newBooking.date;
+                const dayFormatted = date.split('-').slice(1).join('');
+                const counterRef = db.ref(`dayCounters/${date}`);
+                counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
+                    const bookingCode = dayFormatted + transactionResult.snapshot.val();
+                    ref.update({ bookingCode: bookingCode });
+                    showConfirmationModal(bookingCode, newBooking.paymentMethod);
+                });
+            });
+            if(bookingModal) bookingModal.style.display = 'none';
+            bookingForm.reset();
+        });
+    }
+
+    if(prevWeekBtn) prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
+    if(nextWeekBtn) nextWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 7); renderCalendar(); });
+    if(closeBookingModalBtn) closeBookingModalBtn.onclick = () => { if(bookingModal) bookingModal.style.display = "none"; };
+    if(closeSlotsModalBtn) closeSlotsModalBtn.onclick = () => { if(slotsModal) slotsModal.style.display = "none"; };
+    if(closeConfirmationModalBtn) closeConfirmationModalBtn.onclick = () => { if(confirmationModal) confirmationModal.style.display = "none"; };
+    
     window.onclick = (event) => {
         if (event.target == bookingModal) bookingModal.style.display = "none";
         if (event.target == slotsModal) slotsModal.style.display = "none";
         if (event.target == confirmationModal) confirmationModal.style.display = "none";
     };
 
-    initializeApp();
+    // استدعاء الدالة الرئيسية لبدء كل شيء
+    startBookingSystem();
 });
