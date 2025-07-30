@@ -81,17 +81,16 @@ header a:hover {
     cursor: not-allowed;
 }
 
-/*  ====== الأنماط المضافة لإصلاح المشكلة ====== */
 /* Calendar Styles */
 .calendar-controls {
-    display: flex; /*  <-- هذا السطر مهم جدًا لوضع الأزرار بجانب بعضها */
-    justify-content: space-between; /* <-- يضع مسافة بين الأزرار والعنوان */
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     margin: 2rem 0;
 }
 .week-view {
-    display: grid; /* <-- هذا السطر يحول الـ div إلى شبكة */
-    grid-template-columns: repeat(7, 1fr); /* <-- يقسم الشبكة إلى 7 أعمدة متساوية (أيام الأسبوع) */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
     gap: 10px;
     margin-bottom: 1rem;
 }
@@ -124,7 +123,6 @@ header a:hover {
     color: #bdbdbd;
     cursor: not-allowed;
 }
-/*  ====== نهاية الأنماط المضافة ====== */
 
 /* Modal Styles */
 .modal {
@@ -177,12 +175,29 @@ header a:hover {
     color: #2e7d32;
     border: 1px solid #a5d6a7;
 }
-.time-slot.pending, .time-slot.approved {
-    background-color: #ffebee;
-    color: #c62828;
+
+/* ====== هذا هو الجزء الذي تم إصلاحه ====== */
+
+/* المواعيد المعلقة (باللون الأصفر/البرتقالي) */
+.time-slot.pending {
+    background-color: #fffde7; /* خلفية صفراء فاتحة */
+    color: #f9a825; /* نص برتقالي داكن */
     cursor: not-allowed;
     text-decoration: line-through;
+    border: 1px solid #fdd835; /* إطار أصفر */
 }
+
+/* المواعيد الموافق عليها (باللون الأحمر) */
+.time-slot.approved {
+    background-color: #ffebee; /* خلفية حمراء فاتحة */
+    color: #c62828; /* نص أحمر داكن */
+    cursor: not-allowed;
+    text-decoration: line-through;
+    border: 1px solid #ef9a9a; /* إطار أحمر */
+}
+
+/* ====== نهاية الجزء الذي تم إصلاحه ====== */
+
 
 /* Form Styles */
 form label {
