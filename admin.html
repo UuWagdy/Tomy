@@ -31,11 +31,13 @@
         <div class="management-grid">
             <section id="general-settings-section">
                 <h2>الإعدادات العامة</h2>
-                <div class="form-group">
-                    <label for="logo-upload">تغيير الشعار:</label>
-                    <input type="file" id="logo-upload" class="form-control" accept="image/*">
-                    <div id="upload-progress" style="display:none; margin-top:10px;">جاري الرفع... 0%</div>
-                </div>
+                <form id="logo-form">
+                    <div class="form-group">
+                        <label for="logo-url">رابط الشعار (URL):</label>
+                        <input type="url" id="logo-url" class="form-control" placeholder="https://example.com/logo.png">
+                    </div>
+                    <button type="submit" class="btn btn-primary">حفظ الشعار</button>
+                </form>
                 <hr>
                 <div class="form-group">
                      <label>تغيير كلمة المرور:</label>
@@ -91,7 +93,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+    <!-- We no longer need firebase-storage-compat.js -->
     <script src="js/utils.js"></script>
     <script src="js/admin.js"></script>
 </body>
