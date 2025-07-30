@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loader.style.display = 'none';
             bookingContainer.style.display = 'block';
             
-            headerLogo.src = settings.logoUrl || 'logo.png';
+            if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
             
             populatePaymentMethods();
             setupUIForBookingModel();
@@ -89,26 +89,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // UPDATED FUNCTION
     function setupUIForBookingModel() {
-        calendarSection.style.display = 'block'; // Show calendar for all models
+        calendarSection.style.display = 'block';
         
-        // Check the booking model from settings
         if (settings.bookingModel === 'capacity') {
-            serviceSection.style.display = 'none'; // Hide service selection
+            serviceSection.style.display = 'none';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
-        } else { // 'slots' model
-            serviceSection.style.display = 'none'; // Also hide service selection for slots model now
+        } else {
+            serviceSection.style.display = 'none';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم والموعد";
         }
         
-        // We still populate services in the background in case they are needed for the booking record
         populateServices(); 
         renderCalendar();
     }
 
     function populateServices() {
-        // This function now just prepares the service data without showing it
         serviceSelect.innerHTML = '<option value="" selected>-- خدمة عامة --</option>';
         for (const id in services) {
             serviceSelect.innerHTML += `<option value="${id}">${services[id].name}</option>`;
@@ -148,17 +144,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayDiv.classList.add('disabled');
                 if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
             } else {
+
+                //  ====== هذا هو الجزء الذي تم إصلاحه ======
                 if(settings.bookingModel === 'capacity') {
-                    const totalBookingsForDay = dayBookings.length;
+                    // الإصلاح: نحسب فقط الحجوزات الموافق عليها (approved)
+                    const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
                     const capacity = settings.dailyCapacity || 10;
 
-                    if (totalBookingsForDay >= capacity) {
+                    if (approvedBookingsCount >= capacity) {
                         dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
                     } else {
-                         dayDiv.innerHTML += `<br><small>متاح: ${capacity - totalBookingsForDay}</small>`;
+                         // نعرض للمستخدم العدد المتاح بناءً على الحجوزات المؤكدة فقط
+                         dayDiv.innerHTML += `<br><small>متاح: ${capacity - approvedBookingsCount}</small>`;
                     }
                 }
+                //  ====== نهاية الجزء الذي تم إصلاحه ======
+
             }
             calendarView.appendChild(dayDiv);
         }
@@ -229,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
         if(time) display += ` - الساعة ${formatTo12Hour(time)}`;
 
-        // This part is now optional and won't show anything unless a service is manually selected
         const selectedServiceId = serviceSelect.value;
         if(selectedServiceId && services[selectedServiceId]){
             display += ` (خدمة: ${services[selectedServiceId].name})`;
@@ -259,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const bookingCode = dayFormatted + newId;
         const selectedServiceId = serviceSelect.value;
-        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : "حجز موعد"; // Default service name
+        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : "حجز موعد";
 
         const newBooking = {
             fullName: document.getElementById('fullName').value,
