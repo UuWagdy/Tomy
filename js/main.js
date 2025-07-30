@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // الخطوة 1: تعريف بيانات الاتصال
     const firebaseConfig = {
       apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", // استخدم بياناتك الصحيحة
       authDomain: "tomy-barber-shop.firebaseapp.com",
@@ -12,23 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
       measurementId: "G-HNW5F8YJE3"
     };
 
-    // الخطوة 2: تهيئة التطبيق بالطريقة الصحيحة (Compat/v8)
     firebase.initializeApp(firebaseConfig);
-
-    // الخطوة 3: إنشاء متغيرات الاتصال الأساسية
     const db = firebase.database();
     
-    // ==========================================================
-    // الآن كل شيء جاهز للعمل
-    // ==========================================================
-    
-    // تعريف متغيرات عامة
     let currentDate = new Date();
     let settings = {};
     let services = {};
     let bookings = {};
     
-    // تعريف كل عناصر HTML التي تحتاجها
     const loader = document.getElementById('loader');
     const bookingContainer = document.getElementById('booking-container');
     const headerLogo = document.getElementById('header-logo');
@@ -54,28 +44,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
-
     function startBookingSystem() {
         const settingsRef = db.ref('settings').once('value');
         const servicesRef = db.ref('services').once('value');
-
         Promise.all([settingsRef, servicesRef]).then(([settingsSnap, servicesSnap]) => {
             settings = settingsSnap.val() || {};
             services = servicesSnap.val() || {};
-
             if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
-            
             populatePaymentMethods();
             setupUIForBookingModel(); 
-
             db.ref('bookings').on('value', snap => {
                 bookings = snap.val() || {};
                 renderCalendar(); 
             });
-
             loader.style.display = 'none';
             bookingContainer.style.display = 'block';
-
         }).catch(err => {
             console.error("خطأ في تحميل الإعدادات الأولية:", err);
             loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
@@ -104,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarSection.style.display = 'block';
         const serviceSection = document.getElementById('service-selection-section');
         if(serviceSection) serviceSection.style.display = 'none';
-
         if (settings.bookingModel === 'capacity') {
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
         } else {
@@ -124,11 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const weekStart = new Date(currentDate);
         weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
         currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
-        
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         prevWeekBtn.disabled = weekStart < today;
-
         for (let i = 0; i < 7; i++) {
             const dayDate = new Date(weekStart);
             dayDate.setDate(weekStart.getDate() + i);
@@ -137,11 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const dayDiv = document.createElement('div');
             dayDiv.className = 'day-slot';
             dayDiv.dataset.date = dayString;
-            
             const dayBookings = bookings ? Object.values(bookings).filter(b => b.date === dayString) : [];
-            
             dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
-
             if (dayDate < today || !schedule.active) {
                 dayDiv.classList.add('disabled');
                 if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
@@ -149,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(settings.bookingModel === 'capacity') {
                     const capacity = settings.dailyCapacity || 10;
                     const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
-                    
                     if (approvedBookingsCount >= capacity) {
                         dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
@@ -171,29 +147,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const schedule = getDaySchedule(new Date(dateString));
         if (!schedule || !schedule.open || !schedule.close) return;
         const slotDuration = parseInt(settings.slotDuration, 10) || 30;
-        
         const timeToMinutes = (t) => t.split(':').map(Number).reduce((h, m) => h * 60 + m);
         const start = timeToMinutes(schedule.open);
         const end = timeToMinutes(schedule.close);
-        
         const now = new Date();
         const todayString = toYYYYMMDD(now);
         const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
-
         for (let time = start; time < end; time += slotDuration) {
             const h = Math.floor(time / 60);
             const m = time % 60;
             const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-            
             const slotDiv = document.createElement('div');
             slotDiv.className = 'time-slot';
             slotDiv.textContent = formatTo12Hour(timeStr);
             slotDiv.dataset.date = dateString;
             slotDiv.dataset.time = timeStr;
-
             const isPast = dateString === todayString && time < currentTimeMinutes;
             const booking = bookings ? Object.values(bookings).find(b => b.date === dateString && b.time === timeStr) : null;
-
             if (isPast) {
                 slotDiv.classList.add('disabled');
             } else if (booking) {
@@ -238,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toYYYYMMDD = (date) => date.toISOString().split('T')[0];
 
-    // إضافة مستمعي الأحداث مع التحقق من وجود العناصر أولاً
     if(calendarView) {
         calendarView.addEventListener('click', (e) => {
             const daySlot = e.target.closest('.day-slot');
@@ -277,10 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dayFormatted = date.split('-').slice(1).join('');
                 const counterRef = db.ref(`dayCounters/${date}`);
                 counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
-                    // **** هذا هو التعديل الأساسي والنهائي لمشكلة الكود ****
-                    // يضمن أن يكون العداد دائما من رقمين (01, 02, .. 10)
                     const bookingCode = dayFormatted + String(transactionResult.snapshot.val()).padStart(2, '0');
-                    
                     ref.update({ bookingCode: bookingCode });
                     showConfirmationModal(bookingCode, newBooking.paymentMethod);
                 });
@@ -302,6 +268,5 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target == confirmationModal) confirmationModal.style.display = "none";
     };
 
-    // استدعاء الدالة الرئيسية لبدء كل شيء
     startBookingSystem();
 });
