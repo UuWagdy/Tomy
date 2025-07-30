@@ -229,32 +229,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    if(bookingForm) {
-        bookingForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newBooking = {
-                fullName: document.getElementById('fullName').value,
-                phone: document.getElementById('phone').value,
-                date: hiddenDateInput.value,
-                time: hiddenTimeInput.value || null,
-                serviceName: "حجز موعد",
-                paymentMethod: paymentMethodSelect.value,
-                status: 'pending'
-            };
-            db.ref('bookings').push(newBooking).then((ref) => {
-                const date = newBooking.date;
-                const dayFormatted = date.split('-').slice(1).join('');
-                const counterRef = db.ref(`dayCounters/${date}`);
-                counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
-                    const bookingCode = dayFormatted + String(transactionResult.snapshot.val()).padStart(2, '0');
-                    ref.update({ bookingCode: bookingCode });
-                    showConfirmationModal(bookingCode, newBooking.paymentMethod);
-                });
-            });
-            if(bookingModal) bookingModal.style.display = 'none';
-            bookingForm.reset();
+  // --- هذا هو الكود الجديد الذي سيتم وضعه مكانه ---
+if(bookingForm) {
+    bookingForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newBooking = {
+            fullName: document.getElementById('fullName').value,
+            phone: document.getElementById('phone').value,
+            date: hiddenDateInput.value,
+            time: hiddenTimeInput.value || null,
+            serviceName: "حجز موعد",
+            paymentMethod: paymentMethodSelect.value,
+            status: 'pending'
+        };
+
+        // أولاً، نقوم بحفظ بيانات الحجز الأساسية
+        const newBookingRef = await db.ref('bookings').push(newBooking);
+
+        // ثانيًا، نقوم بإنشاء عداد عام واحد فقط
+        const globalCounterRef = db.ref('globalBookingCounter');
+
+        // ثالثًا، نستخدم transaction لزيادة العداد بأمان وضمان عدم تكرار الأرقام
+        globalCounterRef.transaction((currentCount) => {
+            return (currentCount || 0) + 1;
+        }).then((transactionResult) => {
+            // القيمة الجديدة للعداد هي الكود الجديد
+            const bookingCode = transactionResult.snapshot.val();
+            
+            // نقوم بتحديث الحجز الذي تم إنشاؤه لإضافة الكود الجديد
+            newBookingRef.update({ bookingCode: bookingCode });
+
+            // نعرض نافذة التأكيد للعميل مع الكود الجديد
+            showConfirmationModal(bookingCode, newBooking.paymentMethod);
         });
-    }
+
+        if(bookingModal) bookingModal.style.display = 'none';
+        bookingForm.reset();
+    });
+}
 
     if(prevWeekBtn) prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
     if(nextWeekBtn) nextWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 7); renderCalendar(); });
