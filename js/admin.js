@@ -102,11 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
             const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
-            
-            // **** بداية التعديل على عرض الـ ID ****
-            // تم تغيير النص من "الكود" إلى "رقم الحجز"
-            const idDisplay = `<strong>رقم الحجز:</strong> ${booking.dailyId}`;
-            
+            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'غير محدد'}`;
             let actionButtons = '';
             if (booking.status === 'pending') {
                 actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
@@ -116,23 +112,18 @@ document.addEventListener('DOMContentLoaded', () => {
             item.innerHTML = `
                 <div>
                     <strong>${booking.fullName}</strong> (${booking.phone})<br>
-                    <small>${idDisplay}</small><br>
+                    <small>${codeDisplay}</small><br>
                     <small><strong>التاريخ:</strong> ${booking.date} - <strong>الوقت:</strong> ${timeDisplay}</small><br>
                     <small><strong>الدفع:</strong> ${booking.paymentMethod}</small>
                 </div>
                 <div>${actionButtons}</div>`;
             return item;
-            // **** نهاية التعديل على عرض الـ ID ****
         }
 
         function renderPendingBookings(bookings) {
             if(!pendingList) return;
             pendingList.innerHTML = '';
-            
-            // **** هذا هو الإصلاح النهائي لضمان ظهور الرقم ****
-            // نعرض فقط الحجوزات المعلقة التي تم إنشاء رقم يومي لها بالفعل
-            const pending = bookings.filter(b => b.status === 'pending' && b.dailyId);
-            
+            const pending = bookings.filter(b => b.status === 'pending');
             if (pending.length === 0) {
                 pendingList.innerHTML = '<p class="note">لا توجد حجوزات معلقة.</p>';
                 return;
