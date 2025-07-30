@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- هذا الملف لصفحة الأدمن فقط ---
+    
     const adminContent = document.getElementById('admin-content');
     const passwordPromptDiv = document.getElementById('password-prompt');
     
-    // كلمة المرور - يمكنك تغييرها
     const ADMIN_PASSWORD = 'tomy_admin_123'; 
 
     function authenticate() {
@@ -15,8 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
             initializeAdminPanel();
         } else {
             alert('كلمة مرور خاطئة! لا يمكنك الوصول لهذه الصفحة.');
-            // يمكنك إعادة توجيهه لصفحة أخرى إذا أردت
-            // window.location.href = 'index.html'; 
             passwordPromptDiv.innerHTML = '<h2>وصول مرفوض</h2><p>كلمة المرور غير صحيحة.</p>';
         }
     }
@@ -35,8 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pendingList.innerHTML = '';
             approvedList.innerHTML = '';
 
-            const pendingBookings = bookings.filter(b => b.status === 'pending');
-            const approvedBookings = bookings.filter(b => b.status === 'approved');
+            const sortedBookings = bookings.sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
+
+            const pendingBookings = sortedBookings.filter(b => b.status === 'pending');
+            const approvedBookings = sortedBookings.filter(b => b.status === 'approved');
 
             if (pendingBookings.length === 0) {
                 pendingList.innerHTML = '<p>لا توجد حجوزات معلقة.</p>';
@@ -46,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.className = 'booking-item pending';
                     item.innerHTML = `
                         <div>
-                            <strong>${booking.fullName}</strong> - ${booking.phone}<br>
-                            <small>${booking.date} @ ${booking.time}</small>
+                            <strong>${booking.fullName}</strong> (${booking.phone})<br>
+                            <small>${new Date(booking.date + 'T00:00:00').toLocaleDateString('ar-EG', {weekday: 'long', day: 'numeric', month: 'long'})} - الساعة ${booking.time}</small>
                         </div>
                         <div>
                             <button class="btn btn-primary" onclick="approveBooking(${booking.id})">قبول</button>
@@ -65,9 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const item = document.createElement('div');
                     item.className = 'booking-item approved';
                     item.innerHTML = `
-                        <div>
-                            <strong>${booking.fullName}</strong> - ${booking.phone}<br>
-                            <small>${booking.date} @ ${booking.time}</small>
+                         <div>
+                            <strong>${booking.fullName}</strong> (${booking.phone})<br>
+                            <small>${new Date(booking.date + 'T00:00:00').toLocaleDateString('ar-EG', {weekday: 'long', day: 'numeric', month: 'long'})} - الساعة ${booking.time}</small>
                         </div>
                         <div>
                              <button class="btn" onclick="rejectBooking(${booking.id})">إلغاء الحجز</button>
@@ -79,23 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         window.approveBooking = (id) => {
-            const booking = bookings.find(b => b.id === id);
-            if (booking) {
-                booking.status = 'approved';
+            const bookingIndex = bookings.findIndex(b => b.id === id);
+            if (bookingIndex > -1) {
+                bookings[bookingIndex].status = 'approved';
                 saveBookings();
-                renderAdminLists(); // تحديث القوائم
+                renderAdminLists();
             }
         };
 
         window.rejectBooking = (id) => {
             bookings = bookings.filter(b => b.id !== id);
             saveBookings();
-            renderAdminLists(); // تحديث القوائم
+            renderAdminLists();
         };
         
         renderAdminLists();
     }
 
-    // --- بدء عملية التحقق من كلمة المرور ---
     authenticate();
 });
