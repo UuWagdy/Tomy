@@ -27,6 +27,14 @@
             </div>
         </section>
 
+        <!-- NEW: Today's Bookings Section -->
+        <section id="today-bookings-section">
+            <h2>حجوزات اليوم الموافق عليها</h2>
+            <div id="today-bookings-list">
+                <!-- Today's bookings will be dynamically inserted here -->
+            </div>
+        </section>
+
         <!-- Management Grids -->
         <div class="management-grid">
             <section id="general-settings-section">
@@ -68,13 +76,11 @@
                     <option value="capacity">نظام الطاقة الاستيعابية (عدد ثابت)</option>
                 </select>
                 
-                <!-- UPDATED: Container for SLOTS model settings -->
                 <div id="slots-input-container" style="display: none; margin-top: 1rem;">
                     <label for="slot-duration">مدة كل حجز (بالدقائق):</label>
                     <input type="number" id="slot-duration" class="form-control" min="10" step="5">
                 </div>
                 
-                <!-- UPDATED: Container for CAPACITY model settings -->
                 <div id="capacity-input-container" style="display: none; margin-top: 1rem;">
                     <label for="daily-capacity">الطاقة الاستيعابية اليومية (عدد الحجوزات):</label>
                     <input type="number" id="daily-capacity" class="form-control" min="1">
