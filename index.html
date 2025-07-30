@@ -10,7 +10,7 @@
     <header>
         <nav class="container">
             <a href="index.html" class="logo-link">
-                <!-- ضع شعارك هنا -->
+                <!-- تأكد من وجود ملف logo.png في المجلد الرئيسي -->
                 <img src="logo.png" alt="Tomy Barber Shop Logo" class="logo">
             </a>
             <ul>
@@ -19,15 +19,91 @@
             </ul>
         </nav>
     </header>
-    <main class="container page-padding">
+    <main>
         <section class="hero">
-            <h1>Tomy Barber Shop</h1>
-            <p>أناقتك تبدأ من هنا. أفضل تجربة حلاقة في المدينة.</p>
-            <a href="services.html" class="btn btn-primary">احجز موعدك الآن</a>
+            <div class="container">
+                <h1>Tomy Barber Shop</h1>
+                <p>أناقتك تبدأ من هنا. أفضل تجربة حلاقة في المدينة.</p>
+                <a href="services.html" class="btn btn-primary">احجز موعدك الآن</a>
+            </div>
         </section>
+    </main>
+    <footer>
+        <div class="container">
+            <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+</body>
+</html>```
+
+---
+
+### 2️⃣ ملف `services.html` (صفحة الخدمات والحجز)
+
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخدمات والحجز - Tomy Barber Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="index.html" class="logo-link"><img src="logo.png" alt="Tomy Barber Shop Logo" class="logo"></a>
+            <ul>
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="services.html">الخدمات والحجز</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="container page-padding">
+        <section id="calendar-section">
+            <h2>اختر يوماً من التقويم لعرض المواعيد</h2>
+            <div class="calendar-controls">
+                <button id="prev-week" class="btn">الأسبوع السابق</button>
+                <h3 id="current-week-display"></h3>
+                <button id="next-week" class="btn">الأسبوع التالي</button>
+            </div>
+            <div id="calendar-view" class="week-view"></div>
+            <p class="text-center note">الأيام الملونة بالأحمر ممتلئة تماماً. اضغط على أي يوم آخر لعرض المواعيد المتاحة.</p>
+        </section>
+
+        <!-- Time Slots Modal (نافذة المواعيد) -->
+        <div id="time-slots-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="close-slots-modal">×</span>
+                <h3 id="slots-modal-title">المواعيد المتاحة ليوم</h3>
+                <div id="time-slots-container">
+                    <!-- سيتم ملء المواعيد هنا عبر جافاسكريبت -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form Modal (نافذة نموذج الحجز) -->
+        <div id="booking-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="close-booking-modal">×</span>
+                <h3>تأكيد الحجز</h3>
+                <form id="booking-form">
+                    <p>الموعد المختار: <strong id="selected-slot-display"></strong></p>
+                    <label for="fullName">الاسم الكامل:</label>
+                    <input type="text" id="fullName" required>
+                    <label for="phone">رقم الهاتف:</label>
+                    <input type="tel" id="phone" required>
+                    <!-- حقول مخفية لحفظ التاريخ والوقت -->
+                    <input type="hidden" id="selected-date">
+                    <input type="hidden" id="selected-time">
+                    <button type="submit" class="btn">إرسال طلب الحجز</button>
+                </form>
+            </div>
+        </div>
     </main>
     <footer>
         <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
     </footer>
+    <script src="js/main.js"></script>
 </body>
 </html>
