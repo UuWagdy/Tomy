@@ -1,0 +1,25 @@
+/* --- ستايل لوحة التحكم الخاصة بالأدمن --- */
+body { font-family: 'Tajawal', sans-serif; margin: 0; background-color: #f0f2f5; color: #333; direction: rtl; }
+.container { max-width: 1200px; margin: auto; padding: 0 20px; }
+.page-padding { padding-top: 2rem; padding-bottom: 2rem; }
+header { background: #fff; color: #333; padding: 1rem 0; border-bottom: 1px solid #ddd; }
+header nav { display: flex; justify-content: space-between; align-items: center; }
+.logo-link img.logo { max-height: 50px; }
+header h2 { margin: 0; }
+.btn { display: inline-block; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; }
+.btn-primary { background: #d4af37; color: #222; font-weight: bold; }
+section { margin-top: 1.5rem; padding: 1.5rem; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.dashboard-grid, .management-grid, .schedule-grid { display: grid; gap: 20px; }
+.dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.management-grid { grid-template-columns: 1fr 1fr; }
+.stat-card { padding: 20px; text-align: center; }
+.stat-card h3 { margin: 0 0 10px; color: #555; }
+.stat-card p { margin: 0; font-size: 2.5rem; font-weight: bold; color: #d4af37; }
+.booking-item { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+.booking-item.pending { background-color: #fffde7; border-left: 5px solid #fdd835; }
+.booking-item.approved { background-color: #e8f5e9; border-left: 5px solid #66bb6a; }
+form label { display: block; margin-top: 10px; font-weight: bold; }
+form input, form select { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+form button { margin-top: 20px; }
+footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #222; color: #fff; }
+@media (max-width: 900px) { .management-grid { grid-template-columns: 1fr; } }
