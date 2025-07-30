@@ -1,18 +1,70 @@
-/* --- أضف هذه الأنماط في نهاية ملف style.css --- */
-
-/* Font Imports (from HTML) and General Enhancements */
+/* General Body Styles */
 body {
-    font-family: 'Tajawal', sans-serif; /* A modern Arabic font */
+    font-family: 'Tajawal', sans-serif;
+    margin: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    direction: rtl;
 }
 
 h1, h2, h3, .btn {
-    font-family: 'Cairo', sans-serif; /* A strong font for titles */
+    font-family: 'Cairo', sans-serif;
     font-weight: 700;
 }
 
-/* Enhanced Hero Section */
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 0 20px;
+}
+.page-padding {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+.text-center {
+    text-align: center;
+}
+
+/* Header & Navigation */
+header {
+    background: #222;
+    color: #fff;
+    padding: 1rem 0;
+    border-bottom: 3px solid #d4af37;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo-link img.logo {
+    max-height: 50px;
+}
+header ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+header ul li {
+    display: inline;
+    margin-left: 25px;
+}
+header a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+header a:hover {
+    color: #d4af37;
+}
+
+/* Hero Section */
 .hero {
-    background: url('../images/hero-background.jpg') no-repeat center center/cover; /* <<< غيّر هذه الصورة الخلفية */
+    /* المسار الصحيح للخلفية: ../ تعني "ارجع خطوة للخلف" من مجلد css لتصل للمجلد الرئيسي ثم ادخل images */
+    background: url('../images/hero-background.jpg') no-repeat center center/cover;
     height: 90vh;
     color: #fff;
     display: flex;
@@ -21,7 +73,7 @@ h1, h2, h3, .btn {
     text-align: center;
     position: relative;
 }
-.hero::before { /* Overlay for better text readability */
+.hero::before { /* طبقة معتمة لتحسين قراءة النص */
     content: '';
     position: absolute;
     top: 0;
@@ -40,20 +92,44 @@ h1, h2, h3, .btn {
     font-weight: 900;
     margin-bottom: 0.5rem;
     letter-spacing: 2px;
-    color: #d4af37; /* Gold color for the title */
+    color: #d4af37; /* اللون الذهبي المميز */
 }
 .hero-subtitle {
     font-size: 1.5rem;
     margin-bottom: 2rem;
 }
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s ease;
+    font-size: 16px;
+}
+.btn:hover {
+    background: #555;
+    transform: translateY(-2px);
+}
+.btn-primary {
+    background: #d4af37;
+    color: #222;
+    font-weight: bold;
+}
+.btn-primary:hover {
+    background: #c8a02b;
+}
 .btn-hero {
     padding: 15px 35px;
     font-size: 1.2rem;
-    transform: scale(1);
-    transition: transform 0.3s ease;
 }
 .btn-hero:hover {
-    transform: scale(1.05);
+    transform: scale(1.05) translateY(-2px);
 }
 
 /* Keyframe Animations */
@@ -68,13 +144,18 @@ h1, h2, h3, .btn {
     }
 }
 
-
 /* Section Styles */
 .section-lead {
     max-width: 700px;
     margin: 1rem auto;
     font-size: 1.1rem;
     color: #555;
+    line-height: 1.7;
+}
+h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #333;
 }
 
 /* Features Section */
@@ -93,12 +174,13 @@ h1, h2, h3, .btn {
     padding: 1.5rem;
 }
 .feature-icon {
-    max-width: 80px; /* Adjust size as needed */
+    max-width: 80px;
     margin-bottom: 1rem;
 }
 .feature-item h3 {
     color: #333;
     margin-bottom: 0.5rem;
+    font-size: 1.5rem;
 }
 
 /* Gallery Section */
@@ -124,7 +206,7 @@ h1, h2, h3, .btn {
 .cta-section {
     background-color: #222;
     color: #fff;
-    padding: 4rem 0;
+    padding: 4rem 1rem;
     margin-top: 2rem;
 }
 .cta-section h2 {
@@ -142,9 +224,20 @@ h1, h2, h3, .btn {
     transform: translateY(0);
 }
 
-/* Responsive Adjustments */
+/* Footer */
+footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    background: #222;
+    color: #fff;
+}
+
+/* Media Queries for Responsiveness */
 @media (max-width: 768px) {
     .hero-title { font-size: 2.8rem; }
     .hero-subtitle { font-size: 1.2rem; }
     .hero { height: 70vh; }
+    h2 { font-size: 2rem; }
+    header nav { flex-direction: column; gap: 15px; }
 }
