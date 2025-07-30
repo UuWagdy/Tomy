@@ -27,7 +27,7 @@
             </div>
         </section>
 
-        <!-- NEW: Today's Bookings Section -->
+        <!-- Today's Bookings Section -->
         <section id="today-bookings-section">
             <h2>حجوزات اليوم الموافق عليها</h2>
             <div id="today-bookings-list">
@@ -60,9 +60,18 @@
                     <input type="text" id="instapay-name" class="form-control" placeholder="اسم حساب انستا باي">
                     <label>Vodafone Cash (اختياري)</label>
                     <input type="tel" id="vodafone-cash" class="form-control" placeholder="رقم فودافون كاش">
-                    <label>رقم تليجرام لتلقي الإثبات (اختياري)</label>
-                    <input type="tel" id="telegram-contact" class="form-control" placeholder="رقم تليجرام">
-                    <button type="submit" class="btn btn-primary">حفظ بيانات الدفع</button>
+                    
+                    <!-- UPDATED: Contact Method Section -->
+                    <label>وسيلة التواصل لتلقي إثبات التحويل:</label>
+                    <select id="contact-platform" class="form-control">
+                        <option value="whatsapp">واتساب</option>
+                        <option value="telegram">تليجرام</option>
+                        <option value="other">وسيلة أخرى (اكتبها بالأسفل)</option>
+                    </select>
+                    <input type="text" id="contact-info" class="form-control" placeholder="اكتب الرقم هنا..." style="margin-top: 5px;">
+                    <input type="text" id="contact-other" class="form-control" placeholder="اكتب اسم الوسيلة الأخرى هنا (مثال: فيسبوك ماسنجر)" style="margin-top: 5px; display: none;">
+
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">حفظ بيانات الدفع</button>
                 </form>
             </section>
         </div>
