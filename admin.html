@@ -50,18 +50,23 @@
         <!-- ======================================================= -->
         <section id="booking-viewer-section">
             <h2>البحث في الحجوزات المؤكدة</h2>
-            <div class="viewer-controls">
-                <!-- فلتر اليوم المحدد -->
+                       <div class="viewer-controls">
+                <!-- ============================================= -->
+                <!-- ====== بداية واجهة الفترة الزمنية (جديد) ====== -->
+                <!-- ============================================= -->
                 <div class="form-group">
-                    <label for="date-picker">اختر يوماً محدداً:</label>
-                    <input type="date" id="date-picker" class="form-control">
+                    <label for="start-date-picker">من تاريخ:</label>
+                    <input type="date" id="start-date-picker" class="form-control">
                 </div>
-                <!-- فلتر الأسبوع الكامل -->
                 <div class="form-group">
-                    <label for="week-picker">أو اختر أسبوعاً كاملاً:</label>
-                    <input type="week" id="week-picker" class="form-control">
+                    <label for="end-date-picker">إلى تاريخ:</label>
+                    <input type="date" id="end-date-picker" class="form-control">
                 </div>
-                <!-- عداد النتائج -->
+                <!-- =========================================== -->
+                <!-- ======= نهاية واجهة الفترة الزمنية (جديد) ====== -->
+                <!-- =========================================== -->
+                
+                <!-- عداد النتائج (يبقى كما هو) -->
                 <div class="count-display">
                     <h3>عدد الحجوزات</h3>
                     <p id="booking-count">0</p>
