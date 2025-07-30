@@ -39,13 +39,17 @@
     <script src="js/utils.js"></script> <!-- Keep this for notifications -->
     <script>
         // Your Firebase login script here...
-        const firebaseConfig = {
-            apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
-            authDomain: "tomy-barber-shop.firebaseapp.com",
-            projectId: "tomy-barber-shop",
-            storageBucket: "tomy-barber-shop.firebasestorage.app",
-            messagingSenderId: "693769920483",
-            appId: "1:693769920483:web:88a3b6cf7318263c540ad6"
+  const firebaseConfig = {
+  apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
+  authDomain: "tomy-barber-shop.firebaseapp.com",
+  databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
+  projectId: "tomy-barber-shop",
+  storageBucket: "tomy-barber-shop.firebasestorage.app",
+  messagingSenderId: "693769920483",
+  appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
+  measurementId: "G-HNW5F8YJE3"
+};
+
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
