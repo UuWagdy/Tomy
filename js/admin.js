@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
         authDomain: "tomy-barber-shop.firebaseapp.com",
         projectId: "tomy-barber-shop",
-        storageBucket: "tomy-barber-shop.firebasestorage.app",
+        storageBucket: "tomy-barber-shop.firebasestorage.app", // This can stay, it doesn't hurt
         messagingSenderId: "693769920483",
         appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
         measurementId: "G-HNW5F8YJE3"
@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const auth = firebase.auth();
-    const storage = firebase.storage();
+    // We no longer need the storage service
+    // const storage = firebase.storage(); 
 
     const adminContent = document.getElementById('admin-content');
     const headerLogo = document.getElementById('header-logo');
@@ -32,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- DOM Elements ---
         const logoutButton = document.getElementById('logout-btn');
-        const logoUploadInput = document.getElementById('logo-upload');
-        const uploadProgress = document.getElementById('upload-progress');
+        const logoForm = document.getElementById('logo-form');
+        const logoUrlInput = document.getElementById('logo-url');
         const changePasswordBtn = document.getElementById('change-password-btn');
         const paymentForm = document.getElementById('payment-form');
         const instapayNameInput = document.getElementById('instapay-name');
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const settings = snapshot.val() || {};
             // Load Logo
             headerLogo.src = settings.logoUrl || 'logo.png';
+            logoUrlInput.value = settings.logoUrl || '';
             // Load Payment Details
             if (settings.paymentDetails) {
                 instapayNameInput.value = settings.paymentDetails.instapayName || '';
@@ -144,28 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(err => showNotification('حدث خطأ: ' + err.message, 'error'));
         });
 
-        logoUploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const uploadTask = storage.ref(`logos/logo`).put(file);
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    uploadProgress.style.display = 'block';
-                    uploadProgress.textContent = `جاري الرفع... ${Math.round(progress)}%`;
-                },
-                (error) => {
-                    showNotification('فشل رفع الصورة: ' + error.message, 'error');
-                },
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        db.ref('settings/logoUrl').set(downloadURL)
-                            .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'));
-                        uploadProgress.style.display = 'none';
-                    });
-                }
-            );
+        logoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newLogoUrl = logoUrlInput.value;
+            db.ref('settings/logoUrl').set(newLogoUrl)
+                .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'))
+                .catch(err => showNotification('فشل تحديث الشعار: ' + err.message, 'error'));
         });
 
         paymentForm.addEventListener('submit', (e) => {
