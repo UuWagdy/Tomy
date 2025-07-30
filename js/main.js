@@ -31,7 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- وظائف مساعدة ---
     const saveBookings = () => localStorage.setItem('tomyBarberBookings', JSON.stringify(bookings));
     
-    // وظيفة لإنشاء قائمة بكل المواعيد الممكنة في يوم
+    // (الحل) وظيفة آمنة لتنسيق التاريخ بدون مشاكل المنطقة الزمنية
+    const toYYYYMMDD = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
     const generateTimeSlots = () => {
         const slots = [];
         for (let hour = WORK_START_HOUR; hour < WORK_END_HOUR; hour++) {
@@ -48,24 +55,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderCalendar = () => {
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
-        weekStart.setDate(currentDate.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1)); // Start Monday
+        weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1); // يبدأ من الإثنين
 
-        currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG')}`;
+        currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
+        
+        // (تحسين) تعطيل زر "الأسبوع السابق" إذا كان في الماضي
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        prevWeekBtn.disabled = weekStart < today;
 
         for (let i = 0; i < 7; i++) {
             const dayDate = new Date(weekStart);
             dayDate.setDate(weekStart.getDate() + i);
-            const dayString = dayDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            const dayString = toYYYYMMDD(dayDate); // استخدام الوظيفة الآمنة
 
             const dayDiv = document.createElement('div');
             dayDiv.className = 'day-slot';
-            dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG')}`;
+            dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
             dayDiv.dataset.date = dayString;
 
-            // التحقق إذا كان اليوم ممتلئاً بالكامل
-            const approvedBookingsForDay = bookings.filter(b => b.date === dayString && b.status === 'approved').length;
-            if (approvedBookingsForDay >= allPossibleSlots.length) {
-                dayDiv.classList.add('full');
+            // لا تسمح بالضغط على الأيام الماضية
+            if (dayDate < today) {
+                dayDiv.classList.add('disabled');
+            } else {
+                const approvedBookingsForDay = bookings.filter(b => b.date === dayString && b.status === 'approved').length;
+                if (approvedBookingsForDay >= allPossibleSlots.length) {
+                    dayDiv.classList.add('full');
+                }
             }
             
             calendarView.appendChild(dayDiv);
@@ -75,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Time Slots Logic ---
     const showTimeSlotsForDay = (dateString) => {
         slotsContainer.innerHTML = '';
-        const selectedDate = new Date(dateString);
+        const selectedDate = new Date(dateString + 'T00:00:00'); // تفادي مشاكل المنطقة الزمنية
         slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${selectedDate.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
 
         allPossibleSlots.forEach(time => {
@@ -88,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const existingBooking = bookings.find(b => b.date === dateString && b.time === time);
 
             if (existingBooking) {
-                slotDiv.classList.add(existingBooking.status); // 'pending' or 'approved'
+                slotDiv.classList.add(existingBooking.status);
             } else {
                 slotDiv.classList.add('available');
             }
@@ -100,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners ---
     calendarView.addEventListener('click', (e) => {
         const daySlot = e.target.closest('.day-slot');
-        if (daySlot && !daySlot.classList.contains('full')) {
+        if (daySlot && !daySlot.classList.contains('full') && !daySlot.classList.contains('disabled')) {
             showTimeSlotsForDay(daySlot.dataset.date);
         }
     });
@@ -110,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (slot && slot.classList.contains('available')) {
             hiddenDateInput.value = slot.dataset.date;
             hiddenTimeInput.value = slot.dataset.time;
-            selectedSlotDisplay.textContent = `${new Date(slot.dataset.date).toLocaleDateString('ar-EG')} - الساعة ${slot.dataset.time}`;
+            selectedSlotDisplay.textContent = `${new Date(slot.dataset.date + 'T00:00:00').toLocaleDateString('ar-EG')} - الساعة ${slot.dataset.time}`;
             slotsModal.style.display = 'none';
             bookingModal.style.display = 'block';
         } else if (slot && (slot.classList.contains('pending') || slot.classList.contains('approved'))) {
@@ -123,35 +139,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const date = hiddenDateInput.value;
         const time = hiddenTimeInput.value;
 
-        // إعادة التحقق مرة أخرى قبل الحفظ النهائي
         if (bookings.some(b => b.date === date && b.time === time)) {
-            alert('عفواً، لقد تم حجز هذا الموعد للتو من قبل شخص آخر. الرجاء اختيار موعد آخر.');
+            alert('عفواً، لقد تم حجز هذا الموعد للتو. الرجاء اختيار موعد آخر.');
             return;
         }
 
-        const newBooking = {
-            id: Date.now(),
-            fullName: document.getElementById('fullName').value,
-            phone: document.getElementById('phone').value,
-            date: date,
-            time: time,
-            status: 'pending'
-        };
+        const newBooking = { id: Date.now(), fullName: document.getElementById('fullName').value, phone: document.getElementById('phone').value, date: date, time: time, status: 'pending' };
 
         bookings.push(newBooking);
         saveBookings();
-        alert('تم إرسال طلب الحجز بنجاح. سيتم تأكيد الموعد من قبل الأدمن.');
+        alert('تم إرسال طلب الحجز بنجاح.');
         
         bookingForm.reset();
         bookingModal.style.display = 'none';
-        renderCalendar(); // تحديث التقويم لاحتمالية امتلاء اليوم
+        renderCalendar();
     });
-
-    // التنقل بين الأسابيع
-    prevWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); });
+    
+    prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
     nextWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 7); renderCalendar(); });
     
-    // إغلاق النوافذ المنبثقة
     closeSlotsModalBtn.onclick = () => slotsModal.style.display = "none";
     closeBookingModalBtn.onclick = () => bookingModal.style.display = "none";
     window.onclick = (event) => {
@@ -159,61 +165,5 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target == bookingModal) bookingModal.style.display = "none";
     };
 
-    // --- Initial Load ---
     renderCalendar();
-});```
-
-#### 📁 ملف `js/admin.js` (تعديل طفيف لتحسين العرض)
-
-تم تحسين طريقة العرض لتكون أكثر وضوحاً للأدمن.
-
-```javascript
-// ... (كود التحقق من كلمة المرور يبقى كما هو) ...
-
-function initializeAdminPanel() {
-    // ...
-    const renderAdminLists = () => {
-        // ...
-        // ترتيب الحجوزات حسب التاريخ والوقت
-        const sortedBookings = bookings.sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
-
-        const pendingBookings = sortedBookings.filter(b => b.status === 'pending');
-        const approvedBookings = sortedBookings.filter(b => b.status === 'approved');
-
-        // ... (بقية الكود مع التعديل على العرض) ...
-        // مثال على تعديل العرض داخل حلقة forEach
-        pendingBookings.forEach(booking => {
-            const item = document.createElement('div');
-            item.className = 'booking-item pending';
-            item.innerHTML = `
-                <div>
-                    <strong>${booking.fullName}</strong> (${booking.phone})<br>
-                    <small>${new Date(booking.date).toLocaleDateString('ar-EG', {weekday: 'long', day: 'numeric', month: 'long'})} - الساعة ${booking.time}</small>
-                </div>
-                <div>
-                    <button class="btn btn-primary" onclick="approveBooking(${booking.id})">قبول</button>
-                    <button class="btn" onclick="rejectBooking(${booking.id})">رفض</button>
-                </div>
-            `;
-            pendingList.appendChild(item);
-        });
-        
-        approvedBookings.forEach(booking => {
-            const item = document.createElement('div');
-            item.className = 'booking-item approved';
-            item.innerHTML = `
-                 <div>
-                    <strong>${booking.fullName}</strong> (${booking.phone})<br>
-                    <small>${new Date(booking.date).toLocaleDateString('ar-EG', {weekday: 'long', day: 'numeric', month: 'long'})} - الساعة ${booking.time}</small>
-                </div>
-                <div>
-                     <button class="btn" onclick="rejectBooking(${booking.id})">إلغاء الحجز</button>
-                </div>
-            `;
-            approvedList.appendChild(item);
-        });
-    };
-    // ...
-}
-
-// ... (بقية الكود) ...
+});
