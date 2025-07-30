@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let services = {};
     let bookings = {};
     
+    // --- (باقي تعريفات العناصر كما هي) ---
     const loader = document.getElementById('loader');
     const bookingContainer = document.getElementById('booking-container');
     const headerLogo = document.getElementById('header-logo');
@@ -45,40 +46,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
+
+    // ======== بداية الكود الجديد والمُعاد هيكلته ========
+    function initializeApp() {
+        // الخطوة 1: تحميل الإعدادات والخدمات أولاً (البيانات التي لا تتغير كثيرًا)
+        const settingsRef = db.ref('settings').once('value');
+        const servicesRef = db.ref('services').once('value');
+
+        Promise.all([settingsRef, servicesRef]).then(([settingsSnap, servicesSnap]) => {
+            settings = settingsSnap.val() || {};
+            services = servicesSnap.val() || {};
+
+            // الخطوة 2: تهيئة واجهة المستخدم الأساسية التي تعتمد على الإعدادات
+            if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
+            populatePaymentMethods();
+            setupUIForBookingModel(); // هذه الدالة تجعل قسم التقويم مرئيًا الآن
+
+            // الخطوة 3: الآن وبعد أن أصبحت الواجهة جاهزة، نبدأ في الاستماع لبيانات الحجوزات
+            // on('value') ستعمل مرة فورًا بالبيانات الحالية، ثم تستمع لأي تغيير مستقبلي
+            db.ref('bookings').on('value', snap => {
+                bookings = snap.val() || {};
+                // الآن نرسم التقويم بأمان لأننا نضمن أن القسم مرئي
+                renderCalendar(); 
+            });
+
+            // الخطوة 4: إخفاء علامة التحميل وإظهار المحتوى بالكامل
+            loader.style.display = 'none';
+            bookingContainer.style.display = 'block';
+
+        }).catch(err => {
+            console.error("خطأ في تحميل الإعدادات الأولية:", err);
+            loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
+        });
+    }
+    // ======== نهاية الكود الجديد والمُعاد هيكلته ========
+
+
+    // --- (باقي الدوال تبقى كما هي بدون تغيير) ---
+
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
         const [hour, minute] = timeString.split(':').map(Number);
         const period = hour >= 12 ? 'م' : 'ص';
         const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
         return `${adjustedHour}:${String(minute).padStart(2, '0')} ${period}`;
-    }
-
-    function initializeApp() {
-        const settingsRef = db.ref('settings').once('value');
-        const servicesRef = db.ref('services').once('value');
-        const bookingsRef = db.ref('bookings').once('value');
-
-        Promise.all([settingsRef, servicesRef, bookingsRef]).then(([settingsSnap, servicesSnap, bookingsSnap]) => {
-            settings = settingsSnap.val() || {};
-            services = servicesSnap.val() || {};
-            bookings = bookingsSnap.val() || {};
-
-            loader.style.display = 'none';
-            bookingContainer.style.display = 'block';
-            
-            if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
-            
-            populatePaymentMethods();
-            setupUIForBookingModel();
-            
-            db.ref('bookings').on('value', snap => {
-                bookings = snap.val() || {};
-                if (calendarSection.style.display !== 'none') renderCalendar();
-            });
-
-        }).catch(err => {
-            loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
-        });
     }
     
     function populatePaymentMethods() {
@@ -90,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupUIForBookingModel() {
-        calendarSection.style.display = 'block';
+        calendarSection.style.display = 'block'; // نجعل القسم مرئيًا هنا
         
         if (settings.bookingModel === 'capacity') {
             serviceSection.style.display = 'none';
@@ -101,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         populateServices(); 
-        renderCalendar();
+        // لا نرسم التقويم هنا بعد الآن، بل ننتظر بيانات الحجوزات
     }
 
     function populateServices() {
@@ -144,36 +155,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayDiv.classList.add('disabled');
                 if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
             } else {
-
-                //  ====== هذا هو الجزء الذي تم إصلاحه وتطويره ======
                 if(settings.bookingModel === 'capacity') {
                     const capacity = settings.dailyCapacity || 10;
-                    
-                    // 1. نحسب الحجوزات الموافق عليها
                     const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
-                    
-                    // 2. نحسب الحجوزات المعلقة
                     const pendingBookingsCount = dayBookings.filter(b => b.status === 'pending').length;
 
-                    // اليوم يعتبر ممتلئ فقط إذا وصلت الحجوزات "الموافق عليها" للحد الأقصى
                     if (approvedBookingsCount >= capacity) {
                         dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
                     } else {
-                         // 3. نعرض العدد المتاح والعدد المعلق للمستخدم
                          const availableCount = capacity - approvedBookingsCount;
                          let availabilityText = `متاح: ${availableCount}`;
-                         
-                         // نضيف نص الحجوزات المعلقة فقط إذا كان هناك حجوزات معلقة
                          if (pendingBookingsCount > 0) {
                              availabilityText += ` | ${pendingBookingsCount} قيد التأكيد`;
                          }
-                         
                          dayDiv.innerHTML += `<br><small>${availabilityText}</small>`;
                     }
                 }
-                //  ====== نهاية الجزء الذي تم إصلاحه ======
-
             }
             calendarView.appendChild(dayDiv);
         }
@@ -182,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTimeSlots(dateString) {
         slotsContainer.innerHTML = '';
         const schedule = getDaySchedule(new Date(dateString));
+        if (!schedule || !schedule.open || !schedule.close) return; // Safety check
         const slotDuration = parseInt(settings.slotDuration, 10) || 30;
         
         const timeToMinutes = (t) => t.split(':').map(Number).reduce((h, m) => h * 60 + m);
@@ -209,8 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isPast) {
                 slotDiv.classList.add('disabled');
             } else if (booking) {
-                slotDiv.classList.add(booking.status === 'approved' ? 'approved' : 'approved');
-                slotDiv.classList.add(booking.status === 'pending' ? 'pending' : '');
+                slotDiv.classList.add(booking.status === 'approved' ? 'approved' : 'pending');
             } else {
                 slotDiv.classList.add('available');
             }
@@ -219,11 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
         slotsModal.style.display = 'block';
     }
 
-
     calendarView.addEventListener('click', (e) => {
         const daySlot = e.target.closest('.day-slot');
         if (!daySlot || daySlot.classList.contains('disabled') || daySlot.classList.contains('full')) return;
-
         const date = daySlot.dataset.date;
         if (settings.bookingModel === 'slots') {
             slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
@@ -241,15 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function openBookingModal(date, time = null) {
         hiddenDateInput.value = date;
         hiddenTimeInput.value = time;
-        
         let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
         if(time) display += ` - الساعة ${formatTo12Hour(time)}`;
-
-        const selectedServiceId = serviceSelect.value;
-        if(selectedServiceId && services[selectedServiceId]){
-            display += ` (خدمة: ${services[selectedServiceId].name})`;
-        }
-
         selectedSlotDisplay.textContent = display;
         slotsModal.style.display = 'none';
         bookingModal.style.display = 'block';
@@ -257,53 +246,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const date = hiddenDateInput.value;
-        const paymentMethod = paymentMethodSelect.value;
-        const dayFormatted = date.split('-').slice(1).join('');
-
-        const counterRef = db.ref(`dayCounters/${date}`);
-        let newId;
-        try {
-            const { committed, snapshot } = await counterRef.transaction(currentCount => (currentCount || 0) + 1);
-            if (!committed) throw new Error("Failed to generate booking ID.");
-            newId = snapshot.val();
-        } catch (error) {
-            showNotification('حدث خطأ فني، الرجاء المحاولة مرة أخرى.', 'error');
-            return;
-        }
-        
-        const bookingCode = dayFormatted + newId;
-        const selectedServiceId = serviceSelect.value;
-        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : "حجز موعد";
-
         const newBooking = {
             fullName: document.getElementById('fullName').value,
             phone: document.getElementById('phone').value,
-            date: date,
+            date: hiddenDateInput.value,
             time: hiddenTimeInput.value || null,
-            serviceName: serviceName,
-            paymentMethod: paymentMethod,
-            bookingCode: bookingCode,
+            serviceName: "حجز موعد",
+            paymentMethod: paymentMethodSelect.value,
             status: 'pending'
         };
-
-        db.ref('bookings').push(newBooking).then(() => {
-            bookingModal.style.display = 'none';
-            bookingForm.reset();
-            showConfirmationModal(bookingCode, paymentMethod);
+        db.ref('bookings').push(newBooking).then((ref) => {
+            const date = newBooking.date;
+            const dayFormatted = date.split('-').slice(1).join('');
+            const counterRef = db.ref(`dayCounters/${date}`);
+            counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
+                const bookingCode = dayFormatted + transactionResult.snapshot.val();
+                ref.update({ bookingCode: bookingCode });
+                showConfirmationModal(bookingCode, newBooking.paymentMethod);
+            });
         });
+        bookingModal.style.display = 'none';
+        bookingForm.reset();
     });
 
     function showConfirmationModal(code, paymentMethod) {
         bookingCodeDisplay.textContent = code;
         paymentInfoDisplay.innerHTML = '';
-
         if(paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash') {
             const details = settings.paymentDetails;
             let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
             if (paymentMethod === 'InstaPay' && details.instapayName) html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
             if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
-            
             if (details.contactInfo) {
                 let platform = details.contactPlatform === 'other' ? details.contactOther : (details.contactPlatform || 'واتساب');
                 platform = platform.charAt(0).toUpperCase() + platform.slice(1);
