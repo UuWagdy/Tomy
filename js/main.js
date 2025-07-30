@@ -89,20 +89,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // UPDATED FUNCTION
     function setupUIForBookingModel() {
-        calendarSection.style.display = 'block';
+        calendarSection.style.display = 'block'; // Show calendar for all models
+        
+        // Check the booking model from settings
         if (settings.bookingModel === 'capacity') {
-            serviceSection.style.display = 'none';
+            serviceSection.style.display = 'none'; // Hide service selection
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
-        } else {
-            serviceSection.style.display = 'block';
-            calendarTitle.textContent = "الخطوة 2: اختر يوماً من التقويم";
-            populateServices();
+        } else { // 'slots' model
+            serviceSection.style.display = 'none'; // Also hide service selection for slots model now
+            calendarTitle.textContent = "الخطوة 1: اختر اليوم والموعد";
         }
+        
+        // We still populate services in the background in case they are needed for the booking record
+        populateServices(); 
         renderCalendar();
     }
 
     function populateServices() {
+        // This function now just prepares the service data without showing it
         serviceSelect.innerHTML = '<option value="" selected>-- خدمة عامة --</option>';
         for (const id in services) {
             serviceSelect.innerHTML += `<option value="${id}">${services[id].name}</option>`;
@@ -223,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
         if(time) display += ` - الساعة ${formatTo12Hour(time)}`;
 
+        // This part is now optional and won't show anything unless a service is manually selected
         const selectedServiceId = serviceSelect.value;
         if(selectedServiceId && services[selectedServiceId]){
             display += ` (خدمة: ${services[selectedServiceId].name})`;
@@ -252,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const bookingCode = dayFormatted + newId;
         const selectedServiceId = serviceSelect.value;
-        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : null;
+        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : "حجز موعد"; // Default service name
 
         const newBooking = {
             fullName: document.getElementById('fullName').value,
@@ -282,10 +289,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (paymentMethod === 'InstaPay' && details.instapayName) html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
             if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
             
-            // UPDATED: Display dynamic contact info
             if (details.contactInfo) {
                 let platform = details.contactPlatform === 'other' ? details.contactOther : (details.contactPlatform || 'واتساب');
-                platform = platform.charAt(0).toUpperCase() + platform.slice(1); // Capitalize first letter
+                platform = platform.charAt(0).toUpperCase() + platform.slice(1);
                 html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
             }
             paymentInfoDisplay.innerHTML = html;
