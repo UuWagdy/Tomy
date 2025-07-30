@@ -13,14 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- Global State ---
     let currentDate = new Date();
     let settings = {};
     let services = {};
     let bookings = {};
     let selectedService = null;
     
-    // --- DOM Elements ---
     const loader = document.getElementById('loader');
     const bookingContainer = document.getElementById('booking-container');
     const headerLogo = document.getElementById('header-logo');
@@ -49,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
 
-    // --- Initialization ---
     function initializeApp() {
         const settingsRef = db.ref('settings').once('value');
         const servicesRef = db.ref('services').once('value');
@@ -75,19 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }).catch(err => {
             loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
-            console.error(err);
         });
     }
     
     function populatePaymentMethods() {
         paymentMethodSelect.innerHTML = '<option value="عند تمام العمل" selected>الدفع عند تمام العمل</option>';
         if (settings.paymentDetails) {
-            if (settings.paymentDetails.instapayName) {
-                paymentMethodSelect.innerHTML += '<option value="InstaPay">انستا باي</option>';
-            }
-            if (settings.paymentDetails.vodafoneCash) {
-                paymentMethodSelect.innerHTML += '<option value="Vodafone Cash">فودافون كاش</option>';
-            }
+            if (settings.paymentDetails.instapayName) paymentMethodSelect.innerHTML += '<option value="InstaPay">انستا باي</option>';
+            if (settings.paymentDetails.vodafoneCash) paymentMethodSelect.innerHTML += '<option value="Vodafone Cash">فودافون كاش</option>';
         }
     }
 
@@ -99,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCalendar();
         } else { // 'slots' model
             serviceSection.style.display = 'block';
+            calendarTitle.textContent = "الخطوة 2: اختر يوماً من التقويم";
             populateServices();
         }
     }
@@ -106,11 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateServices() {
         serviceSelect.innerHTML = '<option value="" disabled selected>-- الرجاء اختيار الخدمة أولاً --</option>';
         for (const id in services) {
-            serviceSelect.innerHTML += `<option value="${id}">${services[id].name} (${services[id].duration} دقيقة)</option>`;
+            // UPDATED: Removed duration from service display as it's now global
+            serviceSelect.innerHTML += `<option value="${id}">${services[id].name}</option>`;
         }
     }
 
-    // --- Calendar & Slots Logic ---
     function getDaySchedule(date) {
         const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const dayName = dayNames[date.getDay()];
@@ -121,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
         weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
-
         currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
         
         const today = new Date();
@@ -138,9 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dayDiv.dataset.date = dayString;
             
             const dayBookings = Object.values(bookings).filter(b => b.date === dayString);
-            const approvedBookings = dayBookings.filter(b => b.status === 'approved').length;
-            const pendingBookings = dayBookings.filter(b => b.status === 'pending').length;
-
+            
             dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
 
             if (dayDate < today || !schedule.active) {
@@ -148,17 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
             } else {
                 if(settings.bookingModel === 'capacity') {
-                    // UPDATED: Use the global dailyCapacity setting
+                    // CRUCIAL FIX: Count both pending and approved bookings against capacity
+                    const totalBookingsForDay = dayBookings.length;
                     const capacity = settings.dailyCapacity || 10;
-                    if (approvedBookings >= capacity) {
+
+                    if (totalBookingsForDay >= capacity) {
                         dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
                     } else {
-                         dayDiv.innerHTML += `<br><small>متاح: ${capacity - approvedBookings}</small>`;
-                         if(pendingBookings > 0) dayDiv.innerHTML += `<br><small>قيد الانتظار: ${pendingBookings}</small>`;
+                         dayDiv.innerHTML += `<br><small>متاح: ${capacity - totalBookingsForDay}</small>`;
                     }
                 }
-                // For 'slots' model, fullness is checked in the modal
             }
             calendarView.appendChild(dayDiv);
         }
@@ -167,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTimeSlots(dateString) {
         slotsContainer.innerHTML = '';
         const schedule = getDaySchedule(new Date(dateString));
-        const serviceDuration = parseInt(selectedService.duration, 10);
+        // CRUCIAL CHANGE: Use the global slot duration from settings
+        const slotDuration = parseInt(settings.slotDuration, 10) || 30;
         
         const timeToMinutes = (t) => t.split(':').map(Number).reduce((h, m) => h * 60 + m);
         const start = timeToMinutes(schedule.open);
@@ -177,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const todayString = toYYYYMMDD(now);
         const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
 
-        for (let time = start; time < end; time += serviceDuration) {
+        for (let time = start; time < end; time += slotDuration) {
             const h = Math.floor(time / 60);
             const m = time % 60;
             const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
@@ -206,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Event Handlers ---
     serviceSelect.addEventListener('change', () => {
         if (serviceSelect.value) {
             selectedService = services[serviceSelect.value];
@@ -223,16 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settings.bookingModel === 'slots') {
             slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
             renderTimeSlots(date);
-        } else { // capacity model
+        } else {
             openBookingModal(date);
         }
     });
     
     slotsContainer.addEventListener('click', (e) => {
         const slot = e.target.closest('.time-slot.available');
-        if(slot) {
-            openBookingModal(slot.dataset.date, slot.dataset.time);
-        }
+        if(slot) openBookingModal(slot.dataset.date, slot.dataset.time);
     });
     
     function openBookingModal(date, time = null) {
@@ -257,16 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const counterRef = db.ref(`dayCounters/${date}`);
         let newId;
         try {
-            const { committed, snapshot } = await counterRef.transaction(currentCount => {
-                return (currentCount || 0) + 1;
-            });
-            if (committed) {
-                newId = snapshot.val();
-            } else {
-                throw new Error("Failed to generate booking ID.");
-            }
+            const { committed, snapshot } = await counterRef.transaction(currentCount => (currentCount || 0) + 1);
+            if (!committed) throw new Error("Failed to generate booking ID.");
+            newId = snapshot.val();
         } catch (error) {
-            console.error(error);
             showNotification('حدث خطأ فني، الرجاء المحاولة مرة أخرى.', 'error');
             return;
         }
@@ -278,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             phone: document.getElementById('phone').value,
             date: date,
             time: hiddenTimeInput.value || null,
-            serviceName: selectedService ? selectedService.name : null,
+            serviceName: selectedService ? services[serviceSelect.value].name : null,
             paymentMethod: paymentMethod,
             bookingCode: bookingCode,
             status: 'pending'
@@ -298,24 +280,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if(paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash') {
             const details = settings.paymentDetails;
             let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
-            if (paymentMethod === 'InstaPay' && details.instapayName) {
-                html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
-            }
-            if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) {
-                html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
-            }
-            if (details.telegramContact) {
-                html += `<p><strong>أرسل إثبات التحويل إلى تليجرام رقم:</strong> ${details.telegramContact}</p>`;
-            }
-             paymentInfoDisplay.innerHTML = html;
+            if (paymentMethod === 'InstaPay' && details.instapayName) html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
+            if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
+            if (details.telegramContact) html += `<p><strong>أرسل إثبات التحويل إلى تليجرام رقم:</strong> ${details.telegramContact}</p>`;
+            paymentInfoDisplay.innerHTML = html;
         }
         confirmationModal.style.display = 'block';
     }
 
-    // --- Helpers & Utils ---
     const toYYYYMMDD = (date) => date.toISOString().split('T')[0];
 
-    // --- Modal Controls ---
     prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
     nextWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 7); renderCalendar(); });
     closeBookingModalBtn.onclick = () => bookingModal.style.display = "none";
@@ -327,6 +301,5 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target == confirmationModal) confirmationModal.style.display = "none";
     };
 
-    // --- Start the App ---
     initializeApp();
 });
