@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - Tomy Barber Shop</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -19,23 +20,54 @@
         
         <!-- Dashboard Section -->
         <section id="dashboard-section">
-            <h2>لوحة التحليلات</h2>
+            <h2 class="section-title text-center">لوحة التحليلات</h2>
             <div class="dashboard-grid">
                 <div class="stat-card"><h3>حجوزات معلقة</h3><p id="pending-count">0</p></div>
                 <div class="stat-card"><h3>حجوزات اليوم</h3><p id="today-count">0</p></div>
-                <div class="stat-card"><h3>إجمالي الحجوزات (آخر 30 يوم)</h3><p id="total-count">0</p></div>
+                <div class="stat-card"><h3>إجمالي الحجوزات</h3><p id="total-count">0</p></div>
             </div>
         </section>
 
         <!-- Today's Bookings Section -->
         <section id="today-bookings-section">
             <h2>حجوزات اليوم الموافق عليها</h2>
-            <div id="today-bookings-list">
+            <div id="today-bookings-list" class="item-list">
                 <!-- Today's bookings will be dynamically inserted here -->
             </div>
         </section>
+        
+        <!-- Pending Bookings Section -->
+        <section id="bookings-management-section">
+            <h2>إدارة الحجوزات المعلقة</h2>
+            <div id="pending-bookings-list" class="item-list"></div>
+        </section>
+        
+        <!-- NEW: Gallery Management Section -->
+        <section id="gallery-management-section">
+            <h2 class="section-title text-center">إدارة معرض الأعمال</h2>
+            <div class="management-grid">
+                <div>
+                    <h3>إضافة صورة جديدة</h3>
+                    <form id="gallery-form">
+                        <div class="form-group">
+                            <label for="image-upload">اختر صورة (بحد أقصى 5MB):</label>
+                            <input type="file" id="image-upload" class="form-control" accept="image/png, image/jpeg, image/webp">
+                        </div>
+                        <progress id="upload-progress" value="0" max="100" style="display:none;"></progress>
+                        <button type="submit" class="btn btn-primary">رفع الصورة</button>
+                    </form>
+                </div>
+                <div>
+                    <h3>الصور الحالية</h3>
+                    <div id="gallery-items-container" class="item-list">
+                        <!-- Admin gallery items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        <!-- Management Grids -->
+
+        <!-- Settings Grids -->
         <div class="management-grid">
             <section id="general-settings-section">
                 <h2>الإعدادات العامة</h2>
@@ -46,7 +78,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">حفظ الشعار</button>
                 </form>
-                <hr>
+                <hr style="margin: 1.5rem 0;">
                 <div class="form-group">
                      <label>تغيير كلمة المرور:</label>
                      <button id="change-password-btn" class="btn">إرسال رابط التغيير إلى بريدي</button>
@@ -61,15 +93,14 @@
                     <label>Vodafone Cash (اختياري)</label>
                     <input type="tel" id="vodafone-cash" class="form-control" placeholder="رقم فودافون كاش">
                     
-                    <!-- UPDATED: Contact Method Section -->
-                    <label>وسيلة التواصل لتلقي إثبات التحويل:</label>
+                    <label style="margin-top: 1rem;">وسيلة التواصل لتلقي إثبات التحويل:</label>
                     <select id="contact-platform" class="form-control">
                         <option value="whatsapp">واتساب</option>
                         <option value="telegram">تليجرام</option>
-                        <option value="other">وسيلة أخرى (اكتبها بالأسفل)</option>
+                        <option value="other">وسيلة أخرى</option>
                     </select>
                     <input type="text" id="contact-info" class="form-control" placeholder="اكتب الرقم هنا..." style="margin-top: 5px;">
-                    <input type="text" id="contact-other" class="form-control" placeholder="اكتب اسم الوسيلة الأخرى هنا (مثال: فيسبوك ماسنجر)" style="margin-top: 5px; display: none;">
+                    <input type="text" id="contact-other" class="form-control" placeholder="اكتب اسم الوسيلة الأخرى هنا" style="margin-top: 5px; display: none;">
 
                     <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">حفظ بيانات الدفع</button>
                 </form>
@@ -77,13 +108,15 @@
         </div>
 
         <section id="booking-model-section">
-            <h2>نموذج ونظام الحجز</h2>
+            <h2 class="section-title text-center">نموذج ونظام الحجز</h2>
             <form id="booking-model-form">
-                <label>اختر نظام الحجز:</label>
-                <select id="booking-model-select" class="form-control">
-                    <option value="slots">نظام المواعيد (شرائح زمنية ثابتة)</option>
-                    <option value="capacity">نظام الطاقة الاستيعابية (عدد ثابت)</option>
-                </select>
+                <div class="form-group">
+                    <label for="booking-model-select">اختر نظام الحجز:</label>
+                    <select id="booking-model-select" class="form-control">
+                        <option value="slots">نظام المواعيد (شرائح زمنية ثابتة)</option>
+                        <option value="capacity">نظام الطاقة الاستيعابية (عدد يومي)</option>
+                    </select>
+                </div>
                 
                 <div id="slots-input-container" style="display: none; margin-top: 1rem;">
                     <label for="slot-duration">مدة كل حجز (بالدقائق):</label>
@@ -100,19 +133,14 @@
         </section>
 
         <section id="schedule-section">
-            <h2>إعدادات أيام العمل</h2>
-            <p class="note">حدد أيام الإجازات من هنا. (أوقات الفتح والإغلاق تطبق على "نظام المواعيد" فقط).</p>
+            <h2 class="section-title text-center">إعدادات أيام وأوقات العمل</h2>
+            <p class="note text-center">حدد أيام الإجازات من هنا. أوقات الفتح والإغلاق تطبق على "نظام المواعيد" فقط.</p>
             <form id="schedule-form">
                 <div class="schedule-grid">
                     <!-- Days will be generated by JS -->
                 </div>
-                <button type="submit" class="btn btn-primary">حفظ أوقات العمل</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">حفظ أوقات العمل</button>
             </form>
-        </section>
-
-        <section id="bookings-management-section">
-            <h2>إدارة الحجوزات المعلقة</h2>
-            <div id="pending-bookings-list"></div>
         </section>
 
     </main>
@@ -122,6 +150,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script> <!-- ADDED STORAGE SCRIPT -->
     <script src="js/utils.js"></script>
     <script src="js/admin.js"></script>
 </body>
