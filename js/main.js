@@ -1,22 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ========== الخطوة الأخيرة: الصق مفاتيح Firebase هنا ==========
-   const firebaseConfig = {
-  apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
-  authDomain: "tomy-barber-shop.firebaseapp.com",
-  projectId: "tomy-barber-shop",
-  storageBucket: "tomy-barber-shop.firebasestorage.app",
-  messagingSenderId: "693769920483",
-  appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
-  measurementId: "G-HNW5F8YJE3"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
+        authDomain: "tomy-barber-shop.firebaseapp.com",
+        projectId: "tomy-barber-shop",
+        storageBucket: "tomy-barber-shop.firebasestorage.app",
+        messagingSenderId: "693769920483",
+        appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
+        measurementId: "G-HNW5F8YJE3"
+    };
 
-    // ========== تهيئة Firebase ==========
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     // DOM Elements
+    const serviceSelection = document.getElementById('service-selection');
+    const calendarSection = document.getElementById('calendar-section');
     const calendarView = document.getElementById('calendar-view');
+    const calendarLoader = document.getElementById('calendar-loader');
     const currentWeekDisplay = document.getElementById('current-week-display');
     const prevWeekBtn = document.getElementById('prev-week');
     const nextWeekBtn = document.getElementById('next-week');
@@ -30,13 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedSlotDisplay = document.getElementById('selected-slot-display');
     const hiddenDateInput = document.getElementById('selected-date');
     const hiddenTimeInput = document.getElementById('selected-time');
+    const hiddenServiceIdInput = document.getElementById('selected-service-id');
+    const hiddenServiceNameInput = document.getElementById('selected-service-name');
 
     if (!calendarView) return;
 
     let currentDate = new Date();
     let bookings = {};
+    let services = {};
+    let blockedDates = {};
     let settings = { openingHour: '09:00', closingHour: '21:00' };
-    let allPossibleSlots = [];
 
     const toYYYYMMDD = (date) => {
         const y = date.getFullYear();
@@ -45,22 +49,50 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${y}-${m}-${d}`;
     };
 
-    const generateTimeSlots = () => {
-        const WORK_START_HOUR = parseInt(settings.openingHour.split(':')[0]);
-        const WORK_END_HOUR = parseInt(settings.closingHour.split(':')[0]);
-        const SLOT_DURATION_MINUTES = 45;
-        const slots = [];
-        for (let hour = WORK_START_HOUR; hour < WORK_END_HOUR; hour++) {
-            for (let min = 0; min < 60; min += SLOT_DURATION_MINUTES) {
-                const time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
-                slots.push(time);
-            }
+    const timeStringToMinutes = (timeStr) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    };
+
+    const generateTimeSlots = (dateString) => {
+        const selectedServiceId = serviceSelection.value;
+        if (!selectedServiceId || !services[selectedServiceId]) return [];
+        
+        const serviceDuration = parseInt(services[selectedServiceId].duration, 10);
+        const openingTime = timeStringToMinutes(settings.openingHour);
+        const closingTime = timeStringToMinutes(settings.closingHour);
+        const allSlots = [];
+
+        // Generate potential slots based on service duration
+        for (let time = openingTime; time <= closingTime - serviceDuration; time += serviceDuration) {
+            const hour = Math.floor(time / 60);
+            const min = time % 60;
+            allSlots.push(`${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`);
         }
-        return slots;
+        
+        // Filter out slots that conflict with existing approved bookings
+        const approvedBookingsForDay = Object.values(bookings).filter(b => b.date === dateString && b.status === 'approved');
+        
+        return allSlots.filter(slot => {
+            const slotStart = timeStringToMinutes(slot);
+            const slotEnd = slotStart + serviceDuration;
+
+            // Check for overlap with any approved booking
+            return !approvedBookingsForDay.some(booking => {
+                const bookingService = Object.values(services).find(s => s.name === booking.serviceName);
+                if (!bookingService) return false;
+
+                const bookingStart = timeStringToMinutes(booking.time);
+                const bookingEnd = bookingStart + parseInt(bookingService.duration, 10);
+
+                // True if there is an overlap
+                return slotStart < bookingEnd && slotEnd > bookingStart;
+            });
+        });
     };
     
     const renderCalendar = () => {
-        allPossibleSlots = generateTimeSlots();
+        calendarLoader.style.display = 'none';
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
         weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
@@ -81,12 +113,13 @@ document.addEventListener('DOMContentLoaded', () => {
             dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
             dayDiv.dataset.date = dayString;
 
-            const bookingsArray = Object.values(bookings);
-            if (dayDate < today) {
+            if (dayDate < today || blockedDates[dayString]) {
                 dayDiv.classList.add('disabled');
+                 if(blockedDates[dayString]) dayDiv.innerHTML += '<br><small>(مغلق)</small>';
             } else {
-                const approvedBookingsForDay = bookingsArray.filter(b => b.date === dayString && b.status === 'approved').length;
-                if (approvedBookingsForDay >= allPossibleSlots.length) {
+                const possibleSlots = generateTimeSlots(dayString);
+                const bookingsForDay = Object.values(bookings).filter(b => b.date === dayString && (b.status === 'approved' || b.status === 'pending')).length;
+                if (possibleSlots.length === 0 && bookingsForDay > 5) { // Heuristic for 'full'
                     dayDiv.classList.add('full');
                 }
             }
@@ -98,39 +131,74 @@ document.addEventListener('DOMContentLoaded', () => {
         slotsContainer.innerHTML = '';
         const selectedDate = new Date(dateString + 'T00:00:00');
         slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${selectedDate.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+        
+        const possibleSlots = generateTimeSlots(dateString);
+        if(possibleSlots.length === 0){
+             slotsContainer.innerHTML = '<p>عفواً، لا توجد مواعيد متاحة في هذا اليوم لهذه الخدمة. الرجاء اختيار يوم آخر أو خدمة أخرى.</p>';
+        }
 
-        const bookingsArray = Object.values(bookings);
-        allPossibleSlots.forEach(time => {
+        possibleSlots.forEach(time => {
             const slotDiv = document.createElement('div');
-            slotDiv.className = 'time-slot';
+            slotDiv.className = 'time-slot available'; // Now we only show available slots
             slotDiv.textContent = time;
             slotDiv.dataset.date = dateString;
             slotDiv.dataset.time = time;
-            
-            const existingBooking = bookingsArray.find(b => b.date === dateString && b.time === time);
-            if (existingBooking) {
-                slotDiv.classList.add(existingBooking.status);
-            } else {
-                slotDiv.classList.add('available');
-            }
             slotsContainer.appendChild(slotDiv);
         });
         slotsModal.style.display = 'block';
     };
 
-    // Firebase Listeners
-    db.ref('settings').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) settings = data;
-        renderCalendar();
+    const loadServices = () => {
+        db.ref('services').on('value', (snapshot) => {
+            services = snapshot.val() || {};
+            serviceSelection.innerHTML = '<option value="" disabled selected>-- الرجاء اختيار الخدمة أولاً --</option>';
+            for (const id in services) {
+                const service = services[id];
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${service.name} (${service.duration} دقيقة)`;
+                serviceSelection.appendChild(option);
+            }
+        });
+    };
+
+    // --- Firebase Listeners ---
+    const fetchData = () => {
+        calendarLoader.style.display = 'block';
+        const promises = [
+            db.ref('settings').once('value'),
+            db.ref('bookings').once('value'),
+            db.ref('blockedDates').once('value')
+        ];
+
+        Promise.all(promises).then((snapshots) => {
+            settings = snapshots[0].val() || settings;
+            bookings = snapshots[1].val() || {};
+            blockedDates = snapshots[2].val() || {};
+            renderCalendar();
+
+            // Setup listeners for real-time updates
+            db.ref('bookings').on('value', (snapshot) => {
+                bookings = snapshot.val() || {};
+                renderCalendar();
+            });
+            db.ref('blockedDates').on('value', (snapshot) => {
+                blockedDates = snapshot.val() || {};
+                renderCalendar();
+            });
+        });
+    };
+
+    // --- Event Listeners ---
+    serviceSelection.addEventListener('change', () => {
+        if (serviceSelection.value) {
+            calendarSection.style.display = 'block';
+            fetchData();
+        } else {
+            calendarSection.style.display = 'none';
+        }
     });
 
-    db.ref('bookings').on('value', (snapshot) => {
-        bookings = snapshot.val() || {};
-        renderCalendar();
-    });
-
-    // Event Listeners
     calendarView.addEventListener('click', (e) => {
         const daySlot = e.target.closest('.day-slot');
         if (daySlot && !daySlot.classList.contains('full') && !daySlot.classList.contains('disabled')) {
@@ -141,13 +209,17 @@ document.addEventListener('DOMContentLoaded', () => {
     slotsContainer.addEventListener('click', (e) => {
         const slot = e.target.closest('.time-slot');
         if (slot && slot.classList.contains('available')) {
+            const selectedServiceId = serviceSelection.value;
+            const selectedService = services[selectedServiceId];
+
             hiddenDateInput.value = slot.dataset.date;
             hiddenTimeInput.value = slot.dataset.time;
-            selectedSlotDisplay.textContent = `${new Date(slot.dataset.date + 'T00:00:00').toLocaleDateString('ar-EG')} - الساعة ${slot.dataset.time}`;
+            hiddenServiceIdInput.value = selectedServiceId;
+            hiddenServiceNameInput.value = selectedService.name;
+
+            selectedSlotDisplay.textContent = `(${selectedService.name}) يوم ${new Date(slot.dataset.date + 'T00:00:00').toLocaleDateString('ar-EG')} - الساعة ${slot.dataset.time}`;
             slotsModal.style.display = 'none';
             bookingModal.style.display = 'block';
-        } else if (slot && (slot.classList.contains('pending') || slot.classList.contains('approved'))) {
-            alert('عفواً، هذا الموعد محجوز بالفعل.');
         }
     });
 
@@ -156,16 +228,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const newBooking = { 
             fullName: document.getElementById('fullName').value,
             phone: document.getElementById('phone').value,
+            serviceId: hiddenServiceIdInput.value,
+            serviceName: hiddenServiceNameInput.value,
             date: hiddenDateInput.value,
             time: hiddenTimeInput.value,
             status: 'pending' 
         };
 
-        db.ref('bookings').push(newBooking);
-
-        alert('تم إرسال طلب الحجز بنجاح.');
-        bookingForm.reset();
-        bookingModal.style.display = 'none';
+        db.ref('bookings').push(newBooking).then(() => {
+            showNotification('تم إرسال طلب الحجز بنجاح.', 'success');
+            bookingForm.reset();
+            bookingModal.style.display = 'none';
+        }).catch(err => {
+            showNotification('حدث خطأ أثناء إرسال الحجز.', 'error');
+        });
     });
     
     prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
@@ -176,4 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target == slotsModal) slotsModal.style.display = "none";
         if (event.target == bookingModal) bookingModal.style.display = "none";
     };
+
+    // Initial Load
+    loadServices();
 });
