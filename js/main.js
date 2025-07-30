@@ -46,6 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
+    // NEW Helper to format time to 12-hour format with Arabic AM/PM
+    function formatTo12Hour(timeString) {
+        if (!timeString) return '';
+        const [hour, minute] = timeString.split(':').map(Number);
+        const period = hour >= 12 ? 'م' : 'ص';
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        return `${adjustedHour}:${String(minute).padStart(2, '0')} ${period}`;
+    }
 
     function initializeApp() {
         const settingsRef = db.ref('settings').once('value');
@@ -84,22 +92,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupUIForBookingModel() {
+        // FIXED: Show calendar for both models initially
+        calendarSection.style.display = 'block';
         if (settings.bookingModel === 'capacity') {
             serviceSection.style.display = 'none';
-            calendarSection.style.display = 'block';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
-            renderCalendar();
         } else { // 'slots' model
             serviceSection.style.display = 'block';
             calendarTitle.textContent = "الخطوة 2: اختر يوماً من التقويم";
             populateServices();
         }
+        renderCalendar();
     }
 
     function populateServices() {
-        serviceSelect.innerHTML = '<option value="" disabled selected>-- الرجاء اختيار الخدمة أولاً --</option>';
+        serviceSelect.innerHTML = '<option value="" selected>-- خدمة عامة --</option>'; // Default option
         for (const id in services) {
-            // UPDATED: Removed duration from service display as it's now global
             serviceSelect.innerHTML += `<option value="${id}">${services[id].name}</option>`;
         }
     }
@@ -138,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
             } else {
                 if(settings.bookingModel === 'capacity') {
-                    // CRUCIAL FIX: Count both pending and approved bookings against capacity
                     const totalBookingsForDay = dayBookings.length;
                     const capacity = settings.dailyCapacity || 10;
 
@@ -157,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTimeSlots(dateString) {
         slotsContainer.innerHTML = '';
         const schedule = getDaySchedule(new Date(dateString));
-        // CRUCIAL CHANGE: Use the global slot duration from settings
         const slotDuration = parseInt(settings.slotDuration, 10) || 30;
         
         const timeToMinutes = (t) => t.split(':').map(Number).reduce((h, m) => h * 60 + m);
@@ -175,19 +181,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const slotDiv = document.createElement('div');
             slotDiv.className = 'time-slot';
-            slotDiv.textContent = timeStr;
+            // UPDATED: Display 12-hour format
+            slotDiv.textContent = formatTo12Hour(timeStr);
             slotDiv.dataset.date = dateString;
-            slotDiv.dataset.time = timeStr;
+            slotDiv.dataset.time = timeStr; // Keep 24-hour format in data
 
             const isPast = dateString === todayString && time < currentTimeMinutes;
             const booking = Object.values(bookings).find(b => b.date === dateString && b.time === timeStr);
 
             if (isPast) {
                 slotDiv.classList.add('disabled');
-                slotDiv.innerHTML += booking ? ' (تم حجزه)' : ' (فائت)';
             } else if (booking) {
                 slotDiv.classList.add(booking.status === 'approved' ? 'approved' : 'pending');
-                slotDiv.innerHTML += booking.status === 'approved' ? ' (محجوز)' : ' (قيد التأكيد)';
             } else {
                 slotDiv.classList.add('available');
             }
@@ -196,14 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
         slotsModal.style.display = 'block';
     }
 
-
-    serviceSelect.addEventListener('change', () => {
-        if (serviceSelect.value) {
-            selectedService = services[serviceSelect.value];
-            calendarSection.style.display = 'block';
-            renderCalendar();
-        }
-    });
 
     calendarView.addEventListener('click', (e) => {
         const daySlot = e.target.closest('.day-slot');
@@ -228,8 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
         hiddenTimeInput.value = time;
         
         let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
-        if(time) display += ` - الساعة ${time}`;
-        if(selectedService) display += ` (خدمة: ${selectedService.name})`;
+        if(time) display += ` - الساعة ${formatTo12Hour(time)}`; // Use 12-hour format here too
+
+        const selectedServiceId = serviceSelect.value;
+        if(selectedServiceId && services[selectedServiceId]){
+            display += ` (خدمة: ${services[selectedServiceId].name})`;
+        }
 
         selectedSlotDisplay.textContent = display;
         slotsModal.style.display = 'none';
@@ -254,13 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const bookingCode = dayFormatted + newId;
+        const selectedServiceId = serviceSelect.value;
+        const serviceName = selectedServiceId && services[selectedServiceId] ? services[selectedServiceId].name : null;
 
         const newBooking = {
             fullName: document.getElementById('fullName').value,
             phone: document.getElementById('phone').value,
             date: date,
             time: hiddenTimeInput.value || null,
-            serviceName: selectedService ? services[serviceSelect.value].name : null,
+            serviceName: serviceName,
             paymentMethod: paymentMethod,
             bookingCode: bookingCode,
             status: 'pending'
