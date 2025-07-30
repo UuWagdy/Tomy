@@ -1,6 +1,6 @@
 /* General Body Styles */
 body {
-    font-family: 'Tajawal', sans-serif; /* A modern Arabic font */
+    font-family: 'Tajawal', sans-serif;
     margin: 0;
     background-color: #f9f9f9;
     color: #333;
@@ -60,7 +60,7 @@ header h2 {
 }
 .hero h1 {
     font-size: 3rem;
-    color: #d4af37;
+    color: #333; /* Changed for better visibility on white background */
 }
 
 /* Buttons */
@@ -91,7 +91,6 @@ header h2 {
     background-color: #ccc;
     cursor: not-allowed;
 }
-
 
 /* Calendar */
 .calendar-controls {
@@ -132,15 +131,14 @@ header h2 {
     cursor: not-allowed;
 }
 .day-slot.disabled:hover {
-    transform: none; /* إلغاء حركة الرفع */
+    transform: none;
 }
 .note {
     color: #777;
     font-size: 0.9rem;
 }
 
-
-/* Modal Styles (for both modals) */
+/* Modal Styles */
 .modal {
     display: none;
     position: fixed;
@@ -158,7 +156,7 @@ header h2 {
     padding: 25px;
     border-radius: 8px;
     width: 90%;
-    max-width: 550px; /* Slightly larger for time slots */
+    max-width: 550px;
     position: relative;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
@@ -183,7 +181,6 @@ header h2 {
     gap: 10px;
     margin-top: 20px;
 }
-
 .time-slot {
     padding: 15px 10px;
     border-radius: 5px;
@@ -192,9 +189,8 @@ header h2 {
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s, transform 0.2s;
 }
-
 .time-slot.available {
-    background-color: #e8f5e9; /* Green */
+    background-color: #e8f5e9;
     color: #2e7d32;
     border: 1px solid #a5d6a7;
 }
@@ -202,23 +198,20 @@ header h2 {
     background-color: #c8e6c9;
     transform: scale(1.05);
 }
-
 .time-slot.pending {
-    background-color: #fffde7; /* Yellow */
+    background-color: #fffde7;
     color: #f9a825;
     border: 1px solid #fff59d;
     cursor: not-allowed;
     text-decoration: line-through;
 }
-
 .time-slot.approved {
-    background-color: #ffebee; /* Red */
+    background-color: #ffebee;
     color: #c62828;
     border: 1px solid #ef9a9a;
     cursor: not-allowed;
     text-decoration: line-through;
 }
-
 
 /* Booking Form Styles */
 #booking-form label {
@@ -245,7 +238,6 @@ header h2 {
     border-radius: 4px;
     display: block;
 }
-
 
 /* Admin Section Styles */
 #admin-section,
