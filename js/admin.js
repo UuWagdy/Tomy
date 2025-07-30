@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminContent = document.getElementById('admin-content');
     const headerLogo = document.getElementById('header-logo');
 
-    // --- Authentication Check ---
     auth.onAuthStateChanged(user => {
         if (user) {
             initializeAdminPanel(user);
@@ -40,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const telegramContactInput = document.getElementById('telegram-contact');
         const bookingModelForm = document.getElementById('booking-model-form');
         const bookingModelSelect = document.getElementById('booking-model-select');
+        // UPDATED: Added new elements
+        const slotsInputContainer = document.getElementById('slots-input-container');
+        const slotDurationInput = document.getElementById('slot-duration');
         const capacityInputContainer = document.getElementById('capacity-input-container');
         const dailyCapacityInput = document.getElementById('daily-capacity');
         const scheduleForm = document.getElementById('schedule-form');
@@ -51,34 +53,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Load Initial Data ---
         db.ref('settings').on('value', (snapshot) => {
             const settings = snapshot.val() || {};
-            // Load Logo
             headerLogo.src = settings.logoUrl || 'logo.png';
             logoUrlInput.value = settings.logoUrl || '';
-            // Load Payment Details
+
             if (settings.paymentDetails) {
                 instapayNameInput.value = settings.paymentDetails.instapayName || '';
                 vodafoneCashInput.value = settings.paymentDetails.vodafoneCash || '';
                 telegramContactInput.value = settings.paymentDetails.telegramContact || '';
             }
-            // Load Booking Model and Capacity
-            bookingModelSelect.value = settings.bookingModel || 'slots';
-            dailyCapacityInput.value = settings.dailyCapacity || 15; // Default value of 15
-            
-            // Show/hide capacity input based on the loaded model
-            if (settings.bookingModel === 'capacity') {
-                capacityInputContainer.style.display = 'block';
-            } else {
-                capacityInputContainer.style.display = 'none';
-            }
 
-            // Load Schedule
+            // UPDATED: Load settings for both models
+            bookingModelSelect.value = settings.bookingModel || 'slots';
+            slotDurationInput.value = settings.slotDuration || 30; // Default 30 mins
+            dailyCapacityInput.value = settings.dailyCapacity || 15; // Default 15 slots
+            
+            // Trigger change to show the correct input on load
+            toggleModelInputs();
             renderSchedule(settings.schedule);
         });
         
         db.ref('bookings').on('value', (snapshot) => {
-            const bookings = snapshot.val() || {};
-            renderPendingBookings(bookings);
-            updateDashboard(bookings);
+            renderPendingBookings(snapshot.val() || {});
+            updateDashboard(snapshot.val() || {});
         });
 
         // --- UI Rendering ---
@@ -91,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dayData = scheduleData[day] || { active: true, open: '09:00', close: '21:00' };
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'day-schedule-item';
-                // Removed capacity input from here
                 dayDiv.innerHTML = `
                     <h4>${days[day]}</h4>
                     <label><input type="checkbox" data-day="${day}" class="active-checkbox" ${dayData.active ? 'checked' : ''}> يوم عمل</label>
@@ -139,10 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             pendingCount.textContent = bookingsArray.filter(b => b.status === 'pending').length;
             todayCount.textContent = bookingsArray.filter(b => b.date === todayStr && b.status === 'approved').length;
-            totalCount.textContent = bookingsArray.filter(b => {
-                const bookingDate = new Date(b.date);
-                return b.status === 'approved' && bookingDate >= thirtyDaysAgo;
-            }).length;
+            totalCount.textContent = bookingsArray.filter(b => new Date(b.date) >= thirtyDaysAgo && b.status === 'approved').length;
         }
 
         // --- Event Listeners & Actions ---
@@ -157,55 +149,48 @@ document.addEventListener('DOMContentLoaded', () => {
         logoForm.addEventListener('submit', (e) => {
             e.preventDefault();
             db.ref('settings/logoUrl').set(logoUrlInput.value)
-                .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'))
-                .catch(err => showNotification('فشل تحديث الشعار: ' + err.message, 'error'));
+                .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'));
         });
 
         paymentForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const data = {
-                instapayName: instapayNameInput.value,
-                vodafoneCash: vodafoneCashInput.value,
-                telegramContact: telegramContactInput.value,
-            };
+            const data = { instapayName: instapayNameInput.value, vodafoneCash: vodafoneCashInput.value, telegramContact: telegramContactInput.value };
             db.ref('settings/paymentDetails').set(data)
                 .then(() => showNotification('تم حفظ بيانات الدفع.', 'success'));
         });
 
-        // NEW: Event listener to show/hide capacity input
-        bookingModelSelect.addEventListener('change', () => {
+        // UPDATED: Function to show/hide inputs based on model
+        function toggleModelInputs() {
             if (bookingModelSelect.value === 'capacity') {
                 capacityInputContainer.style.display = 'block';
-            } else {
+                slotsInputContainer.style.display = 'none';
+            } else { // slots
                 capacityInputContainer.style.display = 'none';
+                slotsInputContainer.style.display = 'block';
             }
-        });
+        }
+        bookingModelSelect.addEventListener('change', toggleModelInputs);
         
-        // UPDATED: Save both model and capacity
+        // UPDATED: Save all model-related settings
         bookingModelForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const dataToUpdate = {
                 bookingModel: bookingModelSelect.value,
+                slotDuration: parseInt(slotDurationInput.value, 10),
                 dailyCapacity: parseInt(dailyCapacityInput.value, 10)
             };
             db.ref('settings').update(dataToUpdate)
-              .then(() => showNotification('تم حفظ نموذج الحجز.', 'success'));
+              .then(() => showNotification('تم حفظ نموذج الحجز بنجاح.', 'success'));
         });
         
         scheduleForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const scheduleData = {};
-            const dayItems = scheduleForm.querySelectorAll('.day-schedule-item');
-            dayItems.forEach(item => {
+            scheduleForm.querySelectorAll('.day-schedule-item').forEach(item => {
                 const day = item.querySelector('.active-checkbox').dataset.day;
                 const isActive = item.querySelector('.active-checkbox').checked;
                 const inputs = item.querySelectorAll('input');
-                scheduleData[day] = {
-                    active: isActive,
-                    open: inputs[1].value,
-                    close: inputs[2].value
-                    // Removed capacity from here
-                };
+                scheduleData[day] = { active: isActive, open: inputs[1].value, close: inputs[2].value };
             });
             db.ref('settings/schedule').set(scheduleData)
                 .then(() => showNotification('تم حفظ أوقات العمل الأسبوعية.', 'success'));
