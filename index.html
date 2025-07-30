@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tomy Barber Shop - الرئيسية</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- Font for Titles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -14,25 +18,78 @@
             </a>
             <ul>
                 <li><a href="index.html">الرئيسية</a></li>
-                <!-- UPDATED TEXT -->
                 <li><a href="services.html">الخدمات والحجز</a></li>
             </ul>
         </nav>
     </header>
     <main>
+        <!-- Hero Section with Animation -->
         <section class="hero">
-            <div class="container">
-                <h1>Tomy Barber Shop</h1>
-                <p>أناقتك تبدأ من هنا. أفضل تجربة حلاقة في المدينة.</p>
-                <a href="services.html" class="btn btn-primary">احجز موعدك الآن</a>
+            <div class="hero-content">
+                <h1 class="hero-title">Tomy Barber Shop</h1>
+                <p class="hero-subtitle">أناقتك تبدأ من هنا. أفضل تجربة حلاقة في المدينة.</p>
+                <a href="services.html" class="btn btn-primary btn-hero">احجز موعدك الآن</a>
             </div>
         </section>
+
+        <!-- About Us Section -->
+        <section class="container page-padding text-center fade-in">
+            <h2>من نحن؟</h2>
+            <p class="section-lead">في Tomy Barber Shop، نحن لا نقدم مجرد قصة شعر، بل نقدم تجربة متكاملة. نحن نجمع بين التقنيات الكلاسيكية والأساليب العصرية لنمنحك المظهر الذي تستحقه، في أجواء مريحة ومميزة.</p>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section fade-in">
+            <div class="container">
+                <h2 class="text-center">لماذا تختارنا؟</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <img src="images/icon-barber.png" alt="ايقونة حلاق" class="feature-icon">
+                        <h3>حلاقون محترفون</h3>
+                        <p>فريقنا من الحلاقين يمتلك خبرة واسعة وشغفًا بمهنتهم لضمان أفضل النتائج.</p>
+                    </div>
+                    <div class="feature-item">
+                        <img src="images/icon-products.png" alt="ايقونة منتجات" class="feature-icon">
+                        <h3>منتجات عالية الجودة</h3>
+                        <p>نستخدم فقط أفضل المنتجات العالمية للعناية بالشعر واللحية للحفاظ على صحة مظهرك.</p>
+                    </div>
+                    <div class="feature-item">
+                        <img src="images/icon-relax.png" alt="ايقونة استرخاء" class="feature-icon">
+                        <h3>أجواء مريحة</h3>
+                        <p>استمتع بتجربة حلاقة هادئة ومريحة في مساحة مصممة خصيصًا لراحتك.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Gallery Section -->
+        <section class="container page-padding fade-in">
+            <h2 class="text-center">من أعمالنا</h2>
+            <div class="gallery-grid">
+                <!--  كيف تضع الصور: استبدل 'images/gallery-1.jpg' بمسار صورتك -->
+                <div class="gallery-item"><img src="images/gallery-1.jpg" alt="صورة من أعمالنا 1"></div>
+                <div class="gallery-item"><img src="images/gallery-2.jpg" alt="صورة من أعمالنا 2"></div>
+                <div class="gallery-item"><img src="images/gallery-3.jpg" alt="صورة من أعمالنا 3"></div>
+                <div class="gallery-item"><img src="images/gallery-4.jpg" alt="صورة من أعمالنا 4"></div>
+            </div>
+        </section>
+
+        <!-- Call to Action Section -->
+        <section class="cta-section fade-in">
+            <div class="container text-center">
+                <h2>جاهز لتحصل على أفضل مظهر؟</h2>
+                <p>لا تنتظر أكثر! موعدك للحصول على الإطلالة المثالية على بعد نقرة واحدة.</p>
+                <a href="services.html" class="btn btn-primary">احجز الآن</a>
+            </div>
+        </section>
+
     </main>
     
     <footer>
         <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
     </footer>
 
+    <!-- هذا الملف يحتوي على شفرة الأنيميشن -->
     <script src="js/utils.js"></script>
 </body>
 </html>
