@@ -57,3 +57,22 @@ document.head.insertAdjacentHTML('beforeend', `
     }
 </style>
 `);
+
+// Scroll Animation Logic
+document.addEventListener('DOMContentLoaded', () => {
+    const animationObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+
+    const elementsToAnimate = document.querySelectorAll('.animate-on-scroll');
+    elementsToAnimate.forEach(el => {
+        animationObserver.observe(el);
+    });
+});
