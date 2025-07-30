@@ -1,25 +1,38 @@
-/* --- ستايل صفحة تسجيل الدخول (محسن) --- */
+/* --- ستايل صفحة تسجيل الدخول (بالتصميم الداكن) --- */
 
 /* General Body */
 body {
     font-family: 'Tajawal', sans-serif;
     margin: 0;
-    background-color: #f9f9f9;
-    color: #333;
+    background-color: #112A2A;
+    color: #f0f0f0;
     direction: rtl;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main {
+    flex-grow: 1; /* يدفع الفوتر للأسفل */
 }
 .container { max-width: 1100px; margin: auto; padding: 0 20px; }
 .page-padding { padding-top: 2rem; padding-bottom: 2rem; }
 
 /* Header */
-header { background: #222; color: #fff; padding: 1rem 0; border-bottom: 3px solid #d4af37; }
+header {
+    background: #1d1d1d;
+    color: #fff;
+    padding: 1rem 0;
+    border-bottom: 3px solid #d4af37;
+}
 header nav { display: flex; justify-content: space-between; align-items: center; }
 .logo-link img.logo { max-height: 50px; }
 header h2 { font-family: 'Cairo', sans-serif; margin: 0; }
+header a { color: #fff; text-decoration: none; font-size: 1.1rem; font-weight: 700; padding: 5px 10px; }
 
-/* Login Form Container */
+/* Login Form Container - بطاقة بيضاء */
 .modal-content {
     background: #fff;
+    color: #333; /* النص داخل البطاقة داكن */
     margin: 5% auto;
     padding: 30px;
     border-radius: 8px;
@@ -31,13 +44,14 @@ header h2 { font-family: 'Cairo', sans-serif; margin: 0; }
     text-align: center;
     font-size: 1.8rem;
     margin-top: 0;
+    color: #d4af37; /* عنوان ذهبي */
 }
 
 /* Form Elements */
 form label {
     display: block;
     margin-top: 20px;
-    font-weight: 700; /* Bold */
+    font-weight: 700;
     font-size: 1.1rem;
 }
 form input {
@@ -54,7 +68,7 @@ form input {
     width: 100%;
     padding: 12px;
     background: #d4af37;
-    color: #222;
+    color: #111;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -78,4 +92,10 @@ form input {
 }
 
 /* Footer */
-footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #222; color: #fff; }
+footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    background: #111;
+    color: #888;
+}
