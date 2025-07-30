@@ -1,10 +1,10 @@
-/* --- ستايل صفحة الخدمات (النسخة الكاملة والمحدثة) --- */
+/* --- ستايل صفحة الخدمات (تصميم داكن ومحسن + إصلاح الفوتر والتقويم) --- */
 
 /* General Body Styles */
 body {
     font-family: 'Tajawal', sans-serif;
     margin: 0;
-    background-color: #112A2A; /* Match homepage background */
+    background-color: #112A2A;
     color: #f0f0f0;
     direction: rtl;
     font-size: 16px;
@@ -74,6 +74,7 @@ h2, h3 {
 #calendar-title, #slots-modal-title {
     color: #d4af37;
     font-size: 2rem;
+    text-align: center; /* توسيط العنوان */
 }
 
 /* Buttons */
@@ -103,20 +104,23 @@ h2, h3 {
     cursor: not-allowed;
 }
 
-/*  ====== الأنماط المضافة لإصلاح المشكلة ====== */
+/* ====== هذا هو الكود الذي تم إصلاحه ====== */
 /* Calendar Styles */
 .calendar-controls {
-    display: flex; /*  <-- هذا السطر مهم جدًا لوضع الأزرار بجانب بعضها */
-    justify-content: space-between; /* <-- يضع مسافة بين الأزرار والعنوان */
+    display: flex; /* <-- هذا هو السطر الأهم لإصلاح المشكلة */
+    justify-content: space-between; /* يضع مسافة بين العناصر */
     align-items: center;
     margin: 2rem 0;
 }
+/* ===================================== */
+
 #current-week-display {
     font-size: 1.5rem;
+    font-family: 'Cairo', sans-serif;
 }
 .week-view {
-    display: grid; /* <-- هذا السطر يحول الـ div إلى شبكة */
-    grid-template-columns: repeat(7, 1fr); /* <-- يقسم الشبكة إلى 7 أعمدة متساوية (أيام الأسبوع) */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
     gap: 10px;
     margin-bottom: 1rem;
     animation: fadeInUp 1s ease-out;
@@ -158,145 +162,23 @@ h2, h3 {
     color: #777;
     cursor: not-allowed;
 }
-/*  ====== نهاية الأنماط المضافة ====== */
 
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-}
-.modal-content {
-    background: #fff;
-    color: #333;
-    margin: 10% auto;
-    padding: 25px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 550px;
-    position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-.modal-content h3 {
-    font-family: 'Cairo', sans-serif;
-    color: #333;
-}
-.close-button {
-    position: absolute;
-    right: auto;
-    left: 15px;
-    top: 10px;
-    font-size: 28px;
-    font-weight: bold;
-    color: #aaa;
-    cursor: pointer;
-}
-
-/* Time Slots Modal Styles */
-#time-slots-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 10px;
-    margin-top: 20px;
-}
-.time-slot {
-    padding: 15px 10px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.time-slot:hover {
-    transform: scale(1.05);
-}
-.time-slot.available {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
-}
-.time-slot.pending {
-    background-color: #fffde7;
-    color: #f9a825;
-    cursor: not-allowed;
-    text-decoration: line-through;
-    border: 1px solid #fdd835;
-}
-.time-slot.approved {
-    background-color: #ffebee;
-    color: #c62828;
-    cursor: not-allowed;
-    text-decoration: line-through;
-    border: 1px solid #ef9a9a;
-}
-
-/* Form Styles */
-form label {
-    display: block;
-    margin-top: 15px;
-    font-weight: 700;
-    font-size: 1.1rem;
-}
-form input, form select {
-    width: 100%;
-    padding: 12px;
-    margin-top: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-#selected-slot-display {
-    background-color: #eee;
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-}
-.booking-code {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #d4af37;
-    background: #333;
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: 2px dashed #d4af37;
-}
-#payment-info-display {
-    margin-top: 1rem;
-    padding: 15px;
-    background: #fffde7;
-    border: 1px solid #fff59d;
-    border-radius: 5px;
-    color: #5d4037;
-}
-#payment-info-display h4 {
-    color: #333;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 2rem 0;
-    background: #111;
-    color: #888;
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* (باقي الكود كما هو) */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); }
+.modal-content { background: #fff; color: #333; margin: 10% auto; padding: 25px; border-radius: 8px; max-width: 550px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-content h3 { font-family: 'Cairo', sans-serif; color: #333; }
+.close-button { position: absolute; right: auto; left: 15px; top: 10px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+#time-slots-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 20px; }
+.time-slot { padding: 15px 10px; border-radius: 5px; text-align: center; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s; }
+.time-slot:hover { transform: scale(1.05); }
+.time-slot.available { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.time-slot.pending { background-color: #fffde7; color: #f9a825; cursor: not-allowed; text-decoration: line-through; border: 1px solid #fdd835; }
+.time-slot.approved { background-color: #ffebee; color: #c62828; cursor: not-allowed; text-decoration: line-through; border: 1px solid #ef9a9a; }
+form label { display: block; margin-top: 15px; font-weight: 700; font-size: 1.1rem; }
+form input, form select { width: 100%; padding: 12px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+#selected-slot-display { background-color: #eee; padding: 12px; border-radius: 4px; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700; }
+.booking-code { font-size: 2.5rem; font-weight: 700; color: #d4af37; background: #333; padding: 10px 20px; border-radius: 8px; border: 2px dashed #d4af37; }
+#payment-info-display { margin-top: 1rem; padding: 15px; background: #fffde7; border: 1px solid #fff59d; border-radius: 5px; color: #5d4037; }
+#payment-info-display h4 { color: #333; }
+footer { text-align: center; padding: 2rem 0; background: #111; color: #888; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
