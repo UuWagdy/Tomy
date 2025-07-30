@@ -322,3 +322,73 @@ footer {
     background: #222;
     color: #fff;
 }
+/* =============================================== */
+/* === Media Queries for Mobile Responsiveness === */
+/* =============================================== */
+
+/* سيتم تطبيق هذا الكود فقط على الشاشات التي عرضها 768 بكسل أو أقل */
+@media (max-width: 768px) {
+
+    /* 1. تعديل حجم الخطوط الرئيسية لتناسب الشاشة */
+    h1, .hero h1 {
+        font-size: 2.2rem; /* تصغير حجم العنوان الرئيسي */
+    }
+    h2 {
+        font-size: 1.8rem; /* تصغير حجم العناوين الفرعية */
+    }
+
+    /* 2. تعديل القائمة العلوية لتكون رأسية */
+    header nav {
+        flex-direction: column; /* جعل اللوجو والقائمة تحت بعض */
+        gap: 15px; /* مسافة بين اللوجو والقائمة */
+    }
+    
+    header ul {
+        padding: 0;
+        text-align: center; /* توسيط القائمة */
+    }
+    
+    header ul li {
+        display: block; /* جعل كل عنصر في القائمة يأخذ سطراً كاملاً */
+        margin: 10px 0; /* مسافة رأسية بين عناصر القائمة */
+    }
+
+    /* 3. تعديل التقويم ليصبح عمودين فقط بدلاً من 7 */
+    .week-view {
+        grid-template-columns: repeat(2, 1fr); /* أهم تعديل: عمودين فقط */
+        gap: 15px; /* زيادة المسافة بين الأيام */
+    }
+    
+    .day-slot {
+        padding: 20px 10px; /* زيادة المساحة الداخلية لسهولة الضغط */
+    }
+
+    /* 4. تعديل أزرار التحكم بالتقويم لتكون رأسية */
+    .calendar-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    /* 5. تعديل النوافذ المنبثقة لتناسب الشاشة */
+    .modal-content {
+        width: 95%; /* جعل النافذة تأخذ معظم عرض الشاشة */
+        margin: 25% auto; /* تعديل المسافة من الأعلى */
+        padding: 20px;
+    }
+
+    #time-slots-container {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); /* تصغير حجم المواعيد قليلاً */
+    }
+    
+    /* 6. تعديل جداول الأدمن */
+    .booking-item {
+        flex-direction: column; /* جعل محتويات حجز الأدمن تحت بعض */
+        align-items: flex-start; /* محاذاة لليمين */
+        gap: 15px;
+    }
+    .reports-table th,
+    .reports-table td {
+        padding: 8px 5px; /* تصغير المساحة الداخلية للجدول */
+        font-size: 14px;
+    }
+}
