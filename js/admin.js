@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   const firebaseConfig = {
-    apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", // استخدم بياناتك الصحيحة
+    apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
     authDomain: "tomy-barber-shop.firebaseapp.com",
     databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
     projectId: "tomy-barber-shop",
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   firebase.initializeApp(firebaseConfig);
-
   const db = firebase.database();
   const auth = firebase.auth();
     
@@ -38,17 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const toYYYYMMDD = (d) => d.toISOString().split("T")[0];
 
     function initializeAdminPanel(user) {
-        // --- متغيرات لتخزين البيانات ---
         let allBookingsData = {};
-
-        // --- عناصر الواجهة الأساسية ---
         const headerLogo = document.getElementById('header-logo');
         const logoutButton = document.getElementById('logout-btn');
         const pendingList = document.getElementById('pending-bookings-list');
         const todayBookingsList = document.getElementById('today-bookings-list');
         const upcomingBookingsList = document.getElementById('upcoming-bookings-list');
-        const datePicker = document.getElementById('date-picker');
-        const weekPicker = document.getElementById('week-picker');
+        const startDatePicker = document.getElementById('start-date-picker');
+        const endDatePicker = document.getElementById('end-date-picker');
         const bookingCountDisplay = document.getElementById('booking-count');
         const viewerResultsContainer = document.getElementById('viewer-results-container');
         const pendingCount = document.getElementById('pending-count');
@@ -71,12 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const dailyCapacityInput = document.getElementById('daily-capacity');
         const scheduleForm = document.getElementById('schedule-form');
 
-        // --- تحميل البيانات الأولية ---
         db.ref('settings').on('value', (snapshot) => {
             const settings = snapshot.val() || {};
             if(headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
             if(logoUrlInput) logoUrlInput.value = settings.logoUrl || '';
-
             if (settings.paymentDetails) {
                 if(instapayNameInput) instapayNameInput.value = settings.paymentDetails.instapayName || '';
                 if(vodafoneCashInput) vodafoneCashInput.value = settings.paymentDetails.vodafoneCash || '';
@@ -88,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if(bookingModelSelect) bookingModelSelect.value = settings.bookingModel || 'slots';
             if(slotDurationInput) slotDurationInput.value = settings.slotDuration || 30;
             if(dailyCapacityInput) dailyCapacityInput.value = settings.dailyCapacity || 15;
-            
             toggleModelInputs();
             if(scheduleForm) renderSchedule(settings.schedule);
         });
@@ -96,28 +89,41 @@ document.addEventListener('DOMContentLoaded', () => {
         db.ref('bookings').on('value', (snapshot) => {
             allBookingsData = snapshot.val() || {};
             const bookingsArray = Object.entries(allBookingsData).map(([id, booking]) => ({ id, ...booking }));
-            
             renderPendingBookings(bookingsArray);
             renderTodayBookings(bookingsArray);
             renderUpcomingBookings(bookingsArray);
             updateDashboard(bookingsArray);
-
-            if (datePicker && datePicker.value) {
-                handleDateSelection();
-            } else if (weekPicker && weekPicker.value) {
-                handleWeekSelection();
+            if (startDatePicker && startDatePicker.value && endDatePicker && endDatePicker.value) {
+                handleDateRangeSelection();
             }
         });
 
-        // --- دوال العرض (Rendering) ---
+        function createBookingItem(booking) {
+            const item = document.createElement('div');
+            item.className = `booking-item ${booking.status}`;
+            const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
+            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'غير محدد'}`;
+            let actionButtons = '';
+            if (booking.status === 'pending') {
+                actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
+            } else {
+                actionButtons = `<button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
+            }
+            item.innerHTML = `
+                <div>
+                    <strong>${booking.fullName}</strong> (${booking.phone})<br>
+                    <small>${codeDisplay}</small><br>
+                    <small><strong>التاريخ:</strong> ${booking.date} - <strong>الوقت:</strong> ${timeDisplay}</small><br>
+                    <small><strong>الدفع:</strong> ${booking.paymentMethod}</small>
+                </div>
+                <div>${actionButtons}</div>`;
+            return item;
+        }
+
         function renderPendingBookings(bookings) {
             if(!pendingList) return;
             pendingList.innerHTML = '';
-            
-            // **** هذا هو الإصلاح النهائي والمهم ****
-            // نعرض فقط الحجوزات المعلقة التي تم إنشاء كود لها بالفعل
-            const pending = bookings.filter(b => b.status === 'pending' && b.bookingCode);
-            
+            const pending = bookings.filter(b => b.status === 'pending');
             if (pending.length === 0) {
                 pendingList.innerHTML = '<p class="note">لا توجد حجوزات معلقة.</p>';
                 return;
@@ -173,14 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!viewerResultsContainer || !bookingCountDisplay) return;
             viewerResultsContainer.innerHTML = '';
             bookingCountDisplay.textContent = bookings.length;
-
             if (title) {
                 const titleEl = document.createElement('h3');
                 titleEl.className = 'date-header';
                 titleEl.textContent = title;
                 viewerResultsContainer.appendChild(titleEl);
             }
-
             if (bookings.length === 0) {
                 viewerResultsContainer.innerHTML += '<p class="note">لا توجد حجوزات مؤكدة في هذه الفترة.</p>';
                 return;
@@ -188,114 +192,131 @@ document.addEventListener('DOMContentLoaded', () => {
             bookings.forEach(booking => viewerResultsContainer.appendChild(createBookingItem(booking)));
         }
 
-        function createBookingItem(booking) {
-            const item = document.createElement('div');
-            item.className = `booking-item ${booking.status}`;
-            const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
-            
-            // الآن هذا السطر آمن 100% لأننا لن نعرض الحجز المعلق إلا بعد إضافة الكود إليه
-            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode}`;
-
-            let actionButtons = '';
-            if (booking.status === 'pending') {
-                actionButtons = `
-                    <button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button>
-                    <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>
-                `;
-            } else { // approved
-                actionButtons = `<button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
-            }
-
-            item.innerHTML = `
-                <div>
-                    <strong>${booking.fullName}</strong> (${booking.phone})<br>
-                    <small>${codeDisplay}</small><br>
-                    <small><strong>التاريخ:</strong> ${booking.date} - <strong>الوقت:</strong> ${timeDisplay}</small><br>
-                    <small><strong>الدفع:</strong> ${booking.paymentMethod}</small>
-                </div>
-                <div>
-                    ${actionButtons}
-                </div>
-            `;
-            return item;
-        }
-
         function updateDashboard(bookings) {
             const todayStr = toYYYYMMDD(new Date());
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
             if(pendingCount) pendingCount.textContent = bookings.filter(b => b.status === 'pending').length;
             if(todayCount) todayCount.textContent = bookings.filter(b => b.date === todayStr && b.status === 'approved').length;
             if(totalCount) totalCount.textContent = bookings.filter(b => new Date(b.date) >= thirtyDaysAgo && b.status === 'approved').length;
         }
 
-        // --- دوال معالجة الأحداث (Event Handlers) ---
-        function handleDateSelection() {
-            if (weekPicker) weekPicker.value = '';
-            const selectedDate = datePicker.value;
-            if (!selectedDate) {
-                renderFilteredBookings([], "الرجاء اختيار يوم لعرض الحجوزات.");
+        function handleDateRangeSelection() {
+            const startDate = startDatePicker.value;
+            const endDate = endDatePicker.value;
+            if (!startDate || !endDate) {
+                renderFilteredBookings([], "الرجاء تحديد فترة زمنية كاملة (من تاريخ وإلى تاريخ).");
+                return;
+            }
+            if (endDate < startDate) {
+                renderFilteredBookings([], "خطأ: تاريخ النهاية لا يمكن أن يكون قبل تاريخ البداية.");
                 return;
             }
             const bookingsArray = Object.values(allBookingsData);
-            const filtered = bookingsArray.filter(b => b.date === selectedDate && b.status === 'approved').sort((a,b) => (a.time || '').localeCompare(b.time || ''));
-            const title = `حجوزات يوم: ${new Date(selectedDate + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+            const filtered = bookingsArray.filter(b => b.status === 'approved' && b.date >= startDate && b.date <= endDate)
+                                          .sort((a,b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+            const title = `عرض الحجوزات من ${startDate} إلى ${endDate}`;
             renderFilteredBookings(filtered, title);
-        }
-
-        function handleWeekSelection() {
-            if (datePicker) datePicker.value = '';
-            const selectedWeek = weekPicker.value;
-            if (!selectedWeek) {
-                renderFilteredBookings([], "الرجاء اختيار أسبوع لعرض الحجوزات.");
-                return;
-            }
-
-            const { start, end } = getWeekDateRange(selectedWeek);
-            const startDateStr = toYYYYMMDD(start);
-            const endDateStr = toYYYYMMDD(end);
-
-            const bookingsArray = Object.values(allBookingsData);
-            const filtered = bookingsArray.filter(b => b.status === 'approved' && b.date >= startDateStr && b.date <= endDateStr)
-                .sort((a,b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
-            
-            const title = `حجوزات الأسبوع من ${start.toLocaleDateString('ar-EG')} إلى ${end.toLocaleDateString('ar-EG')}`;
-            renderFilteredBookings(filtered, title);
-        }
-        
-        function getWeekDateRange(weekString) {
-            const [year, weekNum] = weekString.split('-W').map(Number);
-            const d = new Date("Jan 01, " + year + " 01:00:00");
-            const w = d.getTime() + 604800000 * (weekNum - 1);
-            const n1 = new Date(w);
-            const n2 = new Date(w + 518400000);
-            return { start: n1, end: n2 };
         }
 
         function renderSchedule(scheduleData = {}) {
-            // ... (الكود هنا كما هو)
+            if(!scheduleForm) return;
+            const scheduleContainer = scheduleForm.querySelector('.schedule-grid');
+            if(!scheduleContainer) return;
+            scheduleContainer.innerHTML = '';
+            const days = { monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد' };
+            for (const day in days) {
+                const dayData = scheduleData[day] || { active: true, open: '09:00', close: '21:00' };
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-schedule-item';
+                dayDiv.innerHTML = `
+                    <h4>${days[day]}</h4>
+                    <label><input type="checkbox" data-day="${day}" class="active-checkbox" ${dayData.active ? 'checked' : ''}> يوم عمل</label>
+                    <div class="day-inputs" style="display:${dayData.active ? 'block' : 'none'}">
+                        <label>من:</label><input type="time" class="form-control" value="${dayData.open}" ${!dayData.active ? 'disabled' : ''}>
+                        <label>إلى:</label><input type="time" class="form-control" value="${dayData.close}" ${!dayData.active ? 'disabled' : ''}>
+                    </div>`;
+                scheduleContainer.appendChild(dayDiv);
+            }
         }
         
         function toggleContactInputs() {
-            // ... (الكود هنا كما هو)
+            if(!contactPlatformSelect || !contactOtherInput || !contactInfoInput) return;
+            contactOtherInput.style.display = (contactPlatformSelect.value === 'other') ? 'block' : 'none';
+            contactInfoInput.placeholder = (contactPlatformSelect.value === 'other') ? 'اكتب الرابط أو المعلومة هنا...' : 'اكتب الرقم هنا...';
         }
         
         function toggleModelInputs() {
-            // ... (الكود هنا كما هو)
+            if(!bookingModelSelect || !capacityInputContainer || !slotsInputContainer) return;
+            slotsInputContainer.style.display = (bookingModelSelect.value === 'slots') ? 'block' : 'none';
+            capacityInputContainer.style.display = (bookingModelSelect.value === 'capacity') ? 'block' : 'none';
         }
 
-        // --- ربط الأحداث بالعناصر ---
         if(logoutButton) logoutButton.addEventListener('click', () => auth.signOut());
-        if(datePicker) datePicker.addEventListener('change', handleDateSelection);
-        if(weekPicker) weekPicker.addEventListener('change', handleWeekSelection);
-        // ... (باقي ربط الأحداث كما هو)
+        if(startDatePicker) startDatePicker.addEventListener('change', handleDateRangeSelection);
+        if(endDatePicker) endDatePicker.addEventListener('change', handleDateRangeSelection);
+        if(changePasswordBtn) changePasswordBtn.addEventListener('click', () => {
+            auth.sendPasswordResetEmail(user.email)
+                .then(() => showNotification('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.', 'success'))
+                .catch(err => showNotification('حدث خطأ: ' + err.message, 'error'));
+        });
+        if(logoForm) logoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            db.ref('settings/logoUrl').set(logoUrlInput.value)
+                .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'));
+        });
+        if(contactPlatformSelect) contactPlatformSelect.addEventListener('change', toggleContactInputs);
+        if(paymentForm) paymentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = { 
+                instapayName: instapayNameInput.value, 
+                vodafoneCash: vodafoneCashInput.value,
+                contactPlatform: contactPlatformSelect.value,
+                contactInfo: contactInfoInput.value,
+                contactOther: contactOtherInput.value,
+            };
+            db.ref('settings/paymentDetails').set(data)
+                .then(() => showNotification('تم حفظ بيانات الدفع.', 'success'));
+        });
+        if(bookingModelSelect) bookingModelSelect.addEventListener('change', toggleModelInputs);
+        if(bookingModelForm) bookingModelForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const dataToUpdate = {
+                bookingModel: bookingModelSelect.value,
+                slotDuration: parseInt(slotDurationInput.value, 10),
+                dailyCapacity: parseInt(dailyCapacityInput.value, 10)
+            };
+            db.ref('settings').update(dataToUpdate)
+              .then(() => showNotification('تم حفظ نموذج الحجز بنجاح.', 'success'));
+        });
+        if(scheduleForm) {
+            scheduleForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const scheduleData = {};
+                scheduleForm.querySelectorAll('.day-schedule-item').forEach(item => {
+                    const day = item.querySelector('.active-checkbox').dataset.day;
+                    const isActive = item.querySelector('.active-checkbox').checked;
+                    const inputs = item.querySelectorAll('input');
+                    scheduleData[day] = { active: isActive, open: inputs[1].value, close: inputs[2].value };
+                });
+                db.ref('settings/schedule').set(scheduleData)
+                    .then(() => showNotification('تم حفظ أوقات العمل الأسبوعية.', 'success'));
+            });
+            scheduleForm.addEventListener('change', (e) => {
+                if (e.target.classList.contains('active-checkbox')) {
+                    const parent = e.target.closest('.day-schedule-item');
+                    const inputsContainer = parent.querySelector('.day-inputs');
+                    if(inputsContainer) inputsContainer.style.display = e.target.checked ? 'block' : 'none';
+                    parent.querySelectorAll('.form-control').forEach(input => input.disabled = !e.target.checked);
+                }
+            });
+        }
         
         window.handleBooking = (id, action) => {
             if (action === 'approve') {
                 db.ref(`bookings/${id}`).update({ status: 'approved' }).then(() => showNotification('تم قبول الحجز.', 'success'));
-            } else { // Reject
-                db.ref(`bookings/${id}`).remove().then(() => showNotification('تم رفض الحجز.', 'success'));
+            } else {
+                db.ref(`bookings/${id}`).remove().then(() => showNotification('تم رفض/إلغاء الحجز.', 'success'));
             }
         };
     }
