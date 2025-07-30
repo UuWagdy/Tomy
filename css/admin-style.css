@@ -1,11 +1,12 @@
-/* --- ستايل لوحة التحكم (محسن) --- */
+/* --- ستايل لوحة التحكم (بالتصميم الداكن والمحسن) --- */
 
 /* General Body Styles */
 body {
     font-family: 'Tajawal', sans-serif;
     margin: 0;
-    background-color: #f0f2f5;
-    color: #333;
+    /* تغيير الخلفية واللون الأساسي */
+    background-color: #112A2A;
+    color: #f0f0f0;
     direction: rtl;
     font-size: 16px;
 }
@@ -16,12 +17,15 @@ body {
 }
 .page-padding { padding-top: 2rem; padding-bottom: 2rem; }
 
-/* Header */
+/* Header - تعديل الهيدر ليتناسب مع السمة الداكنة */
 header {
-    background: #fff;
-    color: #333;
+    background: #1d1d1d;
+    color: #fff;
     padding: 1rem 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 3px solid #d4af37;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 header nav { display: flex; justify-content: space-between; align-items: center; }
 .logo-link img.logo { max-height: 50px; }
@@ -29,28 +33,29 @@ header h2 {
     font-family: 'Cairo', sans-serif;
     margin: 0;
 }
+header a {
+    color: #fff; text-decoration: none; font-size: 1.1rem; font-weight: 700; padding: 5px 10px;
+}
 
 /* Buttons */
 .btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: 'Cairo', sans-serif;
-    font-size: 1rem;
-    transition: transform 0.2s;
+    display: inline-block; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 1rem; transition: transform 0.2s;
 }
 .btn:hover { transform: translateY(-2px); }
-.btn-primary { background: #d4af37; color: #222; font-weight: bold; }
+.btn-primary { background: #d4af37; color: #111; font-weight: bold; }
+/* زر تسجيل الخروج */
+#logout-btn { background-color: #333; color: #fff; border: 1px solid #555; }
+#logout-btn:hover { background-color: #444; }
 
-/* Sections */
+
+/* Sections - البطاقات البيضاء فوق الخلفية الداكنة */
 section {
     margin-top: 2rem;
     padding: 2rem;
-    background: #fff;
+    background: #fff; /* خلفية بيضاء للوضوح */
+    color: #333;    /* لون النص داكن داخل البطاقات */
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 section h2 {
     font-family: 'Cairo', sans-serif;
@@ -58,6 +63,7 @@ section h2 {
     font-size: 1.8rem;
     margin-top: 0;
     margin-bottom: 1.5rem;
+    color: #d4af37; /* لون العنوان ذهبي */
 }
 
 /* Grids */
@@ -74,38 +80,24 @@ section h2 {
 .stat-card h3 { margin: 0 0 10px; font-size: 1.1rem; color: #555; font-weight: 700; }
 .stat-card p { margin: 0; font-size: 2.8rem; font-weight: 700; color: #d4af37; }
 .booking-item {
-    border: 1px solid #eee;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-right-width: 5px;
+    border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border-right-width: 5px;
 }
 .booking-item strong { font-size: 1.1rem; }
 .booking-item.pending { background-color: #fffde7; border-right-color: #fdd835; }
 .booking-item.approved { background-color: #e8f5e9; border-right-color: #66bb6a; }
+.note { color: #777; font-size: 0.9rem; text-align: center; }
+
 
 /* Forms */
 form label {
-    display: block;
-    margin-top: 15px;
-    margin-bottom: 5px;
-    font-weight: 700; /* Bold */
-    font-size: 1.1rem;
+    display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 700; font-size: 1.1rem;
 }
 form input, form select {
-    width: 100%;
-    padding: 12px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+    width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;
 }
 form button { margin-top: 25px; }
 
 /* Footer */
-footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #222; color: #fff; }
+footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #111; color: #888; }
 
 @media (max-width: 900px) { .management-grid { grid-template-columns: 1fr; } }
