@@ -2,7 +2,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
     authDomain: "tomy-barber-shop.firebaseapp.com",
     projectId: "tomy-barber-shop",
-    storageBucket: "tomy-barber-shop.firebasestorage.app",
+    storageBucket: "tomy-barber-shop.appspot.com", // Corrected storage bucket URL
     messagingSenderId: "693769920483",
     appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
     measurementId: "G-HNW5F8YJE3"
@@ -11,6 +11,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
+const storage = firebase.storage(); // Initialize Firebase Storage
 
 const adminContent = document.getElementById('admin-content');
 const headerLogo = document.getElementById('header-logo');
@@ -57,6 +58,13 @@ function initializeAdminPanel(user) {
     const pendingCount = document.getElementById('pending-count');
     const todayCount = document.getElementById('today-count');
     const totalCount = document.getElementById('total-count');
+    
+    // --- NEW: Gallery Management Elements ---
+    const galleryForm = document.getElementById('gallery-form');
+    const imageInput = document.getElementById('image-upload');
+    const uploadProgress = document.getElementById('upload-progress');
+    const galleryItemsContainer = document.getElementById('gallery-items-container');
+
 
     // --- Load Initial Data ---
     db.ref('settings').on('value', (snapshot) => {
@@ -88,6 +96,27 @@ function initializeAdminPanel(user) {
         updateDashboard(allBookings);
     });
 
+    // --- NEW: Load Gallery Images ---
+    const galleryRef = db.ref('gallery');
+    galleryRef.on('value', (snapshot) => {
+        galleryItemsContainer.innerHTML = ''; // Clear old items
+        const images = snapshot.val();
+        if (images) {
+            Object.entries(images).forEach(([key, imageData]) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'gallery-admin-item';
+                itemDiv.innerHTML = `
+                    <img src="${imageData.url}" alt="Gallery image">
+                    <button class="delete-btn" data-key="${key}" data-filename="${imageData.filename}">×</button>
+                `;
+                galleryItemsContainer.appendChild(itemDiv);
+            });
+        } else {
+            galleryItemsContainer.innerHTML = '<p>لا توجد صور في المعرض حاليًا.</p>';
+        }
+    });
+
+
     // --- UI Rendering ---
     function renderSchedule(scheduleData = {}) {
         const scheduleContainer = scheduleForm.querySelector('.schedule-grid');
@@ -112,7 +141,7 @@ function initializeAdminPanel(user) {
     
     function renderPendingBookings(allBookings) {
          pendingList.innerHTML = '';
-         const pending = Object.entries(allBookings).filter(([id, booking]) => booking.status === 'pending');
+         const pending = Object.entries(allBookings).filter(([id, booking]) => booking.status === 'pending').reverse();
          if(pending.length === 0) {
              pendingList.innerHTML = '<p>لا توجد حجوزات معلقة.</p>';
              return;
@@ -124,8 +153,7 @@ function initializeAdminPanel(user) {
                 <div>
                     <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode}</em><br>
                     <small>التاريخ: ${booking.date} ${booking.time ? `- ${formatTo12Hour(booking.time)}` : ''}</small><br>
-                    <small>الخدمة: ${booking.serviceName || 'حجز موعد'}</small><br>
-                    <small>الدفع: ${booking.paymentMethod}</small>
+                    <small>الخدمة: ${booking.serviceName || 'حجز موعد'}</small> | <small>الدفع: ${booking.paymentMethod}</small>
                 </div>
                 <div>
                     <button class="btn btn-primary" onclick="window.handleBooking('${id}', 'approve')">قبول</button>
@@ -153,13 +181,11 @@ function initializeAdminPanel(user) {
         today.forEach(([id, booking]) => {
             const item = document.createElement('div');
             item.className = 'booking-item approved';
-            // UPDATED: Added payment method to the display
             item.innerHTML = `
                 <div>
                     <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode}</em><br>
                     <small>الوقت: ${booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد'}</small><br>
-                    <small>الخدمة: ${booking.serviceName || 'حجز موعد'}</small><br>
-                    <small>طريقة الدفع: ${booking.paymentMethod}</small>
+                    <small>الخدمة: ${booking.serviceName || 'حجز موعد'}</small> | <small>طريقة الدفع: ${booking.paymentMethod}</small>
                 </div>
                 <div>
                     <button class="btn" onclick="window.handleBooking('${id}', 'reject')">إلغاء الحجز</button>
@@ -173,12 +199,10 @@ function initializeAdminPanel(user) {
         const bookingsArray = Object.values(allBookings);
         const toYYYYMMDD = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
         const todayStr = toYYYYMMDD(new Date());
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
+        
         pendingCount.textContent = bookingsArray.filter(b => b.status === 'pending').length;
         todayCount.textContent = bookingsArray.filter(b => b.date === todayStr && b.status === 'approved').length;
-        totalCount.textContent = bookingsArray.filter(b => new Date(b.date) >= thirtyDaysAgo && b.status === 'approved').length;
+        totalCount.textContent = bookingsArray.filter(b => b.status === 'approved').length;
     }
 
     // --- Event Listeners & Actions ---
@@ -264,11 +288,86 @@ function initializeAdminPanel(user) {
         }
     });
 
+    // --- NEW: Gallery Form Submission ---
+    galleryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const file = imageInput.files[0];
+        if (!file) {
+            showNotification('الرجاء اختيار صورة أولاً.', 'error');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            showNotification('حجم الصورة يجب أن يكون أقل من 5 ميجابايت.', 'error');
+            return;
+        }
+        
+        const filename = `${Date.now()}-${file.name}`;
+        const storageRef = storage.ref(`gallery/${filename}`);
+        const uploadTask = storageRef.put(file);
+
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                // Progress function
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                uploadProgress.style.display = 'block';
+                uploadProgress.value = progress;
+            }, 
+            (error) => {
+                // Error function
+                console.error(error);
+                showNotification('حدث خطأ أثناء رفع الصورة.', 'error');
+                uploadProgress.style.display = 'none';
+            }, 
+            () => {
+                // Complete function
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    const newImageRef = galleryRef.push();
+                    newImageRef.set({
+                        url: downloadURL,
+                        filename: filename,
+                        createdAt: Date.now()
+                    }).then(() => {
+                        showNotification('تمت إضافة الصورة للمعرض بنجاح.', 'success');
+                        galleryForm.reset();
+                        uploadProgress.style.display = 'none';
+                    });
+                });
+            }
+        );
+    });
+
+    // --- NEW: Gallery Image Deletion ---
+    galleryItemsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-btn')) {
+            const key = e.target.dataset.key;
+            const filename = e.target.dataset.filename;
+
+            if (confirm('هل أنت متأكد من رغبتك في حذف هذه الصورة؟')) {
+                // Delete from Storage
+                const imageStorageRef = storage.ref(`gallery/${filename}`);
+                imageStorageRef.delete().then(() => {
+                    // Delete from Realtime Database
+                    galleryRef.child(key).remove().then(() => {
+                        showNotification('تم حذف الصورة بنجاح.', 'success');
+                    });
+                }).catch(error => {
+                    console.error(error);
+                    // If file not in storage, still try to delete from DB
+                    if(error.code === 'storage/object-not-found') {
+                         galleryRef.child(key).remove();
+                    }
+                    showNotification('حدث خطأ أثناء حذف الصورة.', 'error');
+                });
+            }
+        }
+    });
+
+
     window.handleBooking = (id, action) => {
         if (action === 'approve') {
             db.ref(`bookings/${id}`).update({ status: 'approved' }).then(() => showNotification('تم قبول الحجز.', 'success'));
-        } else { // Reject
-            db.ref(`bookings/${id}`).remove().then(() => showNotification('تم رفض الحجز.', 'success'));
+        } else { // Reject or Cancel
+            db.ref(`bookings/${id}`).remove().then(() => showNotification('تم إلغاء الحجز بنجاح.', 'success'));
         }
     };
 }
