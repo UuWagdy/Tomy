@@ -11,12 +11,9 @@ body {
     max-width: 1100px;
     margin: auto;
     padding: 0 20px;
-    position: relative;
-    z-index: 2;
 }
 .page-padding {
-    padding-top: 5rem;
-    padding-bottom: 5rem;
+    padding: 4rem 20px;
 }
 .text-center {
     text-align: center;
@@ -95,9 +92,6 @@ header a:hover {
 }
 
 /* Section Styling */
-section {
-    position: relative;
-}
 .section-title {
     margin-bottom: 3rem;
     font-size: 2.5rem;
@@ -118,48 +112,20 @@ section {
 }
 .bg-light {
     background-color: #fff;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-/* Curved Section Dividers */
-.curved-divider {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-    line-height: 0;
-    transform: rotate(180deg);
-    z-index: 1;
-}
-.curved-divider.top {
-    top: 0;
-    transform: rotate(0);
-}
-.curved-divider svg {
-    position: relative;
-    display: block;
-    width: calc(100% + 1.3px);
-    height: 120px;
-}
-.curved-divider .shape-fill {
-    fill: #f9f9f9; /* Color of the next section */
-}
-.curved-divider.top .shape-fill {
-    fill: #FFFFFF;
-}
-
-/* Hero Section */
+/* Hero Section - REVERTED TO FIRST REDESIGN */
 .hero-landing {
     position: relative;
-    height: 75vh;
-    min-height: 500px;
+    height: 80vh;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    /* UPDATED BACKGROUND IMAGE */
-    background: url('https://i.postimg.cc/Jn1r5Mw9/Your-paragraph-text-1500-x-600-px.png') no-repeat center center/cover;
+    background: url('https://i.imgur.com/6JZuT5V.jpg') no-repeat center center/cover;
 }
 .hero-overlay {
     position: absolute;
@@ -167,22 +133,20 @@ section {
     left: 0;
     width: 100%;
     height: 100%;
-    /* Slightly darker overlay for better text contrast */
-    background-color: rgba(0, 0, 0, 0.65); 
+    background-color: rgba(0, 0, 0, 0.6);
 }
 .hero-content {
     position: relative;
     z-index: 2;
-    max-width: 800px;
-    margin: auto;
 }
 .hero-landing h1 {
-    font-size: 3.8rem;
-    font-weight: 900;
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
 }
 .hero-landing p {
-    font-size: 1.3rem;
-    margin-bottom: 2.5rem;
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
 }
 
 
@@ -221,9 +185,6 @@ section {
 }
 
 /* Gallery Section */
-#gallery-section {
-    padding-top: 150px; /* Space for the top curve */
-}
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -285,20 +246,6 @@ section {
     margin-top: 10px;
 }
 
-/* Floating Animated Objects */
-.floating-object {
-    position: absolute;
-    opacity: 0.15;
-    z-index: 0;
-    animation: float 8s ease-in-out infinite;
-}
-.floating-object img {
-    width: 100%;
-}
-#obj1 { width: 80px; top: 20%; left: 10%; animation-duration: 10s; }
-#obj2 { width: 120px; top: 70%; right: 5%; animation-duration: 12s; }
-#obj3 { width: 60px; top: 40%; right: 15%; animation-duration: 7s; }
-#obj4 { width: 100px; top: 85%; left: 12%; animation-duration: 9s; }
 
 /* Animations */
 .animate-on-scroll {
@@ -311,22 +258,24 @@ section {
     transform: translateY(0);
 }
 
-@keyframes float {
-    0% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-30px) rotate(15deg); }
-    100% { transform: translateY(0px) rotate(0deg); }
+/* FADE IN UP ANIMATION FOR HERO */
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
 }
 
-/* Ensuring other styles are not conflicting */
-.modal-content { z-index: 1001; }
-#admin-content section { z-index: 2; position: relative; background: #fff; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.05); }
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-    .hero-landing { height: 60vh; }
     .hero-landing h1 { font-size: 2.8rem; }
     .section-title { font-size: 2rem; }
-    .page-padding { padding: 4rem 0; }
-    .curved-divider svg { height: 80px; }
-    #gallery-section { padding-top: 100px; }
 }
