@@ -13,404 +13,212 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const auth = firebase.auth();
+    const storage = firebase.storage();
 
     const adminContent = document.getElementById('admin-content');
-    const logoutButton = document.getElementById('logout-btn');
+    const headerLogo = document.getElementById('header-logo');
 
-    function initializeAdminPanel() {
-        adminContent.style.display = 'block';
-
-        // DOM Elements
-        const settingsForm = document.getElementById('settings-form');
-        const openingHourInput = document.getElementById('opening-hour');
-        const closingHourInput = document.getElementById('closing-hour');
-
-        const serviceForm = document.getElementById('service-form');
-        const serviceNameInput = document.getElementById('service-name');
-        const serviceDurationInput = document.getElementById('service-duration');
-        const servicesList = document.getElementById('services-list');
-
-        const blockDateForm = document.getElementById('block-date-form');
-        const blockDateInput = document.getElementById('block-date-input');
-
-        const searchInput = document.getElementById('search-booking');
-        const pendingList = document.getElementById('pending-bookings-list');
-        const approvedList = document.getElementById('approved-bookings-list');
-        const reportsTableBody = document.getElementById('reports-table-body');
-        
-        // Dashboard stats
-        const pendingCount = document.getElementById('pending-count');
-        const approvedCount = document.getElementById('approved-count');
-        const pastCount = document.getElementById('past-count');
-
-        // Edit Modal
-        const editModal = document.getElementById('edit-booking-modal');
-        const closeEditModalBtn = document.getElementById('close-edit-modal');
-        const editBookingForm = document.getElementById('edit-booking-form');
-        const editFullName = document.getElementById('edit-fullName');
-        const editPhone = document.getElementById('edit-phone');
-        const hiddenBookingId = document.getElementById('edit-booking-id');
-
-        let bookings = {};
-        let services = {};
-        let settings = { openingHour: '09:00', closingHour: '21:00' };
-
-        // --- Data Loading and Rendering ---
-        const loadSettings = () => {
-            openingHourInput.value = settings.openingHour;
-            closingHourInput.value = settings.closingHour;
-        };
-
-        const renderServices = () => {
-            servicesList.innerHTML = '';
-            for (const id in services) {
-                const service = services[id];
-                const item = document.createElement('div');
-                item.className = 'booking-item';
-                item.innerHTML = `
-                    <div><strong>${service.name}</strong> - ${service.duration} دقيقة</div>
-                    <div><button class="btn" onclick="deleteService('${id}')">حذف</button></div>
-                `;
-                servicesList.appendChild(item);
-            }
-        };
-
-        const renderLists = () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            pendingList.innerHTML = '';
-            approvedList.innerHTML = '';
-            reportsTableBody.innerHTML = '';
-            
-            const now = new Date();
-            const bookingsArray = [];
-            for (let id in bookings) {
-                bookingsArray.push({ id, ...bookings[id] });
-            }
-            
-            const filteredBookings = bookingsArray.filter(b => 
-                b.fullName.toLowerCase().includes(searchTerm) || b.phone.includes(searchTerm)
-            );
-
-            const sortedBookings = filteredBookings.sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
-            
-            const pendingBookings = sortedBookings.filter(b => b.status === 'pending');
-            const futureApproved = sortedBookings.filter(b => b.status === 'approved' && new Date(b.date + 'T' + b.time) > now);
-            const pastApproved = sortedBookings.filter(b => b.status === 'approved' && new Date(b.date + 'T' + b.time) <= now);
-            
-            // Update dashboard
-            pendingCount.textContent = pendingBookings.length;
-            approvedCount.textContent = futureApproved.length;
-            pastCount.textContent = pastApproved.length;
-
-            if (pendingBookings.length === 0) pendingList.innerHTML = '<p>لا توجد حجوزات معلقة.</p>';
-            pendingBookings.forEach(booking => renderBookingItem(booking, pendingList));
-            
-            if (futureApproved.length === 0) approvedList.innerHTML = '<p>لا توجد حجوزات مؤكدة قادمة.</p>';
-            futureApproved.forEach(booking => renderBookingItem(booking, approvedList));
-
-            if (pastApproved.length === 0) reportsTableBody.innerHTML = '<tr><td colspan="5">لا يوجد حجوزات سابقة في السجل.</td></tr>';
-            pastApproved.forEach(booking => {
-                const row = reportsTableBody.insertRow();
-                row.innerHTML = `
-                    <td>${booking.fullName}</td>
-                    <td>${booking.phone}</td>
-                    <td>${booking.serviceName}</td>
-                    <td>${new Date(booking.date + 'T00:00:00').toLocaleDateString('ar-EG')}</td>
-                    <td>${booking.time}</td>
-                `;
-            });
-        };
-
-        const renderBookingItem = (booking, listElement) => {
-            const item = document.createElement('div');
-            item.className = `booking-item ${booking.status}`;
-            const dateDisplay = new Date(booking.date + 'T00:00:00').toLocaleDateString('ar-EG', {weekday: 'long', day: 'numeric', month: 'long'});
-            
-            let buttons = '';
-            if (booking.status === 'pending') {
-                buttons = `
-                    <button class="btn btn-primary" onclick="handleBooking('${booking.id}', 'approve')">قبول</button>
-                    <button class="btn" onclick="handleBooking('${booking.id}', 'reject')">رفض</button>
-                `;
-            } else { // Approved
-                buttons = `<button class="btn" onclick="handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
-            }
-            buttons += `<button class="btn" onclick="openEditModal('${booking.id}')">تعديل</button>`;
-
-            item.innerHTML = `
-                <div>
-                    <strong>${booking.fullName}</strong> (${booking.phone})<br>
-                    <small>${dateDisplay} - الساعة ${booking.time}</small><br>
-                    <em>الخدمة: ${booking.serviceName || 'غير محدد'}</em>
-                </div>
-                <div>${buttons}</div>
-            `;
-            listElement.appendChild(item);
-        };
-
-        // --- Firebase Listeners ---
-        db.ref('settings').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) settings = data;
-            loadSettings();
-        });
-
-        db.ref('services').on('value', (snapshot) => {
-            services = snapshot.val() || {};
-            renderServices();
-        });
-
-        db.ref('bookings').on('value', (snapshot) => {
-            bookings = snapshot.val() || {};
-            renderLists();
-        });
-
-        // --- Global Actions (attached to window) ---
-        window.handleBooking = (id, action) => {
-            if (action === 'approve') {
-                db.ref('bookings/' + id).update({ status: 'approved' })
-                    .then(() => showNotification('تم قبول الحجز بنجاح', 'success'));
-            } else { // Reject or Cancel
-                db.ref('bookings/' + id).remove()
-                    .then(() => showNotification('تم إزالة الحجز بنجاح', 'success'));
-            }
-        };
-
-        window.deleteService = (id) => {
-            if (confirm('هل أنت متأكد من رغبتك في حذف هذه الخدمة؟')) {
-                db.ref('services/' + id).remove()
-                    .then(() => showNotification('تم حذف الخدمة', 'success'));
-            }
-        };
-        
-        window.openEditModal = (id) => {
-            const booking = bookings[id];
-            if(booking){
-                hiddenBookingId.value = id;
-                editFullName.value = booking.fullName;
-                editPhone.value = booking.phone;
-                editModal.style.display = 'block';
-            }
-        };
-
-        // --- Event Listeners ---
-        logoutButton.addEventListener('click', () => {
-            auth.signOut().then(() => {
-                window.location.href = 'index.html';
-            });
-        });
-
-        searchInput.addEventListener('input', renderLists);
-
-        settingsForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newSettings = {
-                openingHour: openingHourInput.value,
-                closingHour: closingHourInput.value
-            };
-            db.ref('settings').set(newSettings)
-                .then(() => showNotification('تم حفظ الإعدادات بنجاح!', 'success'));
-        });
-
-        serviceForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newService = {
-                name: serviceNameInput.value,
-                duration: serviceDurationInput.value
-            };
-            db.ref('services').push(newService)
-                .then(() => {
-                    showNotification('تم إضافة الخدمة بنجاح!', 'success');
-                    serviceForm.reset();
-                });
-        });
-        
-        blockDateForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const dateToBlock = blockDateInput.value;
-            if(dateToBlock) {
-                db.ref('blockedDates').child(dateToBlock).set(true)
-                .then(() => showNotification(`تم إغلاق يوم ${dateToBlock} للحجوزات.`, 'success'));
-            }
-        });
-
-        editBookingForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const id = hiddenBookingId.value;
-            const updatedData = {
-                fullName: editFullName.value,
-                phone: editPhone.value
-            };
-            db.ref('bookings/' + id).update(updatedData)
-                .then(() => {
-                    showNotification('تم تحديث بيانات الحجز', 'success');
-                    editModal.style.display = 'none';
-                });
-        });
-
-        closeEditModalBtn.onclick = () => editModal.style.display = "none";
-        window.onclick = (event) => {
-            if (event.target == editModal) editModal.style.display = "none";
-        };
-    }
-
+    // --- Authentication Check ---
     auth.onAuthStateChanged(user => {
         if (user) {
-            initializeAdminPanel();
+            initializeAdminPanel(user);
         } else {
             window.location.replace('login.html');
         }
     });
-});
-```---
-### **`admin.html` (Updated)**
-*(Completely redesigned to include the new features like dashboard, service management, etc.)*
 
-```html
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - Tomy Barber Shop</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header>
-        <nav class="container">
-            <a href="index.html" class="logo-link"><img src="logo.png" alt="Tomy Barber Shop Logo" class="logo"></a>
-            <h2>لوحة تحكم الأدمن</h2>
-            <button id="logout-btn" class="btn">تسجيل الخروج</button>
-        </nav>
-    </header>
+    function initializeAdminPanel(user) {
+        adminContent.style.display = 'block';
 
-    <main class="container page-padding" id="admin-content" style="display: none;">
+        // --- DOM Elements ---
+        const logoutButton = document.getElementById('logout-btn');
+        const logoUploadInput = document.getElementById('logo-upload');
+        const uploadProgress = document.getElementById('upload-progress');
+        const changePasswordBtn = document.getElementById('change-password-btn');
+        const paymentForm = document.getElementById('payment-form');
+        const instapayNameInput = document.getElementById('instapay-name');
+        const vodafoneCashInput = document.getElementById('vodafone-cash');
+        const telegramContactInput = document.getElementById('telegram-contact');
+        const bookingModelForm = document.getElementById('booking-model-form');
+        const bookingModelSelect = document.getElementById('booking-model-select');
+        const scheduleForm = document.getElementById('schedule-form');
+        const pendingList = document.getElementById('pending-bookings-list');
+        const pendingCount = document.getElementById('pending-count');
+        const todayCount = document.getElementById('today-count');
+        const totalCount = document.getElementById('total-count');
+
+        // --- Load Initial Data ---
+        db.ref('settings').on('value', (snapshot) => {
+            const settings = snapshot.val() || {};
+            // Load Logo
+            headerLogo.src = settings.logoUrl || 'logo.png';
+            // Load Payment Details
+            if (settings.paymentDetails) {
+                instapayNameInput.value = settings.paymentDetails.instapayName || '';
+                vodafoneCashInput.value = settings.paymentDetails.vodafoneCash || '';
+                telegramContactInput.value = settings.paymentDetails.telegramContact || '';
+            }
+            // Load Booking Model
+            bookingModelSelect.value = settings.bookingModel || 'slots';
+            // Load Schedule
+            renderSchedule(settings.schedule);
+        });
         
-        <!-- Dashboard Section -->
-        <section id="dashboard-section">
-            <h2>نظرة عامة</h2>
-            <div class="dashboard-grid">
-                <div class="stat-card">
-                    <h3>حجوزات معلقة</h3>
-                    <p id="pending-count">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>حجوزات قادمة</h3>
-                    <p id="approved-count">0</p>
-                </div>
-                 <div class="stat-card">
-                    <h3>حجوزات مكتملة</h3>
-                    <p id="past-count">0</p>
-                </div>
-            </div>
-        </section>
+        db.ref('bookings').on('value', (snapshot) => {
+            const bookings = snapshot.val() || {};
+            renderPendingBookings(bookings);
+            updateDashboard(bookings);
+        });
 
-        <!-- Management Grids -->
-        <div class="management-grid">
-            <!-- Settings Section -->
-            <section id="settings-section">
-                <h2>الإعدادات العامة</h2>
-                <form id="settings-form">
-                    <div class="form-group">
-                        <label for="opening-hour">ساعة بدء العمل:</label>
-                        <input type="time" id="opening-hour" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="closing-hour">ساعة انتهاء العمل:</label>
-                        <input type="time" id="closing-hour" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
-                </form>
-                <hr>
-                <form id="block-date-form">
-                    <div class="form-group">
-                        <label for="block-date-input">إغلاق يوم معين:</label>
-                        <input type="date" id="block-date-input" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn">إغلاق اليوم</button>
-                </form>
-            </section>
-
-            <!-- Services Management Section -->
-            <section id="services-management-section">
-                <h2>إدارة الخدمات</h2>
-                <form id="service-form">
-                    <div class="form-group">
-                        <label for="service-name">اسم الخدمة:</label>
-                        <input type="text" id="service-name" class="form-control" placeholder="مثال: قص شعر" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="service-duration">مدة الخدمة (بالدقائق):</label>
-                        <input type="number" id="service-duration" class="form-control" placeholder="مثال: 30" required min="15" step="5">
-                    </div>
-                    <button type="submit" class="btn btn-primary">إضافة خدمة</button>
-                </form>
-                <div id="services-list" class="item-list"></div>
-            </section>
-        </div>
-
-
-        <!-- Bookings Section -->
-        <section id="bookings-management-section">
-            <h2>إدارة الحجوزات</h2>
-            <input type="text" id="search-booking" class="form-control" placeholder="ابحث بالاسم أو رقم الهاتف...">
+        // --- UI Rendering ---
+        function renderSchedule(scheduleData = {}) {
+            const scheduleContainer = scheduleForm.querySelector('.schedule-grid');
+            scheduleContainer.innerHTML = '';
+            const days = { monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد' };
             
-            <div id="admin-section">
-                <h3>الحجوزات المعلقة</h3>
-                <div id="pending-bookings-list"></div>
-            </div>
-            
-            <div id="approved-section">
-                <h3>الحجوزات المؤكدة (القادمة)</h3>
-                <div id="approved-bookings-list"></div>
-            </div>
-        </section>
+            for (const day in days) {
+                const dayData = scheduleData[day] || { active: true, open: '09:00', close: '21:00', capacity: 10 };
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-schedule-item';
+                dayDiv.innerHTML = `
+                    <h4>${days[day]}</h4>
+                    <label><input type="checkbox" data-day="${day}" class="active-checkbox" ${dayData.active ? 'checked' : ''}> يوم عمل</label>
+                    <div class="day-inputs" style="display:${dayData.active ? 'block' : 'none'}">
+                        <label>من:</label><input type="time" class="form-control" value="${dayData.open}" ${!dayData.active ? 'disabled' : ''}>
+                        <label>إلى:</label><input type="time" class="form-control" value="${dayData.close}" ${!dayData.active ? 'disabled' : ''}>
+                        <label>الطاقة الاستيعابية (للنموذج العددي):</label>
+                        <input type="number" class="form-control" value="${dayData.capacity}" min="1" ${!dayData.active ? 'disabled' : ''}>
+                    </div>
+                `;
+                scheduleContainer.appendChild(dayDiv);
+            }
+        }
+        
+        function renderPendingBookings(allBookings) {
+             pendingList.innerHTML = '';
+             const pending = Object.entries(allBookings).filter(([id, booking]) => booking.status === 'pending');
+             if(pending.length === 0) {
+                 pendingList.innerHTML = '<p>لا توجد حجوزات معلقة.</p>';
+                 return;
+             }
+             pending.forEach(([id, booking]) => {
+                const item = document.createElement('div');
+                item.className = 'booking-item pending';
+                item.innerHTML = `
+                    <div>
+                        <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode}</em><br>
+                        <small>التاريخ: ${booking.date} ${booking.time ? `- الساعة ${booking.time}` : ''}</small><br>
+                        <small>الخدمة: ${booking.serviceName || 'حجز يوم'}</small><br>
+                        <small>الدفع: ${booking.paymentMethod}</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="window.handleBooking('${id}', 'approve')">قبول</button>
+                        <button class="btn" onclick="window.handleBooking('${id}', 'reject')">رفض</button>
+                    </div>
+                `;
+                pendingList.appendChild(item);
+             });
+        }
+        
+        function updateDashboard(allBookings) {
+            const bookingsArray = Object.values(allBookings);
+            const toYYYYMMDD = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
+            const todayStr = toYYYYMMDD(new Date());
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        <!-- Reports Section -->
-        <section id="reports-section">
-            <h2>سجل الحجوزات المكتملة</h2>
-            <table class="reports-table">
-                <thead>
-                    <tr>
-                        <th>الاسم الكامل</th>
-                        <th>رقم الهاتف</th>
-                        <th>الخدمة</th>
-                        <th>التاريخ</th>
-                        <th>الوقت</th>
-                    </tr>
-                </thead>
-                <tbody id="reports-table-body"></tbody>
-            </table>
-        </section>
-    </main>
+            pendingCount.textContent = bookingsArray.filter(b => b.status === 'pending').length;
+            todayCount.textContent = bookingsArray.filter(b => b.date === todayStr && b.status === 'approved').length;
+            totalCount.textContent = bookingsArray.filter(b => {
+                const bookingDate = new Date(b.date);
+                return b.status === 'approved' && bookingDate >= thirtyDaysAgo;
+            }).length;
+        }
 
-    <!-- Edit Booking Modal -->
-    <div id="edit-booking-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="close-edit-modal">×</span>
-            <h3>تعديل بيانات الحجز</h3>
-            <form id="edit-booking-form">
-                <input type="hidden" id="edit-booking-id">
-                <label for="edit-fullName">الاسم الكامل:</label>
-                <input type="text" id="edit-fullName" required>
-                <label for="edit-phone">رقم الهاتف:</label>
-                <input type="tel" id="edit-phone" required>
-                <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
-            </form>
-        </div>
-    </div>
+        // --- Event Listeners & Actions ---
+        logoutButton.addEventListener('click', () => auth.signOut());
+        
+        changePasswordBtn.addEventListener('click', () => {
+            auth.sendPasswordResetEmail(user.email)
+                .then(() => showNotification('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.', 'success'))
+                .catch(err => showNotification('حدث خطأ: ' + err.message, 'error'));
+        });
 
-    <footer>
-        <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
-    </footer>
+        logoUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    <!-- Firebase Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    
-    <!-- Scripts -->
-    <script src="js/utils.js"></script>
-    <script src="js/admin.js"></script>
-</body>
-</html>
+            const uploadTask = storage.ref(`logos/logo`).put(file);
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    uploadProgress.style.display = 'block';
+                    uploadProgress.textContent = `جاري الرفع... ${Math.round(progress)}%`;
+                },
+                (error) => {
+                    showNotification('فشل رفع الصورة: ' + error.message, 'error');
+                },
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        db.ref('settings/logoUrl').set(downloadURL)
+                            .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'));
+                        uploadProgress.style.display = 'none';
+                    });
+                }
+            );
+        });
+
+        paymentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = {
+                instapayName: instapayNameInput.value,
+                vodafoneCash: vodafoneCashInput.value,
+                telegramContact: telegramContactInput.value,
+            };
+            db.ref('settings/paymentDetails').set(data)
+                .then(() => showNotification('تم حفظ بيانات الدفع.', 'success'));
+        });
+        
+        bookingModelForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            db.ref('settings/bookingModel').set(bookingModelSelect.value)
+              .then(() => showNotification('تم حفظ نموذج الحجز.', 'success'));
+        });
+        
+        scheduleForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const scheduleData = {};
+            const dayItems = scheduleForm.querySelectorAll('.day-schedule-item');
+            dayItems.forEach(item => {
+                const day = item.querySelector('.active-checkbox').dataset.day;
+                const isActive = item.querySelector('.active-checkbox').checked;
+                const inputs = item.querySelectorAll('input');
+                scheduleData[day] = {
+                    active: isActive,
+                    open: inputs[1].value,
+                    close: inputs[2].value,
+                    capacity: parseInt(inputs[3].value, 10)
+                };
+            });
+            db.ref('settings/schedule').set(scheduleData)
+                .then(() => showNotification('تم حفظ أوقات العمل الأسبوعية.', 'success'));
+        });
+        
+        scheduleForm.addEventListener('change', (e) => {
+            if (e.target.classList.contains('active-checkbox')) {
+                const parent = e.target.closest('.day-schedule-item');
+                const inputsContainer = parent.querySelector('.day-inputs');
+                inputsContainer.style.display = e.target.checked ? 'block' : 'none';
+                parent.querySelectorAll('.form-control').forEach(input => input.disabled = !e.target.checked);
+            }
+        });
+
+        window.handleBooking = (id, action) => {
+            if (action === 'approve') {
+                db.ref(`bookings/${id}`).update({ status: 'approved' }).then(() => showNotification('تم قبول الحجز.', 'success'));
+            } else { // Reject
+                db.ref(`bookings/${id}`).remove().then(() => showNotification('تم رفض الحجز.', 'success'));
+            }
+        };
+    }
+});
