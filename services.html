@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الخدمات والحجز - Tomy Barber Shop</title>
-    <!-- تأكد من أنه يستدعي ملف الستايل الصحيح -->
     <link rel="stylesheet" href="css/services-style.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -21,17 +20,8 @@
         </nav>
     </header>
     <main class="container page-padding">
-        
         <div id="loader" class="text-center"><h2>جاري تحميل الإعدادات...</h2></div>
-
         <div id="booking-container" style="display:none;">
-            <!-- قسم اختيار الخدمة (مخفي حاليًا ولكن قد يحتاجه الجافاسكريبت) -->
-            <section id="service-selection-section" style="display:none;">
-                 <h2>الخطوة 1: اختر الخدمة (اختياري)</h2>
-                 <select id="service-selection" class="form-control"></select>
-            </section>
-
-            <!-- قسم التقويم -->
             <section id="calendar-section" style="display:none;">
                 <h2 id="calendar-title">الخطوة 1: اختر يوماً من التقويم</h2>
                 <div class="calendar-controls">
@@ -41,8 +31,6 @@
                 </div>
                 <div id="calendar-view" class="week-view"></div>
             </section>
-
-            <!-- نافذة نموذج الحجز (مهمة جداً) -->
             <div id="booking-modal" class="modal">
                 <div class="modal-content">
                     <span class="close-button" id="close-booking-modal">×</span>
@@ -61,8 +49,6 @@
                     </form>
                 </div>
             </div>
-
-             <!-- نافذة عرض المواعيد المتاحة (مهمة جداً) -->
             <div id="time-slots-modal" class="modal">
                 <div class="modal-content">
                     <span class="close-button" id="close-slots-modal">×</span>
@@ -70,8 +56,6 @@
                     <div id="time-slots-container"></div>
                 </div>
             </div>
-            
-            <!-- نافذة تأكيد الحجز (مهمة جداً) -->
             <div id="confirmation-modal" class="modal">
                  <div class="modal-content text-center">
                     <span class="close-button" id="close-confirmation-modal">×</span>
@@ -79,14 +63,12 @@
                     <p>كود الحجز الخاص بك هو:</p>
                     <p id="booking-code-display" class="booking-code"></p>
                     <div id="payment-info-display"></div>
-                    <p>سيتم التواصل معك للتأكيد. يمكنك إغلاق هذه النافذة.</p>
+                    <p>يمكنك إغلاق هذه النافذة.</p>
                 </div>
             </div>
         </div>
     </main>
-    
     <footer><p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p></footer>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="js/utils.js"></script>
