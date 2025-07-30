@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل دخول الأدمن - Tomy Barber Shop</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -15,15 +16,15 @@
     </header>
 
     <main class="container page-padding">
-        <div class="modal-content" style="margin: 5% auto;">
-            <h3>تسجيل دخول الأدمن</h3>
+        <div class="modal-content" style="margin: 5% auto; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+            <h3 class="text-center" style="margin-bottom: 2rem;">تسجيل دخول الأدمن</h3>
             <form id="login-form">
-                <div id="login-error" class="notification error" style="display:none;"></div>
+                <div id="login-error" class="notification error" style="display:none; margin-bottom: 1rem;"></div>
                 <label for="email">البريد الإلكتروني:</label>
-                <input type="email" id="email" required>
+                <input type="email" id="email" required class="form-control">
                 <label for="password">كلمة المرور:</label>
-                <input type="password" id="password" required>
-                <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
+                <input type="password" id="password" required class="form-control">
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">تسجيل الدخول</button>
             </form>
         </div>
     </main>
@@ -42,7 +43,7 @@
             apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
             authDomain: "tomy-barber-shop.firebaseapp.com",
             projectId: "tomy-barber-shop",
-            storageBucket: "tomy-barber-shop.firebasestorage.app",
+            storageBucket: "tomy-barber-shop.appspot.com",
             messagingSenderId: "693769920483",
             appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
             measurementId: "G-HNW5F8YJE3"
@@ -68,100 +69,5 @@
                 });
         });
     </script>
-</body>
-</html>```
---- END OF FILE login.html ---
---- START OF FILE services.html ---
-```html
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- UPDATED TITLE -->
-    <title>الخدمات والحجز - Tomy Barber Shop</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header>
-        <nav class="container">
-            <a href="index.html" class="logo-link"><img id="header-logo" src="logo.png" alt="Logo" class="logo"></a>
-            <ul>
-                <li><a href="index.html">الرئيسية</a></li>
-                <!-- UPDATED TEXT -->
-                <li><a href="services.html">الخدمات والحجز</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main class="container page-padding">
-        
-        <div id="loader" class="text-center"><h2>جاري تحميل الإعدادات...</h2></div>
-
-        <div id="booking-container" style="display:none;">
-            <!-- This section will be hidden by JS when not needed -->
-            <section id="service-selection-section" style="display:none;">
-                 <h2>الخطوة 1: اختر الخدمة (اختياري)</h2>
-                 <select id="service-selection" class="form-control"></select>
-            </section>
-
-            <section id="calendar-section" style="display:none;">
-                <h2 id="calendar-title">الخطوة 2: اختر يوماً من التقويم</h2>
-                <div class="calendar-controls">
-                    <button id="prev-week" class="btn">الأسبوع السابق</button>
-                    <h3 id="current-week-display"></h3>
-                    <button id="next-week" class="btn">الأسبوع التالي</button>
-                </div>
-                <div id="calendar-view" class="week-view"></div>
-            </section>
-
-            <!-- Booking Form Modal -->
-            <div id="booking-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close-button" id="close-booking-modal">×</span>
-                    <h3>الخطوة النهائية: تأكيد بياناتك</h3>
-                    <form id="booking-form">
-                        <p>الموعد المختار: <strong id="selected-slot-display"></strong></p>
-                        <label for="fullName">الاسم الكامل:</label>
-                        <input type="text" id="fullName" required>
-                        <label for="phone">رقم الهاتف:</label>
-                        <input type="tel" id="phone" required>
-                        <label for="payment-method">طريقة الدفع:</label>
-                        <select id="payment-method" class="form-control" required></select>
-                        <input type="hidden" id="selected-date">
-                        <input type="hidden" id="selected-time">
-                        <button type="submit" class="btn btn-primary">إرسال طلب الحجز</button>
-                    </form>
-                </div>
-            </div>
-
-             <!-- Time Slots Modal -->
-            <div id="time-slots-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close-button" id="close-slots-modal">×</span>
-                    <h3 id="slots-modal-title">المواعيد المتاحة</h3>
-                    <div id="time-slots-container"></div>
-                </div>
-            </div>
-            
-            <!-- Confirmation/Payment Info Modal -->
-            <div id="confirmation-modal" class="modal">
-                 <div class="modal-content text-center">
-                    <span class="close-button" id="close-confirmation-modal">×</span>
-                    <h2 id="confirmation-header">تم إرسال طلبك بنجاح!</h2>
-                    <p>كود الحجز الخاص بك هو:</p>
-                    <p id="booking-code-display" class="booking-code"></p>
-                    <div id="payment-info-display"></div>
-                    <p>سيتم التواصل معك للتأكيد. يمكنك إغلاق هذه النافذة.</p>
-                </div>
-            </div>
-        </div>
-    </main>
-    
-    <footer><p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p></footer>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/main.js"></script>
 </body>
 </html>
