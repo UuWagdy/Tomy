@@ -187,10 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
         bookingModal.style.display = 'block';
     }
     
-    function showConfirmationModal(id, paymentMethod) {
+    function showConfirmationModal(code, paymentMethod) {
         if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
-        // تم تغيير اسم المتغير من code إلى id ليعكس المعنى الجديد
-        bookingCodeDisplay.textContent = id; 
+        bookingCodeDisplay.textContent = code;
         paymentInfoDisplay.innerHTML = '';
         if(paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash') {
             const details = settings.paymentDetails;
@@ -244,20 +243,13 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             db.ref('bookings').push(newBooking).then((ref) => {
                 const date = newBooking.date;
-                
-                // **** بداية التعديل على نظام الـ ID ****
-                // 1. نستخدم العداد اليومي
+                const dayFormatted = date.split('-').slice(1).join('');
                 const counterRef = db.ref(`dayCounters/${date}`);
                 counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
-                    const dailyId = transactionResult.snapshot.val(); // هذا هو رقم الحجز اليومي (1, 2, 3...)
-                    
-                    // 2. نقوم بتحديث الحجز بالرقم الجديد
-                    ref.update({ dailyId: dailyId });
-                    
-                    // 3. نعرض الرقم للعميل
-                    showConfirmationModal(dailyId, newBooking.paymentMethod);
+                    const bookingCode = dayFormatted + String(transactionResult.snapshot.val()).padStart(2, '0');
+                    ref.update({ bookingCode: bookingCode });
+                    showConfirmationModal(bookingCode, newBooking.paymentMethod);
                 });
-                // **** نهاية التعديل على نظام الـ ID ****
             });
             if(bookingModal) bookingModal.style.display = 'none';
             bookingForm.reset();
