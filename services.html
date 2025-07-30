@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- UPDATED TITLE -->
     <title>الخدمات والحجز - Tomy Barber Shop</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -13,7 +13,6 @@
             <a href="index.html" class="logo-link"><img id="header-logo" src="logo.png" alt="Logo" class="logo"></a>
             <ul>
                 <li><a href="index.html">الرئيسية</a></li>
-                <!-- UPDATED TEXT -->
                 <li><a href="services.html">الخدمات والحجز</a></li>
             </ul>
         </nav>
@@ -23,20 +22,22 @@
         <div id="loader" class="text-center"><h2>جاري تحميل الإعدادات...</h2></div>
 
         <div id="booking-container" style="display:none;">
-            <!-- This section will be hidden by JS when not needed -->
-            <section id="service-selection-section" style="display:none;">
-                 <h2>الخطوة 1: اختر الخدمة (اختياري)</h2>
-                 <select id="service-selection" class="form-control"></select>
-            </section>
-
-            <section id="calendar-section" style="display:none;">
-                <h2 id="calendar-title">الخطوة 2: اختر يوماً من التقويم</h2>
+            
+            <section id="calendar-section" class="animate-on-scroll">
+                <h2 id="calendar-title" class="section-title text-center">اختر يوماً من التقويم</h2>
                 <div class="calendar-controls">
                     <button id="prev-week" class="btn">الأسبوع السابق</button>
                     <h3 id="current-week-display"></h3>
                     <button id="next-week" class="btn">الأسبوع التالي</button>
                 </div>
                 <div id="calendar-view" class="week-view"></div>
+                <p class="note text-center" style="margin-top: 1rem;">الأيام باللون الرمادي غير متاحة للحجز.</p>
+            </section>
+
+            <!-- This section is now hidden as service selection is not a primary step -->
+            <section id="service-selection-section" style="display:none;">
+                 <h2>الخطوة 1: اختر الخدمة (اختياري)</h2>
+                 <select id="service-selection" class="form-control"></select>
             </section>
 
             <!-- Booking Form Modal -->
