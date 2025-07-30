@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- وظائف مساعدة ---
     const saveBookings = () => localStorage.setItem('tomyBarberBookings', JSON.stringify(bookings));
     
-    // (الحل) وظيفة آمنة لتنسيق التاريخ بدون مشاكل المنطقة الزمنية
     const toYYYYMMDD = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -59,22 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
         
-        // (تحسين) تعطيل زر "الأسبوع السابق" إذا كان في الماضي
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        prevWeekBtn.disabled = weekStart < today;
+        prevWeekBtn.disabled = weekStart <= today;
 
         for (let i = 0; i < 7; i++) {
             const dayDate = new Date(weekStart);
             dayDate.setDate(weekStart.getDate() + i);
-            const dayString = toYYYYMMDD(dayDate); // استخدام الوظيفة الآمنة
+            const dayString = toYYYYMMDD(dayDate);
 
             const dayDiv = document.createElement('div');
             dayDiv.className = 'day-slot';
             dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
             dayDiv.dataset.date = dayString;
 
-            // لا تسمح بالضغط على الأيام الماضية
             if (dayDate < today) {
                 dayDiv.classList.add('disabled');
             } else {
@@ -91,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Time Slots Logic ---
     const showTimeSlotsForDay = (dateString) => {
         slotsContainer.innerHTML = '';
-        const selectedDate = new Date(dateString + 'T00:00:00'); // تفادي مشاكل المنطقة الزمنية
+        const selectedDate = new Date(dateString + 'T00:00:00');
         slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${selectedDate.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
 
         allPossibleSlots.forEach(time => {
