@@ -18,7 +18,6 @@ const firebaseConfig = {
     let services = {};
     let bookings = {};
     
-    // --- (باقي تعريفات العناصر كما هي) ---
     const loader = document.getElementById('loader');
     const bookingContainer = document.getElementById('booking-container');
     const headerLogo = document.getElementById('header-logo');
@@ -46,10 +45,7 @@ const firebaseConfig = {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
-
-    // ======== بداية الكود الجديد والمُعاد هيكلته ========
     function initializeApp() {
-        // الخطوة 1: تحميل الإعدادات والخدمات أولاً (البيانات التي لا تتغير كثيرًا)
         const settingsRef = db.ref('settings').once('value');
         const servicesRef = db.ref('services').once('value');
 
@@ -57,20 +53,15 @@ const firebaseConfig = {
             settings = settingsSnap.val() || {};
             services = servicesSnap.val() || {};
 
-            // الخطوة 2: تهيئة واجهة المستخدم الأساسية التي تعتمد على الإعدادات
             if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
             populatePaymentMethods();
-            setupUIForBookingModel(); // هذه الدالة تجعل قسم التقويم مرئيًا الآن
+            setupUIForBookingModel(); 
 
-            // الخطوة 3: الآن وبعد أن أصبحت الواجهة جاهزة، نبدأ في الاستماع لبيانات الحجوزات
-            // on('value') ستعمل مرة فورًا بالبيانات الحالية، ثم تستمع لأي تغيير مستقبلي
             db.ref('bookings').on('value', snap => {
                 bookings = snap.val() || {};
-                // الآن نرسم التقويم بأمان لأننا نضمن أن القسم مرئي
                 renderCalendar(); 
             });
 
-            // الخطوة 4: إخفاء علامة التحميل وإظهار المحتوى بالكامل
             loader.style.display = 'none';
             bookingContainer.style.display = 'block';
 
@@ -79,11 +70,9 @@ const firebaseConfig = {
             loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
         });
     }
-    // ======== نهاية الكود الجديد والمُعاد هيكلته ========
 
-
-    // --- (باقي الدوال تبقى كما هي بدون تغيير) ---
-
+    // --- (باقي الدوال تبقى كما هي) ---
+    
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
         const [hour, minute] = timeString.split(':').map(Number);
@@ -101,24 +90,13 @@ const firebaseConfig = {
     }
 
     function setupUIForBookingModel() {
-        calendarSection.style.display = 'block'; // نجعل القسم مرئيًا هنا
-        
+        calendarSection.style.display = 'block';
         if (settings.bookingModel === 'capacity') {
             serviceSection.style.display = 'none';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
         } else {
             serviceSection.style.display = 'none';
             calendarTitle.textContent = "الخطوة 1: اختر اليوم والموعد";
-        }
-        
-        populateServices(); 
-        // لا نرسم التقويم هنا بعد الآن، بل ننتظر بيانات الحجوزات
-    }
-
-    function populateServices() {
-        serviceSelect.innerHTML = '<option value="" selected>-- خدمة عامة --</option>';
-        for (const id in services) {
-            serviceSelect.innerHTML += `<option value="${id}">${services[id].name}</option>`;
         }
     }
 
@@ -129,6 +107,7 @@ const firebaseConfig = {
     }
 
     function renderCalendar() {
+        if (!calendarView) return; // التأكد من وجود العنصر قبل استخدامه
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
         weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
@@ -158,18 +137,13 @@ const firebaseConfig = {
                 if(settings.bookingModel === 'capacity') {
                     const capacity = settings.dailyCapacity || 10;
                     const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
-                    const pendingBookingsCount = dayBookings.filter(b => b.status === 'pending').length;
-
+                    
                     if (approvedBookingsCount >= capacity) {
                         dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
                     } else {
                          const availableCount = capacity - approvedBookingsCount;
-                         let availabilityText = `متاح: ${availableCount}`;
-                         if (pendingBookingsCount > 0) {
-                             availabilityText += ` | ${pendingBookingsCount} قيد التأكيد`;
-                         }
-                         dayDiv.innerHTML += `<br><small>${availabilityText}</small>`;
+                         dayDiv.innerHTML += `<br><small>متاح: ${availableCount}</small>`;
                     }
                 }
             }
@@ -177,7 +151,8 @@ const firebaseConfig = {
         }
     }
 
-    function renderTimeSlots(dateString) {
+    // ... باقي الدوال كما هي ...
+     function renderTimeSlots(dateString) {
         slotsContainer.innerHTML = '';
         const schedule = getDaySchedule(new Date(dateString));
         if (!schedule || !schedule.open || !schedule.close) return; // Safety check
