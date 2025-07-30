@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const paymentForm = document.getElementById('payment-form');
         const instapayNameInput = document.getElementById('instapay-name');
         const vodafoneCashInput = document.getElementById('vodafone-cash');
-        // UPDATED: New contact elements
         const contactPlatformSelect = document.getElementById('contact-platform');
         const contactInfoInput = document.getElementById('contact-info');
         const contactOtherInput = document.getElementById('contact-other');
@@ -70,11 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (settings.paymentDetails) {
                 instapayNameInput.value = settings.paymentDetails.instapayName || '';
                 vodafoneCashInput.value = settings.paymentDetails.vodafoneCash || '';
-                // UPDATED: Load contact details
                 contactPlatformSelect.value = settings.paymentDetails.contactPlatform || 'whatsapp';
                 contactInfoInput.value = settings.paymentDetails.contactInfo || '';
                 contactOtherInput.value = settings.paymentDetails.contactOther || '';
-                toggleContactInputs(); // Show correct inputs on load
+                toggleContactInputs();
             }
 
             bookingModelSelect.value = settings.bookingModel || 'slots';
@@ -128,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>
                         <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode}</em><br>
                         <small>التاريخ: ${booking.date} ${booking.time ? `- ${formatTo12Hour(booking.time)}` : ''}</small><br>
-                        <small>الخدمة: ${booking.serviceName || 'حجز يوم'}</small><br>
+                        <small>الخدمة: ${booking.serviceName || 'حجز موعد'}</small><br>
                         <small>الدفع: ${booking.paymentMethod}</small>
                     </div>
                     <div>
@@ -157,12 +155,13 @@ document.addEventListener('DOMContentLoaded', () => {
             today.forEach(([id, booking]) => {
                 const item = document.createElement('div');
                 item.className = 'booking-item approved';
-                // UPDATED: Added booking code to the display
+                // UPDATED: Added payment method to the display
                 item.innerHTML = `
                     <div>
                         <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode}</em><br>
                         <small>الوقت: ${booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد'}</small><br>
-                        <small>الخدمة: ${booking.serviceName || 'حجز يوم'}</small>
+                        <small>الخدمة: ${booking.serviceName || 'حجز موعد'}</small><br>
+                        <small>طريقة الدفع: ${booking.paymentMethod}</small>
                     </div>
                     <div>
                         <button class="btn" onclick="window.handleBooking('${id}', 'reject')">إلغاء الحجز</button>
@@ -199,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'));
         });
 
-        // UPDATED: Logic to toggle contact inputs
         function toggleContactInputs() {
             if (contactPlatformSelect.value === 'other') {
                 contactOtherInput.style.display = 'block';
@@ -216,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = { 
                 instapayName: instapayNameInput.value, 
                 vodafoneCash: vodafoneCashInput.value,
-                // UPDATED: Save new contact data
                 contactPlatform: contactPlatformSelect.value,
                 contactInfo: contactInfoInput.value,
                 contactOther: contactOtherInput.value,
