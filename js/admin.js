@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   const firebaseConfig = {
-    apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", // استخدم بياناتك الصحيحة
+    apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
     authDomain: "tomy-barber-shop.firebaseapp.com",
     databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
     projectId: "tomy-barber-shop",
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   firebase.initializeApp(firebaseConfig);
-
   const db = firebase.database();
   const auth = firebase.auth();
     
@@ -38,10 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toYYYYMMDD = (d) => d.toISOString().split("T")[0];
 
     function initializeAdminPanel(user) {
-        // --- متغيرات لتخزين البيانات ---
         let allBookingsData = {};
-
-        // --- عناصر الواجهة ---
         const headerLogo = document.getElementById('header-logo');
         const logoutButton = document.getElementById('logout-btn');
         const pendingList = document.getElementById('pending-bookings-list');
@@ -71,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const dailyCapacityInput = document.getElementById('daily-capacity');
         const scheduleForm = document.getElementById('schedule-form');
 
-        // --- تحميل البيانات الأولية ---
         db.ref('settings').on('value', (snapshot) => {
             const settings = snapshot.val() || {};
             if(headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
@@ -103,20 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // --- دالة موحدة لإنشاء عنصر الحجز (لإصلاح مشكلة الكود وتجنب التكرار) ---
         function createBookingItem(booking) {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
             const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
             const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'غير محدد'}`;
             let actionButtons = '';
-
             if (booking.status === 'pending') {
                 actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
             } else {
                 actionButtons = `<button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
             }
-
             item.innerHTML = `
                 <div>
                     <strong>${booking.fullName}</strong> (${booking.phone})<br>
@@ -128,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return item;
         }
 
-        // --- دوال العرض ---
         function renderPendingBookings(bookings) {
             if(!pendingList) return;
             pendingList.innerHTML = '';
@@ -261,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
             capacityInputContainer.style.display = (bookingModelSelect.value === 'capacity') ? 'block' : 'none';
         }
 
-        // --- ربط الأحداث بالعناصر ---
         if(logoutButton) logoutButton.addEventListener('click', () => auth.signOut());
         if(startDatePicker) startDatePicker.addEventListener('change', handleDateRangeSelection);
         if(endDatePicker) endDatePicker.addEventListener('change', handleDateRangeSelection);
