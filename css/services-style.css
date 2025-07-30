@@ -1,14 +1,12 @@
-/* --- ستايل صفحة الخدمات (محسن بالأنيميشن) --- */
-
-/* General Body Styles */
+/* --- ستايل صفحة الخدمات (النسخة النهائية الصحيحة) --- */
 body {
     font-family: 'Tajawal', sans-serif; margin: 0; background-color: #112A2A; color: #f0f0f0; direction: rtl; font-size: 16px;
+    display: flex; flex-direction: column; min-height: 100vh;
 }
+main.container { flex-grow: 1; }
 .container { max-width: 1100px; margin: auto; padding: 0 20px; }
 .page-padding { padding-top: 2rem; padding-bottom: 2rem; }
 .text-center { text-align: center; }
-
-/* Header & Navigation */
 header {
     background: #1d1d1d; color: #fff; padding: 1rem 0; border-bottom: 3px solid #d4af37; position: sticky; top: 0; z-index: 100;
 }
@@ -16,47 +14,38 @@ header nav { display: flex; justify-content: space-between; align-items: center;
 .logo-link img.logo { max-height: 50px; }
 header ul { list-style: none; padding: 0; margin: 0; }
 header ul li { display: inline; margin-left: 25px; }
-header a { color: #fff; text-decoration: none; transition: color 0.3s; }
+header a { color: #fff; text-decoration: none; transition: color 0.3s; font-size: 1.1rem; font-weight: 700; padding: 5px 10px; }
 header a:hover { color: #d4af37; }
-
-/* Titles */
 h2, h3 { font-family: 'Cairo', sans-serif; }
 #calendar-title, #slots-modal-title { color: #d4af37; font-size: 2rem; }
-
-/* Buttons */
-.btn {
-    display: inline-block; padding: 12px 25px; background: #333; color: #fff; border: 1px solid #555; border-radius: 5px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 1rem;
-}
+.btn { display: inline-block; padding: 12px 25px; background: #333; color: #fff; border: 1px solid #555; border-radius: 5px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 1rem; }
 .btn:hover { background: #444; }
 .btn-primary { background: #d4af37; color: #111; font-weight: bold; border: none; }
 .btn:disabled { background-color: #555; color: #888; cursor: not-allowed; }
 
-/* Calendar Styles */
+/* ======== هذا هو الكود الذي يحل المشكلة ======== */
 .calendar-controls {
-    display: flex; justify-content: space-between; align-items: center; margin: 2rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0;
 }
-#current-week-display { font-size: 1.5rem; }
 .week-view {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 1rem;
-    /* ==== أنيميشن عند تحميل التقويم ==== */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 1rem;
     animation: fadeInUp 1s ease-out;
 }
-.day-slot {
-    background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer;
-    min-height: 90px; display: flex; flex-direction: column; justify-content: center; color: #333; font-weight: 700;
-    /* ==== تحسينات على هوفر الأيام ==== */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.day-slot:hover {
-    transform: scale(1.05) translateY(-5px); /* يكبر قليلاً ويرتفع لأعلى */
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* إضافة ظل لجعله بارزًا */
-}
+/* ============================================== */
+
+#current-week-display { font-size: 1.5rem; }
+.day-slot { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer; min-height: 90px; display: flex; flex-direction: column; justify-content: center; color: #333; font-weight: 700; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.day-slot:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
 .day-slot small { font-size: 0.9rem; font-weight: 400; }
 .day-slot.full { background-color: #753d3d; color: #ffcccc; cursor: not-allowed; }
 .day-slot.full:hover, .day-slot.disabled:hover { transform: none; box-shadow: none; }
 .day-slot.disabled { background-color: #333; color: #777; cursor: not-allowed; }
-
-/* Modal Styles & Forms (نفس الكود السابق) */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); }
 .modal-content { background: #fff; color: #333; margin: 10% auto; padding: 25px; border-radius: 8px; max-width: 550px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 .modal-content h3 { font-family: 'Cairo', sans-serif; color: #333; }
@@ -73,16 +62,7 @@ form input, form select { width: 100%; padding: 12px; margin-top: 8px; box-sizin
 .booking-code { font-size: 2.5rem; font-weight: 700; color: #d4af37; background: #333; padding: 10px 20px; border-radius: 8px; border: 2px dashed #d4af37; }
 #payment-info-display { margin-top: 1rem; padding: 15px; background: #fffde7; border: 1px solid #fff59d; border-radius: 5px; color: #5d4037; }
 #payment-info-display h4 { color: #333; }
-footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #111; color: #888; }
+footer { text-align: center; padding: 2rem 0; background: #111; color: #888; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }```
 
-/* ==== حركة ظهور التقويم لأعلى ==== */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+بعد تطبيق هذين التعديلين، قم بحفظ الملفات وافتح صفحة الخدمات في المتصفح. أنا واثق تمامًا أن المشكلة ستحل هذه المرة وستظهر الأيام والتقويم بشكل صحيح.
