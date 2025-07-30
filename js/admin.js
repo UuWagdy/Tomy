@@ -50,9 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const todayCount = document.getElementById('today-count');
         const totalCount = document.getElementById('total-count');
 
-        // --- عناصر واجهة البحث الجديدة ---
-        const datePicker = document.getElementById('date-picker');
-        const weekPicker = document.getElementById('week-picker');
+        // --- عناصر واجهة البحث الجديدة (تم التحديث) ---
+        const startDatePicker = document.getElementById('start-date-picker');
+        const endDatePicker = document.getElementById('end-date-picker');
         const bookingCountDisplay = document.getElementById('booking-count');
         const viewerResultsContainer = document.getElementById('viewer-results-container');
         
@@ -104,10 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTodayBookings(bookingsArray);
             updateDashboard(bookingsArray);
 
-            if (datePicker && datePicker.value) {
-                handleDateSelection();
-            } else if (weekPicker && weekPicker.value) {
-                handleWeekSelection();
+            // تحديث البحث الحالي إذا كان المستخدم قد اختار فترة
+            if (startDatePicker && startDatePicker.value && endDatePicker && endDatePicker.value) {
+                handleDateRangeSelection();
             }
         });
 
@@ -154,10 +153,12 @@ document.addEventListener('DOMContentLoaded', () => {
             bookings.forEach(booking => viewerResultsContainer.appendChild(createBookingItem(booking)));
         }
 
+        // دالة موحدة لإنشاء عنصر الحجز (لإصلاح مشكلة الكود وتجنب التكرار)
         function createBookingItem(booking) {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
             const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
+            // إصلاح نهائي لمشكلة كود الحجز عبر قراءته مباشرة
             const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'غير محدد'}`;
 
             let actionButtons = '';
@@ -195,49 +196,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- دوال معالجة الأحداث (Event Handlers) ---
-        function handleDateSelection() {
-            if (weekPicker) weekPicker.value = '';
-            const selectedDate = datePicker.value;
-            if (!selectedDate) {
-                renderFilteredBookings([], "الرجاء اختيار يوم لعرض الحجوزات.");
+        // الدالة الجديدة للبحث بالفترة الزمنية
+        function handleDateRangeSelection() {
+            const startDate = startDatePicker.value;
+            const endDate = endDatePicker.value;
+
+            if (!startDate || !endDate) {
+                renderFilteredBookings([], "الرجاء تحديد فترة زمنية كاملة (من تاريخ وإلى تاريخ).");
                 return;
             }
-            const bookingsArray = Object.values(allBookingsData);
-            const filtered = bookingsArray.filter(b => b.date === selectedDate && b.status === 'approved').sort((a,b) => (a.time || '').localeCompare(b.time || ''));
-            const title = `حجوزات يوم: ${new Date(selectedDate + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
-            renderFilteredBookings(filtered, title);
-        }
-
-        function handleWeekSelection() {
-            if (datePicker) datePicker.value = '';
-            const selectedWeek = weekPicker.value;
-            if (!selectedWeek) {
-                renderFilteredBookings([], "الرجاء اختيار أسبوع لعرض الحجوزات.");
+            if (endDate < startDate) {
+                renderFilteredBookings([], "خطأ: تاريخ النهاية لا يمكن أن يكون قبل تاريخ البداية.");
                 return;
             }
-
-            const { start, end } = getWeekDateRange(selectedWeek);
-            const startDateStr = toYYYYMMDD(start);
-            const endDateStr = toYYYYMMDD(end);
-
-            const bookingsArray = Object.values(allBookingsData);
-            const filtered = bookingsArray.filter(b => b.status === 'approved' && b.date >= startDateStr && b.date <= endDateStr)
-                .sort((a,b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
             
-            const title = `حجوزات الأسبوع من ${start.toLocaleDateString('ar-EG')} إلى ${end.toLocaleDateString('ar-EG')}`;
+            const bookingsArray = Object.values(allBookingsData);
+            const filtered = bookingsArray.filter(b => 
+                b.status === 'approved' && 
+                b.date >= startDate && 
+                b.date <= endDate
+            ).sort((a,b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+            
+            const title = `عرض الحجوزات من ${startDate} إلى ${endDate}`;
             renderFilteredBookings(filtered, title);
-        }
-        
-        function getWeekDateRange(weekString) {
-            const [year, weekNum] = weekString.split('-W').map(Number);
-            const d = new Date("Jan 01, " + year + " 01:00:00");
-            const w = d.getTime() + 604800000 * (weekNum - 1);
-            const n1 = new Date(w);
-            const n2 = new Date(w + 518400000);
-            return { start: n1, end: n2 };
         }
 
         function renderSchedule(scheduleData = {}) {
+            if(!scheduleForm) return;
             const scheduleContainer = scheduleForm.querySelector('.schedule-grid');
             if(!scheduleContainer) return;
             scheduleContainer.innerHTML = '';
@@ -281,10 +266,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // --- ربط الأحداث بالعناصر ---
+        // --- ربط الأحداث بالعناصر (تم التحديث) ---
         if(logoutButton) logoutButton.addEventListener('click', () => auth.signOut());
-        if(datePicker) datePicker.addEventListener('change', handleDateSelection);
-        if(weekPicker) weekPicker.addEventListener('change', handleWeekSelection);
+        if(startDatePicker) startDatePicker.addEventListener('change', handleDateRangeSelection);
+        if(endDatePicker) endDatePicker.addEventListener('change', handleDateRangeSelection);
         if(changePasswordBtn) changePasswordBtn.addEventListener('click', () => {
             auth.sendPasswordResetEmail(user.email)
                 .then(() => showNotification('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.', 'success'))
@@ -336,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.target.classList.contains('active-checkbox')) {
                     const parent = e.target.closest('.day-schedule-item');
                     const inputsContainer = parent.querySelector('.day-inputs');
-                    inputsContainer.style.display = e.target.checked ? 'block' : 'none';
+                    if(inputsContainer) inputsContainer.style.display = e.target.checked ? 'block' : 'none';
                     parent.querySelectorAll('.form-control').forEach(input => input.disabled = !e.target.checked);
                 }
             });
@@ -345,8 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.handleBooking = (id, action) => {
             if (action === 'approve') {
                 db.ref(`bookings/${id}`).update({ status: 'approved' }).then(() => showNotification('تم قبول الحجز.', 'success'));
-            } else { // Reject
-                db.ref(`bookings/${id}`).remove().then(() => showNotification('تم رفض الحجز.', 'success'));
+            } else {
+                db.ref(`bookings/${id}`).remove().then(() => showNotification('تم رفض/إلغاء الحجز.', 'success'));
             }
         };
     }
