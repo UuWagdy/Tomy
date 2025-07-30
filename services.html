@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الحجز - Tomy Barber Shop</title>
+    <!-- UPDATED TITLE -->
+    <title>الخدمات والحجز - Tomy Barber Shop</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +13,8 @@
             <a href="index.html" class="logo-link"><img id="header-logo" src="logo.png" alt="Logo" class="logo"></a>
             <ul>
                 <li><a href="index.html">الرئيسية</a></li>
-                <li><a href="services.html">الحجز</a></li>
+                <!-- UPDATED TEXT -->
+                <li><a href="services.html">الخدمات والحجز</a></li>
             </ul>
         </nav>
     </header>
@@ -21,13 +23,12 @@
         <div id="loader" class="text-center"><h2>جاري تحميل الإعدادات...</h2></div>
 
         <div id="booking-container" style="display:none;">
-            <!-- Step 1: Service Selection (Only for 'slots' model) -->
+            <!-- This section will be hidden by JS when not needed -->
             <section id="service-selection-section" style="display:none;">
-                 <h2>الخطوة 1: اختر الخدمة المطلوبة</h2>
+                 <h2>الخطوة 1: اختر الخدمة (اختياري)</h2>
                  <select id="service-selection" class="form-control"></select>
             </section>
 
-            <!-- Step 2: Calendar -->
             <section id="calendar-section" style="display:none;">
                 <h2 id="calendar-title">الخطوة 2: اختر يوماً من التقويم</h2>
                 <div class="calendar-controls">
@@ -38,7 +39,7 @@
                 <div id="calendar-view" class="week-view"></div>
             </section>
 
-            <!-- Step 3: Booking Form Modal -->
+            <!-- Booking Form Modal -->
             <div id="booking-modal" class="modal">
                 <div class="modal-content">
                     <span class="close-button" id="close-booking-modal">×</span>
