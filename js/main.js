@@ -145,18 +145,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
             } else {
 
-                //  ====== هذا هو الجزء الذي تم إصلاحه ======
+                //  ====== هذا هو الجزء الذي تم إصلاحه وتطويره ======
                 if(settings.bookingModel === 'capacity') {
-                    // الإصلاح: نحسب فقط الحجوزات الموافق عليها (approved)
-                    const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
                     const capacity = settings.dailyCapacity || 10;
+                    
+                    // 1. نحسب الحجوزات الموافق عليها
+                    const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
+                    
+                    // 2. نحسب الحجوزات المعلقة
+                    const pendingBookingsCount = dayBookings.filter(b => b.status === 'pending').length;
 
+                    // اليوم يعتبر ممتلئ فقط إذا وصلت الحجوزات "الموافق عليها" للحد الأقصى
                     if (approvedBookingsCount >= capacity) {
                         dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
                     } else {
-                         // نعرض للمستخدم العدد المتاح بناءً على الحجوزات المؤكدة فقط
-                         dayDiv.innerHTML += `<br><small>متاح: ${capacity - approvedBookingsCount}</small>`;
+                         // 3. نعرض العدد المتاح والعدد المعلق للمستخدم
+                         const availableCount = capacity - approvedBookingsCount;
+                         let availabilityText = `متاح: ${availableCount}`;
+                         
+                         // نضيف نص الحجوزات المعلقة فقط إذا كان هناك حجوزات معلقة
+                         if (pendingBookingsCount > 0) {
+                             availabilityText += ` | ${pendingBookingsCount} قيد التأكيد`;
+                         }
+                         
+                         dayDiv.innerHTML += `<br><small>${availabilityText}</small>`;
                     }
                 }
                 //  ====== نهاية الجزء الذي تم إصلاحه ======
@@ -196,7 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isPast) {
                 slotDiv.classList.add('disabled');
             } else if (booking) {
-                slotDiv.classList.add(booking.status === 'approved' ? 'approved' : 'pending');
+                slotDiv.classList.add(booking.status === 'approved' ? 'approved' : 'approved');
+                slotDiv.classList.add(booking.status === 'pending' ? 'pending' : '');
             } else {
                 slotDiv.classList.add('available');
             }
