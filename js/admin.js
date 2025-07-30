@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
             const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
-            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'غير محدد'}`;
+            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'جاري الإنشاء...'}`;
             let actionButtons = '';
             if (booking.status === 'pending') {
                 actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
