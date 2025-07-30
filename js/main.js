@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loader');
     const bookingContainer = document.getElementById('booking-container');
     const headerLogo = document.getElementById('header-logo');
-    // ... (Add all other DOM element queries here)
     const serviceSection = document.getElementById('service-selection-section');
     const serviceSelect = document.getElementById('service-selection');
     const calendarSection = document.getElementById('calendar-section');
@@ -40,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const hiddenDateInput = document.getElementById('selected-date');
     const hiddenTimeInput = document.getElementById('selected-time');
     const paymentMethodSelect = document.getElementById('payment-method');
-    // ... (modals)
     const slotsModal = document.getElementById('time-slots-modal');
     const closeSlotsModalBtn = document.getElementById('close-slots-modal');
     const slotsModalTitle = document.getElementById('slots-modal-title');
@@ -65,16 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
             loader.style.display = 'none';
             bookingContainer.style.display = 'block';
             
-            // Set logo
             headerLogo.src = settings.logoUrl || 'logo.png';
             
-            // Populate payment methods
             populatePaymentMethods();
-
-            // Setup UI based on booking model
             setupUIForBookingModel();
             
-            // Add listeners for real-time updates
             db.ref('bookings').on('value', snap => {
                 bookings = snap.val() || {};
                 if (calendarSection.style.display !== 'none') renderCalendar();
@@ -155,15 +148,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
             } else {
                 if(settings.bookingModel === 'capacity') {
-                    if (approvedBookings >= schedule.capacity) {
+                    // UPDATED: Use the global dailyCapacity setting
+                    const capacity = settings.dailyCapacity || 10;
+                    if (approvedBookings >= capacity) {
                         dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
                     } else {
-                         dayDiv.innerHTML += `<br><small>متاح: ${schedule.capacity - approvedBookings}</small>`;
+                         dayDiv.innerHTML += `<br><small>متاح: ${capacity - approvedBookings}</small>`;
                          if(pendingBookings > 0) dayDiv.innerHTML += `<br><small>قيد الانتظار: ${pendingBookings}</small>`;
                     }
                 }
-                // For slots model, we check fullness when opening the modal
+                // For 'slots' model, fullness is checked in the modal
             }
             calendarView.appendChild(dayDiv);
         }
@@ -257,9 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const date = hiddenDateInput.value;
         const paymentMethod = paymentMethodSelect.value;
-        const dayFormatted = date.split('-').slice(1).join(''); // e.g., 0718 for 2025-07-18
+        const dayFormatted = date.split('-').slice(1).join('');
 
-        // Use a transaction to get a unique sequential ID for the day
         const counterRef = db.ref(`dayCounters/${date}`);
         let newId;
         try {
