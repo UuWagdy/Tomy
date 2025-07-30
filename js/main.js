@@ -187,9 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
         bookingModal.style.display = 'block';
     }
     
-    function showConfirmationModal(code, paymentMethod) {
+    function showConfirmationModal(id, paymentMethod) {
         if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
-        bookingCodeDisplay.textContent = code;
+        // تم تغيير اسم المتغير من code إلى id ليعكس المعنى الجديد
+        bookingCodeDisplay.textContent = id; 
         paymentInfoDisplay.innerHTML = '';
         if(paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash') {
             const details = settings.paymentDetails;
@@ -243,24 +244,20 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             db.ref('bookings').push(newBooking).then((ref) => {
                 const date = newBooking.date;
-                // **** بداية التعديل على صيغة الكود ****
-                // 1. نفصل التاريخ للحصول على الشهر واليوم كأرقام
-                const [year, month, day] = date.split('-');
                 
-                // 2. نستخدم العداد اليومي
+                // **** بداية التعديل على نظام الـ ID ****
+                // 1. نستخدم العداد اليومي
                 const counterRef = db.ref(`dayCounters/${date}`);
                 counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
-                    const orderNumber = transactionResult.snapshot.val();
+                    const dailyId = transactionResult.snapshot.val(); // هذا هو رقم الحجز اليومي (1, 2, 3...)
                     
-                    // 3. نركب الكود بالصيغة الجديدة المطلوبة: MonthDayOrderNumber
-                    // نستخدم parseInt لإزالة الأصفار من بداية الشهر واليوم (مثل 07 -> 7)
-                    const bookingCode = `${parseInt(month, 10)}${parseInt(day, 10)}${orderNumber}`;
+                    // 2. نقوم بتحديث الحجز بالرقم الجديد
+                    ref.update({ dailyId: dailyId });
                     
-                    // 4. نقوم بتحديث الحجز بالكود الجديد
-                    ref.update({ bookingCode: bookingCode });
-                    showConfirmationModal(bookingCode, newBooking.paymentMethod);
+                    // 3. نعرض الرقم للعميل
+                    showConfirmationModal(dailyId, newBooking.paymentMethod);
                 });
-                // **** نهاية التعديل على صيغة الكود ****
+                // **** نهاية التعديل على نظام الـ ID ****
             });
             if(bookingModal) bookingModal.style.display = 'none';
             bookingForm.reset();
