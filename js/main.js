@@ -8,14 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM Elements ---
     const calendarView = document.getElementById('calendar-view');
-    // ... (بقية تعريفات DOM Elements تبقى كما هي)
     const currentWeekDisplay = document.getElementById('current-week-display');
     const prevWeekBtn = document.getElementById('prev-week');
     const nextWeekBtn = document.getElementById('next-week');
+
     const slotsModal = document.getElementById('time-slots-modal');
     const closeSlotsModalBtn = document.getElementById('close-slots-modal');
     const slotsModalTitle = document.getElementById('slots-modal-title');
     const slotsContainer = document.getElementById('time-slots-container');
+
     const bookingModal = document.getElementById('booking-modal');
     const closeBookingModalBtn = document.getElementById('close-booking-modal');
     const bookingForm = document.getElementById('booking-form');
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentDate = new Date();
     let bookings = JSON.parse(localStorage.getItem('tomyBarberBookings')) || [];
 
-    // --- بقية الكود تبقى كما هي تماماً بدون تغيير ---
+    // --- Functions ---
     const saveBookings = () => localStorage.setItem('tomyBarberBookings', JSON.stringify(bookings));
     
     const toYYYYMMDD = (date) => {
@@ -40,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const generateTimeSlots = () => {
         const slots = [];
-        // الآن يستخدم الساعات الديناميكية
         for (let hour = WORK_START_HOUR; hour < WORK_END_HOUR; hour++) {
             for (let min = 0; min < 60; min += SLOT_DURATION_MINUTES) {
                 const time = `${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderCalendar = () => {
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
-        weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
+        weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1); // يبدأ من الإثنين
 
         currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
         
@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         slotsModal.style.display = 'block';
     };
 
+    // --- Event Listeners ---
     calendarView.addEventListener('click', (e) => {
         const daySlot = e.target.closest('.day-slot');
         if (daySlot && !daySlot.classList.contains('full') && !daySlot.classList.contains('disabled')) {
@@ -161,4 +162,4 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     renderCalendar();
-});```
+});
