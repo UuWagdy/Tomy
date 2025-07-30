@@ -17,15 +17,22 @@
         </nav>
     </header>
     <main class="container page-padding">
-        <section id="calendar-section">
-            <h2>اختر يوماً من التقويم لعرض المواعيد</h2>
+        
+        <section id="service-selection-section">
+             <h2>الخطوة 1: اختر الخدمة المطلوبة</h2>
+             <select id="service-selection" class="form-control"></select>
+        </section>
+
+        <section id="calendar-section" style="display:none;">
+            <h2>الخطوة 2: اختر يوماً من التقويم</h2>
             <div class="calendar-controls">
                 <button id="prev-week" class="btn">الأسبوع السابق</button>
                 <h3 id="current-week-display"></h3>
                 <button id="next-week" class="btn">الأسبوع التالي</button>
             </div>
+            <div id="calendar-loader" style="text-align: center; padding: 2rem;">جاري تحميل المواعيد...</div>
             <div id="calendar-view" class="week-view"></div>
-            <p class="text-center note">الأيام الملونة بالأحمر ممتلئة تماماً. اضغط على أي يوم آخر لعرض المواعيد المتاحة.</p>
+            <p class="text-center note">الأيام الملونة بالأحمر ممتلئة تماماً. الأيام الرمادية مغلقة أو غير متاحة. اضغط على أي يوم آخر لعرض المواعيد المتاحة.</p>
         </section>
 
         <!-- Time Slots Modal -->
@@ -41,7 +48,7 @@
         <div id="booking-modal" class="modal">
             <div class="modal-content">
                 <span class="close-button" id="close-booking-modal">×</span>
-                <h3>تأكيد الحجز</h3>
+                <h3>الخطوة 3: تأكيد الحجز</h3>
                 <form id="booking-form">
                     <p>الموعد المختار: <strong id="selected-slot-display"></strong></p>
                     <label for="fullName">الاسم الكامل:</label>
@@ -50,7 +57,9 @@
                     <input type="tel" id="phone" required>
                     <input type="hidden" id="selected-date">
                     <input type="hidden" id="selected-time">
-                    <button type="submit" class="btn">إرسال طلب الحجز</button>
+                    <input type="hidden" id="selected-service-id">
+                    <input type="hidden" id="selected-service-name">
+                    <button type="submit" class="btn btn-primary">إرسال طلب الحجز</button>
                 </form>
             </div>
         </div>
@@ -60,11 +69,12 @@
         <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
     </footer>
 
-    <!-- Firebase Libraries (يتم استدعاؤها مرة واحدة فقط) -->
+    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
-    <!-- Main Script (يتم استدعاؤه مرة واحدة فقط) -->
+    <!-- Main Scripts -->
+    <script src="js/utils.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
