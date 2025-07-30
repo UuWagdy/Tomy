@@ -1,14 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // ========== الخطوة الأخيرة: الصق مفاتيح Firebase هنا ==========
-    const firebaseConfig = {
-      apiKey: "ضع هنا الـ API KEY الخاص بك",
-      authDomain: "ضع هنا الـ AUTH DOMAIN الخاص بك",
-      projectId: "ضع هنا الـ PROJECT ID الخاص بك",
-      storageBucket: "ضع هنا الـ STORAGE BUCKET الخاص بك",
-      messagingSenderId: "ضع هنا الـ SENDER ID الخاص بك",
-      appId: "ضع هنا الـ APP ID الخاص بك"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
+  authDomain: "tomy-barber-shop.firebaseapp.com",
+  projectId: "tomy-barber-shop",
+  storageBucket: "tomy-barber-shop.firebasestorage.app",
+  messagingSenderId: "693769920483",
+  appId: "1:693769920483:web:88a3b6cf7318263c540ad6",
+  measurementId: "G-HNW5F8YJE3"
+};
 
     // ========== تهيئة Firebase ==========
     firebase.initializeApp(firebaseConfig);
