@@ -1,5 +1,6 @@
-<!-- --- START OF FILE index.html ---
-```html -->
+--- END OF FILE admin.js ---
+--- START OF FILE index.html ---
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tomy Barber Shop - الرئيسية</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -22,80 +22,144 @@
         </nav>
     </header>
     <main>
-        <!-- Floating Objects -->
-        <div class="floating-object" id="obj1"><img src="https://i.imgur.com/u5yOJVW.png" alt="floating barber pole"></div>
-        <div class="floating-object" id="obj2"><img src="https://i.imgur.com/L1n7Qf7.png" alt="floating scissors"></div>
-
         <!-- Hero Section -->
         <section class="hero-landing">
-            <div class="container">
-                <div class="hero-content animate-on-scroll">
-                    <h1>أناقتك تبدأ من هنا</h1>
-                    <p>نقدم لك أفضل تجربة حلاقة في المدينة بأيدي أمهر الخبراء. جودة، احترافية، وأناقة مضمونة.</p>
-                    <a href="services.html" class="btn btn-primary">احجز موعدك الآن</a>
-                </div>
+            <div class="hero-overlay"></div>
+            <div class="container hero-content">
+                <h1 class="fade-in-up">أناقتك تبدأ من هنا</h1>
+                <p class="fade-in-up" style="animation-delay: 0.2s;">نقدم لك أفضل تجربة حلاقة في المدينة بأيدي أمهر الخبراء.</p>
+                <a href="services.html" class="btn btn-primary fade-in-up" style="animation-delay: 0.4s;">احجز موعدك الآن</a>
             </div>
         </section>
 
-        <!-- Curved Shape Divider -->
-        <div class="curved-divider">
-            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
-            </svg>
-        </div>
-
         <!-- Why Choose Us Section -->
         <section class="page-padding">
-            <div class="floating-object" id="obj3"><img src="https://i.imgur.com/L1n7Qf7.png" alt="floating scissors"></div>
             <div class="container">
                 <h2 class="text-center section-title">لماذا تختار Tomy Barber؟</h2>
                 <div class="features-grid">
                     <div class="feature-card animate-on-scroll">
                         <img src="https://i.imgur.com/L4ZgZ8c.png" alt="خبراء الحلاقة" class="feature-icon">
                         <h3>خبراء الحلاقة</h3>
-                        <p>فريقنا مكون من حلاقين محترفين يمتلكون سنوات من الخبرة لضمان أفضل النتائج.</p>
+                        <p>فريقنا مكون من حلاقين محترفين يمتلكون سنوات من الخبرة.</p>
                     </div>
-                    <div class="feature-card animate-on-scroll" style="transition-delay: 0.1s;">
+                    <div class="feature-card animate-on-scroll" style="animation-delay: 0.1s;">
                         <img src="https://i.imgur.com/UfF9A5A.png" alt="أجواء مريحة" class="feature-icon">
                         <h3>أجواء مريحة</h3>
-                        <p>استرخِ في بيئة مصممة خصيصًا لراحتك وهدوئك، حيث الأناقة تلتقي بالسكينة.</p>
+                        <p>استرخِ في بيئة مصممة خصيصًا لراحتك وهدوئك.</p>
                     </div>
-                    <div class="feature-card animate-on-scroll" style="transition-delay: 0.2s;">
+                    <div class="feature-card animate-on-scroll" style="animation-delay: 0.2s;">
                         <img src="https://i.imgur.com/kG5vG5e.png" alt="حجز سهل" class="feature-icon">
                         <h3>حجز سهل وسريع</h3>
-                        <p>احجز موعدك بسهولة عبر موقعنا الإلكتروني في أقل من دقيقة ووفر وقتك.</p>
+                        <p>احجز موعدك بسهولة عبر موقعنا الإلكتروني في أقل من دقيقة.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Gallery Section -->
-        <section id="gallery-section" class="page-padding bg-light">
-             <div class="curved-divider top">
-                <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                    <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" class="shape-fill"></path>
-                </svg>
-            </div>
-            <div class="floating-object" id="obj4"><img src="https://i.imgur.com/u5yOJVW.png" alt="floating barber pole"></div>
+        <!-- Services Highlight Section -->
+        <section class="page-padding bg-light">
             <div class="container">
-                <h2 class="text-center section-title">من أعمالنا</h2>
-                <div class="gallery-grid">
-                    <!-- Gallery images will be loaded here by main.js -->
+                <h2 class="text-center section-title">خدماتنا المميزة</h2>
+                <div class="services-grid">
+                    <div class="service-item animate-on-scroll">
+                        <h4>قص وتصفيف الشعر</h4>
+                        <p>أحدث القصات الكلاسيكية والعصرية التي تناسب شخصيتك.</p>
+                    </div>
+                    <div class="service-item animate-on-scroll" style="animation-delay: 0.1s;">
+                        <h4>حلاقة وتحديد اللحية</h4>
+                        <p>عناية فائقة باللحية باستخدام أفضل المنتجات والتقنيات.</p>
+                    </div>
+                    <div class="service-item animate-on-scroll" style="animation-delay: 0.2s;">
+                        <h4>علاجات الشعر</h4>
+                        <p>علاجات مغذية لتقوية الشعر واستعادة حيويته ولمعانه.</p>
+                    </div>
+                     <div class="service-item animate-on-scroll" style="animation-delay: 0.3s;">
+                        <h4>عناية ببشرة الوجه</h4>
+                        <p>جلسات تنظيف وتقشير البشرة لتجديد نضارتها.</p>
+                    </div>
                 </div>
                  <div class="text-center" style="margin-top: 3rem;">
-                     <a href="services.html" class="btn">هل أعجبتك أعمالنا؟ احجز الآن</a>
+                     <a href="services.html" class="btn">عرض كل الخدمات والحجز</a>
                 </div>
             </div>
         </section>
+
+         <!-- Gallery Section -->
+        <section class="page-padding">
+            <div class="container">
+                <h2 class="text-center section-title">من أعمالنا</h2>
+                <div class="gallery-grid">
+                    <div class="gallery-item animate-on-scroll"><img src="https://i.imgur.com/bVqDqgZ.jpg" alt="Barber gallery image 1"></div>
+                    <div class="gallery-item animate-on-scroll" style="animation-delay: 0.1s;"><img src="https://i.imgur.com/szaJ9fT.jpg" alt="Barber gallery image 2"></div>
+                    <div class="gallery-item animate-on-scroll" style="animation-delay: 0.2s;"><img src="https://i.imgur.com/5D6xS0h.jpg" alt="Barber gallery image 3"></div>
+                    <div class="gallery-item animate-on-scroll" style="animation-delay: 0.3s;"><img src="https://i.imgur.com/jM8Vw2S.jpg" alt="Barber gallery image 4"></div>
+                </div>
+            </div>
+        </section>
+
     </main>
     
     <footer>
         <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
     </footer>
-
+    
+    <!-- Firebase Libraries for dynamic logo -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // JS for scroll animations
+            const animationObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            const elementsToAnimate = document.querySelectorAll('.animate-on-scroll');
+            elementsToAnimate.forEach(el => {
+                animationObserver.observe(el);
+            });
+
+            // Parallax effect for hero background
+            const hero = document.querySelector('.hero-landing');
+            if(hero) {
+                window.addEventListener('scroll', () => {
+                    const offset = window.pageYOffset;
+                    hero.style.backgroundPositionY = offset * 0.5 + 'px';
+                });
+            }
+
+            // Firebase logic to load logo
+            const headerLogo = document.getElementById('header-logo');
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
+                    authDomain: "tomy-barber-shop.firebaseapp.com",
+                    projectId: "tomy-barber-shop",
+                    storageBucket: "tomy-barber-shop.firebasestorage.app",
+                    messagingSenderId: "693769920483",
+                    appId: "1:693769920483:web:88a3b6cf7318263c540ad6"
+                };
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                const db = firebase.database();
+                db.ref('settings/logoUrl').once('value').then(snapshot => {
+                    const logoUrl = snapshot.val();
+                    if(logoUrl && headerLogo) {
+                        headerLogo.src = logoUrl;
+                    }
+                });
+            } catch(e) {
+                console.error("Firebase could not be initialized for the logo:", e);
+            }
+        });
+    </script>
 </body>
 </html>
