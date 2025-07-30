@@ -46,7 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const logoutButton = document.getElementById('logout-btn');
         const pendingList = document.getElementById('pending-bookings-list');
         const todayBookingsList = document.getElementById('today-bookings-list');
-        const upcomingBookingsList = document.getElementById('upcoming-bookings-list'); // القسم الذي أعدناه
+        const upcomingBookingsList = document.getElementById('upcoming-bookings-list');
+        const startDatePicker = document.getElementById('start-date-picker');
+        const endDatePicker = document.getElementById('end-date-picker');
+        const bookingCountDisplay = document.getElementById('booking-count');
+        const viewerResultsContainer = document.getElementById('viewer-results-container');
         const pendingCount = document.getElementById('pending-count');
         const todayCount = document.getElementById('today-count');
         const totalCount = document.getElementById('total-count');
@@ -90,11 +94,13 @@ document.addEventListener('DOMContentLoaded', () => {
         db.ref('bookings').on('value', (snapshot) => {
             allBookingsData = snapshot.val() || {};
             const bookingsArray = Object.entries(allBookingsData).map(([id, booking]) => ({ id, ...booking }));
-            
             renderPendingBookings(bookingsArray);
             renderTodayBookings(bookingsArray);
             renderUpcomingBookings(bookingsArray);
             updateDashboard(bookingsArray);
+            if (startDatePicker && startDatePicker.value && endDatePicker && endDatePicker.value) {
+                handleDateRangeSelection();
+            }
         });
 
         // --- دالة موحدة لإنشاء عنصر الحجز (لإصلاح مشكلة الكود وتجنب التكرار) ---
@@ -146,28 +152,23 @@ document.addEventListener('DOMContentLoaded', () => {
             today.forEach(booking => todayBookingsList.appendChild(createBookingItem(booking)));
         }
 
-        // --- الدالة المُعادة لعرض الحجوزات القادمة ---
         function renderUpcomingBookings(bookings) {
             if (!upcomingBookingsList) return;
             upcomingBookingsList.innerHTML = '';
-
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
             const thirtyDaysFromNow = new Date(today);
             thirtyDaysFromNow.setDate(today.getDate() + 31);
-
             const upcoming = bookings.filter(b => {
                 const bookingDate = new Date(b.date + 'T00:00:00');
                 return b.status === 'approved' && bookingDate >= tomorrow && bookingDate < thirtyDaysFromNow;
             }).sort((a,b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
-
             if (upcoming.length === 0) {
                 upcomingBookingsList.innerHTML = '<p class="note">لا توجد حجوزات مؤكدة خلال الـ 30 يومًا القادمة.</p>';
                 return;
             }
-
             let currentDateHeader = '';
             upcoming.forEach(booking => {
                 if (booking.date !== currentDateHeader) {
@@ -182,6 +183,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 upcomingBookingsList.appendChild(createBookingItem(booking));
             });
         }
+        
+        function renderFilteredBookings(bookings, title) {
+            if (!viewerResultsContainer || !bookingCountDisplay) return;
+            viewerResultsContainer.innerHTML = '';
+            bookingCountDisplay.textContent = bookings.length;
+            if (title) {
+                const titleEl = document.createElement('h3');
+                titleEl.className = 'date-header';
+                titleEl.textContent = title;
+                viewerResultsContainer.appendChild(titleEl);
+            }
+            if (bookings.length === 0) {
+                viewerResultsContainer.innerHTML += '<p class="note">لا توجد حجوزات مؤكدة في هذه الفترة.</p>';
+                return;
+            }
+            bookings.forEach(booking => viewerResultsContainer.appendChild(createBookingItem(booking)));
+        }
 
         function updateDashboard(bookings) {
             const todayStr = toYYYYMMDD(new Date());
@@ -190,6 +208,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if(pendingCount) pendingCount.textContent = bookings.filter(b => b.status === 'pending').length;
             if(todayCount) todayCount.textContent = bookings.filter(b => b.date === todayStr && b.status === 'approved').length;
             if(totalCount) totalCount.textContent = bookings.filter(b => new Date(b.date) >= thirtyDaysAgo && b.status === 'approved').length;
+        }
+
+        function handleDateRangeSelection() {
+            const startDate = startDatePicker.value;
+            const endDate = endDatePicker.value;
+            if (!startDate || !endDate) {
+                renderFilteredBookings([], "الرجاء تحديد فترة زمنية كاملة (من تاريخ وإلى تاريخ).");
+                return;
+            }
+            if (endDate < startDate) {
+                renderFilteredBookings([], "خطأ: تاريخ النهاية لا يمكن أن يكون قبل تاريخ البداية.");
+                return;
+            }
+            const bookingsArray = Object.values(allBookingsData);
+            const filtered = bookingsArray.filter(b => b.status === 'approved' && b.date >= startDate && b.date <= endDate)
+                                          .sort((a,b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+            const title = `عرض الحجوزات من ${startDate} إلى ${endDate}`;
+            renderFilteredBookings(filtered, title);
         }
 
         function renderSchedule(scheduleData = {}) {
@@ -227,6 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- ربط الأحداث بالعناصر ---
         if(logoutButton) logoutButton.addEventListener('click', () => auth.signOut());
+        if(startDatePicker) startDatePicker.addEventListener('change', handleDateRangeSelection);
+        if(endDatePicker) endDatePicker.addEventListener('change', handleDateRangeSelection);
         if(changePasswordBtn) changePasswordBtn.addEventListener('click', () => {
             auth.sendPasswordResetEmail(user.email)
                 .then(() => showNotification('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.', 'success'))
