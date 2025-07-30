@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Helper to format time to 12-hour format with Arabic AM/PM
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
         const [hour, minute] = timeString.split(':').map(Number);
@@ -45,7 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const paymentForm = document.getElementById('payment-form');
         const instapayNameInput = document.getElementById('instapay-name');
         const vodafoneCashInput = document.getElementById('vodafone-cash');
-        const telegramContactInput = document.getElementById('telegram-contact');
+        // UPDATED: New contact elements
+        const contactPlatformSelect = document.getElementById('contact-platform');
+        const contactInfoInput = document.getElementById('contact-info');
+        const contactOtherInput = document.getElementById('contact-other');
         const bookingModelForm = document.getElementById('booking-model-form');
         const bookingModelSelect = document.getElementById('booking-model-select');
         const slotsInputContainer = document.getElementById('slots-input-container');
@@ -54,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dailyCapacityInput = document.getElementById('daily-capacity');
         const scheduleForm = document.getElementById('schedule-form');
         const pendingList = document.getElementById('pending-bookings-list');
-        const todayBookingsList = document.getElementById('today-bookings-list'); // NEW
+        const todayBookingsList = document.getElementById('today-bookings-list');
         const pendingCount = document.getElementById('pending-count');
         const todayCount = document.getElementById('today-count');
         const totalCount = document.getElementById('total-count');
@@ -68,7 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (settings.paymentDetails) {
                 instapayNameInput.value = settings.paymentDetails.instapayName || '';
                 vodafoneCashInput.value = settings.paymentDetails.vodafoneCash || '';
-                telegramContactInput.value = settings.paymentDetails.telegramContact || '';
+                // UPDATED: Load contact details
+                contactPlatformSelect.value = settings.paymentDetails.contactPlatform || 'whatsapp';
+                contactInfoInput.value = settings.paymentDetails.contactInfo || '';
+                contactOtherInput.value = settings.paymentDetails.contactOther || '';
+                toggleContactInputs(); // Show correct inputs on load
             }
 
             bookingModelSelect.value = settings.bookingModel || 'slots';
@@ -82,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         db.ref('bookings').on('value', (snapshot) => {
             const allBookings = snapshot.val() || {};
             renderPendingBookings(allBookings);
-            renderTodayBookings(allBookings); // NEW
+            renderTodayBookings(allBookings);
             updateDashboard(allBookings);
         });
 
@@ -134,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
              });
         }
         
-        // NEW Function to render today's bookings
         function renderTodayBookings(allBookings) {
             todayBookingsList.innerHTML = '';
             const toYYYYMMDD = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
@@ -142,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const today = Object.entries(allBookings)
                 .filter(([id, booking]) => booking.date === todayStr && booking.status === 'approved')
-                .sort(([, a], [, b]) => (a.time || '').localeCompare(b.time || '')); // Sort by time
+                .sort(([, a], [, b]) => (a.time || '').localeCompare(b.time || ''));
 
             if (today.length === 0) {
                 todayBookingsList.innerHTML = '<p>لا توجد حجوزات لهذا اليوم بعد.</p>';
@@ -151,10 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             today.forEach(([id, booking]) => {
                 const item = document.createElement('div');
-                item.className = 'booking-item approved'; // Use 'approved' style
+                item.className = 'booking-item approved';
+                // UPDATED: Added booking code to the display
                 item.innerHTML = `
                     <div>
-                        <strong>${booking.fullName}</strong> (${booking.phone})<br>
+                        <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode}</em><br>
                         <small>الوقت: ${booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد'}</small><br>
                         <small>الخدمة: ${booking.serviceName || 'حجز يوم'}</small>
                     </div>
@@ -193,9 +199,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(() => showNotification('تم تحديث الشعار بنجاح.', 'success'));
         });
 
+        // UPDATED: Logic to toggle contact inputs
+        function toggleContactInputs() {
+            if (contactPlatformSelect.value === 'other') {
+                contactOtherInput.style.display = 'block';
+                contactInfoInput.placeholder = 'اكتب الرابط أو المعلومة هنا...';
+            } else {
+                contactOtherInput.style.display = 'none';
+                contactInfoInput.placeholder = 'اكتب الرقم هنا...';
+            }
+        }
+        contactPlatformSelect.addEventListener('change', toggleContactInputs);
+
         paymentForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const data = { instapayName: instapayNameInput.value, vodafoneCash: vodafoneCashInput.value, telegramContact: telegramContactInput.value };
+            const data = { 
+                instapayName: instapayNameInput.value, 
+                vodafoneCash: vodafoneCashInput.value,
+                // UPDATED: Save new contact data
+                contactPlatform: contactPlatformSelect.value,
+                contactInfo: contactInfoInput.value,
+                contactOther: contactOtherInput.value,
+            };
             db.ref('settings/paymentDetails').set(data)
                 .then(() => showNotification('تم حفظ بيانات الدفع.', 'success'));
         });
