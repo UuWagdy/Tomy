@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  // الخطوة 1: تعريف بيانات الاتصال
   const firebaseConfig = {
     apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", // استخدم بياناتك الصحيحة
     authDomain: "tomy-barber-shop.firebaseapp.com",
@@ -12,16 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     measurementId: "G-HNW5F8YJE3"
   };
 
-  // الخطوة 2: تهيئة التطبيق بالطريقة الصحيحة (Compat/v8)
-  // تم حذف السطر الخاطئ "const app = initializeApp(firebaseConfig);" من هنا
   firebase.initializeApp(firebaseConfig);
 
-  // الخطوة 3: إنشاء متغيرات الاتصال الأساسية
   const db = firebase.database();
   const auth = firebase.auth();
     
-  // ==========================================================
-
     const adminContent = document.getElementById('admin-content');
     const headerLogo = document.getElementById('header-logo');
 
@@ -43,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeAdminPanel(user) {
-
         // --- DOM Elements ---
         const logoutButton = document.getElementById('logout-btn');
         const logoForm = document.getElementById('logo-form');
@@ -64,6 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const scheduleForm = document.getElementById('schedule-form');
         const pendingList = document.getElementById('pending-bookings-list');
         const todayBookingsList = document.getElementById('today-bookings-list');
+        // ====== الجزء الجديد: الحصول على عنصر القائمة الجديدة ======
+        const upcomingBookingsList = document.getElementById('upcoming-bookings-list');
         const pendingCount = document.getElementById('pending-count');
         const todayCount = document.getElementById('today-count');
         const totalCount = document.getElementById('total-count');
@@ -71,7 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Load Initial Data ---
         db.ref('settings').on('value', (snapshot) => {
             const settings = snapshot.val() || {};
-            if(headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
+            // ... (باقي الكود كما هو)
+             if(headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
             if(logoUrlInput) logoUrlInput.value = settings.logoUrl || '';
 
             if (settings.paymentDetails) {
@@ -94,11 +90,92 @@ document.addEventListener('DOMContentLoaded', () => {
             const allBookings = snapshot.val() || {};
             if(pendingList) renderPendingBookings(allBookings);
             if(todayBookingsList) renderTodayBookings(allBookings);
+            // ====== الجزء الجديد: استدعاء الدالة الجديدة لعرض الحجوزات القادمة ======
+            if(upcomingBookingsList) renderUpcomingBookings(allBookings);
             if(pendingCount) updateDashboard(allBookings);
         });
 
         // --- UI Rendering ---
+
+        // ==========================================================
+        // ========= بداية الدالة الجديدة للحجوزات القادمة =========
+        // ==========================================================
+        function renderUpcomingBookings(allBookings) {
+            if (!upcomingBookingsList) return;
+            upcomingBookingsList.innerHTML = '';
+
+            // 1. تحديد النطاق الزمني (من الغد وحتى 30 يومًا قادمة)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+
+            const thirtyDaysFromNow = new Date(today);
+            thirtyDaysFromNow.setDate(today.getDate() + 31);
+
+            // 2. فلترة الحجوزات لتشمل فقط المؤكدة وفي النطاق الزمني
+            const upcomingApproved = Object.entries(allBookings)
+                .map(([id, booking]) => ({ id, ...booking })) // إضافة الـ ID للحجز
+                .filter(booking => {
+                    const bookingDate = new Date(booking.date + 'T00:00:00');
+                    return booking.status === 'approved' &&
+                           bookingDate >= tomorrow &&
+                           bookingDate < thirtyDaysFromNow;
+                });
+
+            // 3. ترتيب الحجوزات حسب التاريخ ثم الوقت
+            upcomingApproved.sort((a, b) => {
+                if (a.date > b.date) return 1;
+                if (a.date < b.date) return -1;
+                if (a.time > b.time) return 1;
+                if (a.time < b.time) return -1;
+                return 0;
+            });
+
+            // 4. عرض الحجوزات أو رسالة في حالة عدم وجودها
+            if (upcomingApproved.length === 0) {
+                upcomingBookingsList.innerHTML = '<p class="note">لا توجد حجوزات مؤكدة خلال الـ 30 يومًا القادمة.</p>';
+                return;
+            }
+
+            let currentDateHeader = '';
+            upcomingApproved.forEach(booking => {
+                // إضافة عنوان للتاريخ عند تغير اليوم
+                if (booking.date !== currentDateHeader) {
+                    currentDateHeader = booking.date;
+                    const dateObj = new Date(currentDateHeader + 'T00:00:00');
+                    const formattedDate = dateObj.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    
+                    const dateHeaderEl = document.createElement('h3');
+                    dateHeaderEl.className = 'date-header';
+                    dateHeaderEl.textContent = formattedDate;
+                    upcomingBookingsList.appendChild(dateHeaderEl);
+                }
+
+                // عرض تفاصيل الحجز
+                const item = document.createElement('div');
+                item.className = 'booking-item approved';
+                item.innerHTML = `
+                    <div>
+                        <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode || 'N/A'}</em><br>
+                        <small>الوقت: ${booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد'}</small><br>
+                        <small>طريقة الدفع: ${booking.paymentMethod}</small>
+                    </div>
+                    <div>
+                        <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>
+                    </div>
+                `;
+                upcomingBookingsList.appendChild(item);
+            });
+        }
+        // ==========================================================
+        // ========== نهاية الدالة الجديدة للحجوزات القادمة ==========
+        // ==========================================================
+
+
         function renderSchedule(scheduleData = {}) {
+            // ... الكود هنا كما هو بدون تغيير
             const scheduleContainer = scheduleForm.querySelector('.schedule-grid');
             if(!scheduleContainer) return;
             scheduleContainer.innerHTML = '';
@@ -121,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         function renderPendingBookings(allBookings) {
+             // ... الكود هنا كما هو بدون تغيير
              pendingList.innerHTML = '';
              const pending = Object.entries(allBookings).filter(([id, booking]) => booking.status === 'pending');
              if(pending.length === 0) {
@@ -147,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         function renderTodayBookings(allBookings) {
+            // ... الكود هنا كما هو بدون تغيير
             todayBookingsList.innerHTML = '';
             const toYYYYMMDD = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
             const todayStr = toYYYYMMDD(new Date());
@@ -179,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function updateDashboard(allBookings) {
+            // ... الكود هنا كما هو بدون تغيير
             const bookingsArray = Object.values(allBookings);
             const toYYYYMMDD = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
             const todayStr = toYYYYMMDD(new Date());
@@ -191,6 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- Event Listeners & Actions ---
+        // ... كل الأكواد هنا كما هي بدون أي تغيير
         if(logoutButton) logoutButton.addEventListener('click', () => auth.signOut());
         
         if(changePasswordBtn) changePasswordBtn.addEventListener('click', () => {
