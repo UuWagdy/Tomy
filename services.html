@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- UPDATED TITLE -->
     <title>الخدمات والحجز - Tomy Barber Shop</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- يستدعي ملف الستايل الخاص به فقط -->
+    <link rel="stylesheet" href="css/services-style.css">
 </head>
 <body>
     <header>
@@ -13,7 +13,6 @@
             <a href="index.html" class="logo-link"><img id="header-logo" src="logo.png" alt="Logo" class="logo"></a>
             <ul>
                 <li><a href="index.html">الرئيسية</a></li>
-                <!-- UPDATED TEXT -->
                 <li><a href="services.html">الخدمات والحجز</a></li>
             </ul>
         </nav>
@@ -23,14 +22,8 @@
         <div id="loader" class="text-center"><h2>جاري تحميل الإعدادات...</h2></div>
 
         <div id="booking-container" style="display:none;">
-            <!-- This section will be hidden by JS when not needed -->
-            <section id="service-selection-section" style="display:none;">
-                 <h2>الخطوة 1: اختر الخدمة (اختياري)</h2>
-                 <select id="service-selection" class="form-control"></select>
-            </section>
-
             <section id="calendar-section" style="display:none;">
-                <h2 id="calendar-title">الخطوة 2: اختر يوماً من التقويم</h2>
+                <h2 id="calendar-title">الخطوة 1: اختر يوماً من التقويم</h2>
                 <div class="calendar-controls">
                     <button id="prev-week" class="btn">الأسبوع السابق</button>
                     <h3 id="current-week-display"></h3>
@@ -38,8 +31,6 @@
                 </div>
                 <div id="calendar-view" class="week-view"></div>
             </section>
-
-            <!-- Booking Form Modal -->
             <div id="booking-modal" class="modal">
                 <div class="modal-content">
                     <span class="close-button" id="close-booking-modal">×</span>
@@ -58,8 +49,6 @@
                     </form>
                 </div>
             </div>
-
-             <!-- Time Slots Modal -->
             <div id="time-slots-modal" class="modal">
                 <div class="modal-content">
                     <span class="close-button" id="close-slots-modal">×</span>
@@ -67,8 +56,6 @@
                     <div id="time-slots-container"></div>
                 </div>
             </div>
-            
-            <!-- Confirmation/Payment Info Modal -->
             <div id="confirmation-modal" class="modal">
                  <div class="modal-content text-center">
                     <span class="close-button" id="close-confirmation-modal">×</span>
@@ -81,9 +68,7 @@
             </div>
         </div>
     </main>
-    
     <footer><p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p></footer>
-
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="js/utils.js"></script>
