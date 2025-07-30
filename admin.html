@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - Tomy Barber Shop</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="index.html" class="logo-link"><img src="logo.png" alt="Tomy Barber Shop Logo" class="logo"></a>
+            <h2>لوحة تحكم الأدمن</h2>
+        </nav>
+    </header>
+    <main class="container page-padding" id="admin-content" style="display: none;">
+        <!-- Admin Section -->
+        <section id="admin-section">
+            <h2>الحجوزات المعلقة</h2>
+            <div id="pending-bookings-list"></div>
+        </section>
+        
+        <section id="approved-section">
+            <h2>الحجوزات المؤكدة</h2>
+            <div id="approved-bookings-list"></div>
+        </section>
+    </main>
+    <div id="password-prompt" class="container page-padding text-center">
+        <!-- سيتم التحكم به عبر جافاسكريبت -->
+    </div>
+    <footer>
+        <p>© 2025 Tomy Barber Shop. جميع الحقوق محفوظة.</p>
+    </footer>
+    <!-- ملف الجافاسكريبت الخاص بالأدمن -->
+    <script src="js/admin.js"></script>
+</body>
+</html>
