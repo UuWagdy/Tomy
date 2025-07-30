@@ -25,6 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Helper to format time to 12-hour format with Arabic AM/PM
+    function formatTo12Hour(timeString) {
+        if (!timeString) return '';
+        const [hour, minute] = timeString.split(':').map(Number);
+        const period = hour >= 12 ? 'م' : 'ص';
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        return `${adjustedHour}:${String(minute).padStart(2, '0')} ${period}`;
+    }
+
     function initializeAdminPanel(user) {
         adminContent.style.display = 'block';
 
@@ -39,13 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const telegramContactInput = document.getElementById('telegram-contact');
         const bookingModelForm = document.getElementById('booking-model-form');
         const bookingModelSelect = document.getElementById('booking-model-select');
-        // UPDATED: Added new elements
         const slotsInputContainer = document.getElementById('slots-input-container');
         const slotDurationInput = document.getElementById('slot-duration');
         const capacityInputContainer = document.getElementById('capacity-input-container');
         const dailyCapacityInput = document.getElementById('daily-capacity');
         const scheduleForm = document.getElementById('schedule-form');
         const pendingList = document.getElementById('pending-bookings-list');
+        const todayBookingsList = document.getElementById('today-bookings-list'); // NEW
         const pendingCount = document.getElementById('pending-count');
         const todayCount = document.getElementById('today-count');
         const totalCount = document.getElementById('total-count');
@@ -62,19 +71,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 telegramContactInput.value = settings.paymentDetails.telegramContact || '';
             }
 
-            // UPDATED: Load settings for both models
             bookingModelSelect.value = settings.bookingModel || 'slots';
-            slotDurationInput.value = settings.slotDuration || 30; // Default 30 mins
-            dailyCapacityInput.value = settings.dailyCapacity || 15; // Default 15 slots
+            slotDurationInput.value = settings.slotDuration || 30;
+            dailyCapacityInput.value = settings.dailyCapacity || 15;
             
-            // Trigger change to show the correct input on load
             toggleModelInputs();
             renderSchedule(settings.schedule);
         });
         
         db.ref('bookings').on('value', (snapshot) => {
-            renderPendingBookings(snapshot.val() || {});
-            updateDashboard(snapshot.val() || {});
+            const allBookings = snapshot.val() || {};
+            renderPendingBookings(allBookings);
+            renderTodayBookings(allBookings); // NEW
+            updateDashboard(allBookings);
         });
 
         // --- UI Rendering ---
@@ -112,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.innerHTML = `
                     <div>
                         <strong>${booking.fullName}</strong> (${booking.phone}) - <em>الكود: ${booking.bookingCode}</em><br>
-                        <small>التاريخ: ${booking.date} ${booking.time ? `- الساعة ${booking.time}` : ''}</small><br>
+                        <small>التاريخ: ${booking.date} ${booking.time ? `- ${formatTo12Hour(booking.time)}` : ''}</small><br>
                         <small>الخدمة: ${booking.serviceName || 'حجز يوم'}</small><br>
                         <small>الدفع: ${booking.paymentMethod}</small>
                     </div>
@@ -125,6 +134,38 @@ document.addEventListener('DOMContentLoaded', () => {
              });
         }
         
+        // NEW Function to render today's bookings
+        function renderTodayBookings(allBookings) {
+            todayBookingsList.innerHTML = '';
+            const toYYYYMMDD = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
+            const todayStr = toYYYYMMDD(new Date());
+
+            const today = Object.entries(allBookings)
+                .filter(([id, booking]) => booking.date === todayStr && booking.status === 'approved')
+                .sort(([, a], [, b]) => (a.time || '').localeCompare(b.time || '')); // Sort by time
+
+            if (today.length === 0) {
+                todayBookingsList.innerHTML = '<p>لا توجد حجوزات لهذا اليوم بعد.</p>';
+                return;
+            }
+
+            today.forEach(([id, booking]) => {
+                const item = document.createElement('div');
+                item.className = 'booking-item approved'; // Use 'approved' style
+                item.innerHTML = `
+                    <div>
+                        <strong>${booking.fullName}</strong> (${booking.phone})<br>
+                        <small>الوقت: ${booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد'}</small><br>
+                        <small>الخدمة: ${booking.serviceName || 'حجز يوم'}</small>
+                    </div>
+                    <div>
+                        <button class="btn" onclick="window.handleBooking('${id}', 'reject')">إلغاء الحجز</button>
+                    </div>
+                `;
+                todayBookingsList.appendChild(item);
+            });
+        }
+
         function updateDashboard(allBookings) {
             const bookingsArray = Object.values(allBookings);
             const toYYYYMMDD = (d) => new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
@@ -159,19 +200,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(() => showNotification('تم حفظ بيانات الدفع.', 'success'));
         });
 
-        // UPDATED: Function to show/hide inputs based on model
         function toggleModelInputs() {
             if (bookingModelSelect.value === 'capacity') {
                 capacityInputContainer.style.display = 'block';
                 slotsInputContainer.style.display = 'none';
-            } else { // slots
+            } else {
                 capacityInputContainer.style.display = 'none';
                 slotsInputContainer.style.display = 'block';
             }
         }
         bookingModelSelect.addEventListener('change', toggleModelInputs);
         
-        // UPDATED: Save all model-related settings
         bookingModelForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const dataToUpdate = {
