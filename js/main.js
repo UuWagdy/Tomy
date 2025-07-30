@@ -243,13 +243,24 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             db.ref('bookings').push(newBooking).then((ref) => {
                 const date = newBooking.date;
-                const dayFormatted = date.split('-').slice(1).join('');
+                // **** بداية التعديل على صيغة الكود ****
+                // 1. نفصل التاريخ للحصول على الشهر واليوم كأرقام
+                const [year, month, day] = date.split('-');
+                
+                // 2. نستخدم العداد اليومي
                 const counterRef = db.ref(`dayCounters/${date}`);
                 counterRef.transaction(currentCount => (currentCount || 0) + 1).then(transactionResult => {
-                    const bookingCode = dayFormatted + String(transactionResult.snapshot.val()).padStart(2, '0');
+                    const orderNumber = transactionResult.snapshot.val();
+                    
+                    // 3. نركب الكود بالصيغة الجديدة المطلوبة: MonthDayOrderNumber
+                    // نستخدم parseInt لإزالة الأصفار من بداية الشهر واليوم (مثل 07 -> 7)
+                    const bookingCode = `${parseInt(month, 10)}${parseInt(day, 10)}${orderNumber}`;
+                    
+                    // 4. نقوم بتحديث الحجز بالكود الجديد
                     ref.update({ bookingCode: bookingCode });
                     showConfirmationModal(bookingCode, newBooking.paymentMethod);
                 });
+                // **** نهاية التعديل على صيغة الكود ****
             });
             if(bookingModal) bookingModal.style.display = 'none';
             bookingForm.reset();
