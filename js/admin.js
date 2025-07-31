@@ -98,9 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // ===========================================
-        // ▼▼▼ هذا هو الكود بعد التعديل المطلوب ▼▼▼
-        // ===========================================
         function createBookingItem(booking) {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
@@ -122,9 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>${actionButtons}</div>`;
             return item;
         }
-        // ===========================================
-        // ▲▲▲ نهاية الكود المعدل ▲▲▲
-        // ===========================================
 
         function renderPendingBookings(bookings) {
             if(!pendingList) return;
@@ -230,7 +224,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const scheduleContainer = scheduleForm.querySelector('.schedule-grid');
             if(!scheduleContainer) return;
             scheduleContainer.innerHTML = '';
-            const days = { monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء', thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد' };
+            
+            // ---  بداية التعديل: ترتيب أيام الأسبوع من السبت للجمعة ---
+            const days = { 
+                saturday: 'السبت', 
+                sunday: 'الأحد', 
+                monday: 'الإثنين', 
+                tuesday: 'الثلاثاء', 
+                wednesday: 'الأربعاء', 
+                thursday: 'الخميس', 
+                friday: 'الجمعة' 
+            };
+            // --- نهاية التعديل ---
+
             for (const day in days) {
                 const dayData = scheduleData[day] || { active: true, open: '09:00', close: '21:00' };
                 const dayDiv = document.createElement('div');
