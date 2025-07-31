@@ -1,7 +1,11 @@
+// =================================================================
+// هذا هو الكود الكامل والنهائي لملف js/main.js
+// قم بنسخ كل هذا المحتوى واستبدل به الملف القديم بالكامل
+// =================================================================
 document.addEventListener('DOMContentLoaded', () => {
 
     const firebaseConfig = {
-      apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", // استخدم بياناتك الصحيحة
+      apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", 
       authDomain: "tomy-barber-shop.firebaseapp.com",
       databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
       projectId: "tomy-barber-shop",
@@ -16,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentDate = new Date();
     let settings = {};
-    let services = {};
     let bookings = {};
     
     const loader = document.getElementById('loader');
@@ -44,27 +47,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
-    // --- الكود الجديد الصحيح ---
-function startBookingSystem() {
-    const settingsRef = db.ref('settings').once('value');
-    
-    settingsRef.then((settingsSnap) => { // تم التعديل هنا ليطلب الإعدادات فقط
-        settings = settingsSnap.val() || {};
-        // services لم نعد بحاجة إليها
-        if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
-        populatePaymentMethods();
-        setupUIForBookingModel(); 
-        db.ref('bookings').on('value', snap => {
-            bookings = snap.val() || {};
-            renderCalendar(); 
+    // ▼▼▼ الدالة بعد إصلاح مشكلة التحميل ▼▼▼
+    function startBookingSystem() {
+        const settingsRef = db.ref('settings').once('value');
+        
+        settingsRef.then((settingsSnap) => {
+            settings = settingsSnap.val() || {};
+            if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
+            populatePaymentMethods();
+            setupUIForBookingModel(); 
+            db.ref('bookings').on('value', snap => {
+                bookings = snap.val() || {};
+                renderCalendar(); 
+            });
+            loader.style.display = 'none';
+            bookingContainer.style.display = 'block';
+        }).catch(err => {
+            console.error("خطأ في تحميل الإعدادات الأولية:", err);
+            loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
         });
-        loader.style.display = 'none';
-        bookingContainer.style.display = 'block';
-    }).catch(err => {
-        console.error("خطأ في تحميل الإعدادات الأولية:", err);
-        loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
-    });
-}
+    }
+    
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
         const [hour, minute] = timeString.split(':').map(Number);
@@ -85,8 +88,6 @@ function startBookingSystem() {
     function setupUIForBookingModel() {
         if (!calendarSection || !calendarTitle) return;
         calendarSection.style.display = 'block';
-        const serviceSection = document.getElementById('service-selection-section');
-        if(serviceSection) serviceSection.style.display = 'none';
         if (settings.bookingModel === 'capacity') {
             calendarTitle.textContent = "الخطوة 1: اختر اليوم المناسب للحجز";
         } else {
@@ -187,43 +188,39 @@ function startBookingSystem() {
         bookingModal.style.display = 'block';
     }
     
-    // --- الكود الجديد والمحسن ---
-function showConfirmationModal(code, paymentMethod) {
-    if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
-    
-    bookingCodeDisplay.textContent = code; // عرض رقم الحجز
-    paymentInfoDisplay.innerHTML = ''; // إفراغ أي تعليمات قديمة
-    paymentInfoDisplay.style.display = 'none'; // إخفاء قسم التعليمات مبدئيًا
+    // ▼▼▼ الدالة بعد تحسين عرض تعليمات الدفع ▼▼▼
+    function showConfirmationModal(code, paymentMethod) {
+        if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
+        
+        bookingCodeDisplay.textContent = code;
+        paymentInfoDisplay.innerHTML = '';
+        paymentInfoDisplay.style.display = 'none';
 
-    const details = settings.paymentDetails;
+        const details = settings.paymentDetails;
 
-    // التحقق مما إذا كان يجب عرض تعليمات الدفع
-    if (details && (paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash')) {
-        let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
+        if (details && (paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash')) {
+            let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
 
-        // عرض بيانات انستا باي فقط إذا اختاره العميل
-        if (paymentMethod === 'InstaPay' && details.instapayName) {
-            html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
+            if (paymentMethod === 'InstaPay' && details.instapayName) {
+                html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
+            }
+
+            if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) {
+                html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
+            }
+
+            if (details.contactInfo) {
+                let platform = details.contactPlatform === 'other' ? (details.contactOther || 'الوسيلة المحددة') : (details.contactPlatform || 'واتساب');
+                platform = platform.charAt(0).toUpperCase() + platform.slice(1);
+                html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
+            }
+
+            paymentInfoDisplay.innerHTML = html;
+            paymentInfoDisplay.style.display = 'block';
         }
-
-        // عرض بيانات فودافون كاش فقط إذا اختاره العميل
-        if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) {
-            html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
-        }
-
-        // عرض وسيلة التواصل المطلوبة لإرسال الإثبات
-        if (details.contactInfo) {
-            let platform = details.contactPlatform === 'other' ? (details.contactOther || 'الوسيلة المحددة') : (details.contactPlatform || 'واتساب');
-            platform = platform.charAt(0).toUpperCase() + platform.slice(1); // لجعل أول حرف كبير
-            html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
-        }
-
-        paymentInfoDisplay.innerHTML = html;
-        paymentInfoDisplay.style.display = 'block'; // إظهار قسم التعليمات
+        
+        confirmationModal.style.display = 'block';
     }
-    
-    confirmationModal.style.display = 'block'; // إظهار نافذة التأكيد النهائية
-}
 
     const toYYYYMMDD = (date) => date.toISOString().split('T')[0];
 
@@ -248,56 +245,37 @@ function showConfirmationModal(code, paymentMethod) {
         });
     }
     
-// --- هذا هو الكود الجديد الصحيح الذي يجب وضعه ---
-if(bookingForm) {
-    bookingForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newBooking = {
-            fullName: document.getElementById('fullName').value,
-            phone: document.getElementById('phone').value,
-            date: hiddenDateInput.value,
-            time: hiddenTimeInput.value || null,
-            serviceName: "حجز موعد",
-            paymentMethod: paymentMethodSelect.value,
-            status: 'pending'
-        };
+    // ▼▼▼ كود إرسال الحجز بعد إصلاح ترتيب الأوامر ▼▼▼
+    if(bookingForm) {
+        bookingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newBooking = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                date: hiddenDateInput.value,
+                time: hiddenTimeInput.value || null,
+                serviceName: "حجز موعد",
+                paymentMethod: paymentMethodSelect.value,
+                status: 'pending'
+            };
 
-        // أولاً، نحفظ الحجز في قاعدة البيانات
-        const newBookingRef = await db.ref('bookings').push(newBooking);
+            const newBookingRef = await db.ref('bookings').push(newBooking);
+            const globalCounterRef = db.ref('globalBookingCounter');
 
-        // ثانيًا، نذهب للعداد العام لزيادته
-        const globalCounterRef = db.ref('globalBookingCounter');
+            globalCounterRef.transaction((currentCount) => {
+                return (currentCount || 0) + 1;
+            }).then((transactionResult) => {
+                const bookingCode = transactionResult.snapshot.val();
+                newBookingRef.update({ bookingCode: bookingCode });
 
-        // نستخدم transaction لضمان الحصول على رقم فريد
-        globalCounterRef.transaction((currentCount) => {
-            return (currentCount || 0) + 1;
-        }).then((transactionResult) => {
-            // عند اكتمال العملية بنجاح، نحصل على الكود
-            const bookingCode = transactionResult.snapshot.val();
-            
-            // نقوم بتحديث الحجز بالكود الجديد
-            newBookingRef.update({ bookingCode: bookingCode });
+                if(bookingModal) bookingModal.style.display = 'none';
+                bookingForm.reset();
 
-            // ▼▼▼ تم نقل السطرين التاليين إلى هنا لضمان التنفيذ بالترتيب الصحيح ▼▼▼
-            if(bookingModal) bookingModal.style.display = 'none'; // نخفي نافذة الحجز الآن
-            bookingForm.reset(); // نفرغ الحقول الآن
-
-            // أخيرًا، نظهر نافذة التأكيد للعميل مع الكود وبيانات الدفع
-            showConfirmationModal(bookingCode, newBooking.paymentMethod);
+                showConfirmationModal(bookingCode, newBooking.paymentMethod);
+            });
         });
-    });
-}```
+    }
 
-### الخلاصة:
-
-كل ما عليك فعله هو استبدال الجزء الخاص بـ `bookingForm.addEventListener` في ملف `js/main.js` بالكود الجديد الصحيح الذي وضعته بالأعلى.
-
-بعد هذا التعديل، ستعود تجربة المستخدم إلى طبيعتها:
-1.  عندما يضغط العميل على "إرسال طلب الحجز".
-2.  ستختفي نافذة الحجز.
-3.  **ستظهر فورًا نافذة التأكيد** وبداخلها رسالة "تم إرسال طلبك بنجاح!".
-4.  سيظهر **رقم الحجز التسلسلي** (مثلاً: 1, 2, 3...).
-5.  إذا اختار الدفع المسبق (فودافون كاش أو انستا باي)، ستظهر له **تعليمات الدفع** كما كانت في السابق.
     if(prevWeekBtn) prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
     if(nextWeekBtn) nextWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 7); renderCalendar(); });
     if(closeBookingModalBtn) closeBookingModalBtn.onclick = () => { if(bookingModal) bookingModal.style.display = "none"; };
