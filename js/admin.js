@@ -26,6 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const toYYYYMMDD = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
         const [hour, minute] = timeString.split(':').map(Number);
@@ -33,13 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
         return `${adjustedHour}:${String(minute).padStart(2, '0')} ${period}`;
     }
-    
-    const toYYYYMMDD = (date) => {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-};
 
     function initializeAdminPanel(user) {
         let allBookingsData = {};
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pendingList = document.getElementById('pending-bookings-list');
         const todayBookingsList = document.getElementById('today-bookings-list');
         const upcomingBookingsList = document.getElementById('upcoming-bookings-list');
-        const pastBookingsList = document.getElementById('past-bookings-list'); // الإضافة الجديدة
+        const pastBookingsList = document.getElementById('past-bookings-list');
         const startDatePicker = document.getElementById('start-date-picker');
         const endDatePicker = document.getElementById('end-date-picker');
         const bookingCountDisplay = document.getElementById('booking-count');
@@ -98,16 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
             renderPendingBookings(bookingsArray);
             renderTodayBookings(bookingsArray);
             renderUpcomingBookings(bookingsArray);
-            renderPastBookings(bookingsArray); // الإضافة الجديدة
+            renderPastBookings(bookingsArray);
             updateDashboard(bookingsArray);
             if (startDatePicker && startDatePicker.value && endDatePicker && endDatePicker.value) {
                 handleDateRangeSelection();
             }
         });
 
-        // =======================================================
-        // ▼▼▼ هذا هو الكود بعد التعديل المطلوب لإضافة زر الحذف ▼▼▼
-        // =======================================================
+        // ▼▼▼ هذه هي الدالة التي تم إصلاحها ▼▼▼
         function createBookingItem(booking) {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
@@ -118,20 +116,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const bookingDate = new Date(booking.date + 'T00:00:00');
-// ... (الكود السابق للدالة يبقى كما هو)
 
-if (booking.status === 'pending') {
-    actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
-} else if (booking.status === 'approved') {
-    if (bookingDate < today) {
-        // إذا كان الحجز في الماضي، يظهر زر الحذف ويستدعي الإجراء الجديد
-        actionButtons = `<button class="btn btn-danger" onclick="window.handleBooking('${booking.id}', 'delete_past')">حذف نهائي</button>`;
-    } else {
-        // إذا كان الحجز اليوم أو في المستقبل، يظهر زر الإلغاء
-        actionButtons = `<button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
-    }
-}
-// ... (باقي كود الدالة يبقى كما هو)
+            // تم وضع هذا الكود في مكانه الصحيح
+            if (booking.status === 'pending') {
+                actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
+            } else if (booking.status === 'approved') {
+                if (bookingDate < today) {
+                    actionButtons = `<button class="btn btn-danger" onclick="window.handleBooking('${booking.id}', 'delete_past')">حذف نهائي</button>`;
+                } else {
+                    actionButtons = `<button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
+                }
+            }
+
             item.innerHTML = `
                 <div>
                     <strong>${booking.fullName}</strong> (${booking.phone})<br>
@@ -142,9 +138,7 @@ if (booking.status === 'pending') {
                 <div>${actionButtons}</div>`;
             return item;
         }
-        // ===========================================
-        // ▲▲▲ نهاية الكود المعدل ▲▲▲
-        // ===========================================
+        // ▲▲▲ نهاية الدالة التي تم إصلاحها ▲▲▲
 
         function renderPendingBookings(bookings) {
             if(!pendingList) return;
@@ -201,9 +195,6 @@ if (booking.status === 'pending') {
             });
         }
         
-        // =================================================
-        // ▼▼▼ هذه هي الدالة الجديدة لعرض الحجوزات السابقة ▼▼▼
-        // =================================================
         function renderPastBookings(bookings) {
             if (!pastBookingsList) return;
             pastBookingsList.innerHTML = '';
@@ -213,7 +204,7 @@ if (booking.status === 'pending') {
             const past = bookings.filter(b => {
                 const bookingDate = new Date(b.date + 'T00:00:00');
                 return b.status === 'approved' && bookingDate < today;
-            }).sort((a,b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || ''))); // ترتيب تنازلي
+            }).sort((a,b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || '')));
 
             if (past.length === 0) {
                 pastBookingsList.innerHTML = '<p class="note">لا توجد حجوزات سابقة لعرضها.</p>';
@@ -221,9 +212,6 @@ if (booking.status === 'pending') {
             }
             past.forEach(booking => pastBookingsList.appendChild(createBookingItem(booking)));
         }
-        // ===========================================
-        // ▲▲▲ نهاية الدالة الجديدة ▲▲▲
-        // ===========================================
 
         function renderFilteredBookings(bookings, title) {
             if (!viewerResultsContainer || !bookingCountDisplay) return;
@@ -365,23 +353,23 @@ if (booking.status === 'pending') {
             });
         }
         
-        // استبدل الدالة القديمة بهذه الدالة المعدّلة
-window.handleBooking = (id, action) => {
-    const bookingRef = db.ref(`bookings/${id}`);
-
-    if (action === 'approve') {
-        bookingRef.update({ status: 'approved' }).then(() => {
-            showNotification('تم قبول الحجز بنجاح.', 'success');
-        });
-    } else if (action === 'reject') { // هذا الإجراء للرفض أو الإلغاء
-         bookingRef.remove().then(() => {
-            showNotification('تم رفض/إلغاء الحجز بنجاح.', 'success');
-        });
-    } else if (action === 'delete_past') { // إجراء جديد للحذف النهائي
-        if (confirm('هل أنت متأكد من حذف هذا الحجز نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) {
-            bookingRef.remove().then(() => {
-                showNotification('تم حذف الحجز السابق نهائياً.', 'success');
-            });
-        }
+        window.handleBooking = (id, action) => {
+            const bookingRef = db.ref(`bookings/${id}`);
+            if (action === 'approve') {
+                bookingRef.update({ status: 'approved' }).then(() => {
+                    showNotification('تم قبول الحجز بنجاح.', 'success');
+                });
+            } else if (action === 'reject') {
+                 bookingRef.remove().then(() => {
+                    showNotification('تم رفض/إلغاء الحجز بنجاح.', 'success');
+                });
+            } else if (action === 'delete_past') {
+                if (confirm('هل أنت متأكد من حذف هذا الحجز نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                    bookingRef.remove().then(() => {
+                        showNotification('تم حذف الحجز السابق نهائياً.', 'success');
+                    });
+                }
+            }
+        };
     }
-};
+});
