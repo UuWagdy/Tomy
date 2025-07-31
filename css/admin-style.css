@@ -39,12 +39,24 @@ header a {
 
 /* Buttons */
 .btn {
-    display: inline-block; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 1rem; transition: transform 0.2s;
+    display: inline-block; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 1rem; transition: all 0.2s;
 }
 .btn:hover { transform: translateY(-2px); }
 .btn-primary { background: #d4af37; color: #111; font-weight: bold; }
 #logout-btn { background-color: #333; color: #fff; border: 1px solid #555; }
 #logout-btn:hover { background-color: #444; }
+
+/* === بداية الإضافة: تصميم زر الحذف === */
+.btn-danger {
+    background-color: #c62828; /* أحمر داكن */
+    color: #fff;
+    font-weight: bold;
+}
+.btn-danger:hover {
+    background-color: #a12020; /* أحمر أغمق عند المرور */
+}
+/* === نهاية الإضافة === */
+
 
 /* Sections */
 section {
@@ -121,7 +133,6 @@ form select {
     color: #333;
 }
 
-/* --- بداية التعديل: تصميم خاص وجذاب لحقول التاريخ والوقت --- */
 form input[type="date"],
 form input[type="time"] {
     width: 100%;
@@ -129,9 +140,9 @@ form input[type="time"] {
     border: 2px solid #ccc;
     border-radius: 4px;
     font-family: 'Cairo', sans-serif;
-    font-weight: 900;      /* خط عريض جداً */
-    font-size: 1.5rem;     /* خط كبير وواضح */
-    color: #1d1d1d;          /* لون أسود داكن */
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: #1d1d1d;
     text-align: center;
     padding: 12px;
     background-color: #f9f9f9;
@@ -141,7 +152,6 @@ form input[type="time"]:focus {
     border-color: #d4af37;
     outline: none;
 }
-/* --- نهاية التعديل --- */
 
 /* Schedule Section Styling */
 .day-schedule-item {
