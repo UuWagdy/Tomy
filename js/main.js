@@ -1,11 +1,10 @@
 // =================================================================
 // هذا هو الكود الكامل والنهائي لملف js/main.js
-// قم بنسخ كل هذا المحتوى واستبدل به الملف القديم بالكامل
 // =================================================================
 document.addEventListener('DOMContentLoaded', () => {
 
     const firebaseConfig = {
-      apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8", 
+      apiKey: "AIzaSyA2ag4E5xN46wj85EmGvBYdllOHrrLu1I8",
       authDomain: "tomy-barber-shop.firebaseapp.com",
       databaseURL: "https://tomy-barber-shop-default-rtdb.firebaseio.com",
       projectId: "tomy-barber-shop",
@@ -46,6 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeConfirmationModalBtn = document.getElementById('close-confirmation-modal');
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
+
+    // ▼▼▼ هذا هو التعديل الأهم لحل مشكلة التاريخ ▼▼▼
+    const toYYYYMMDD = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+    // ▲▲▲ نهاية التعديل ▲▲▲
 
     function startBookingSystem() {
         db.ref('settings').once('value').then((settingsSnap) => {
@@ -138,16 +146,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const totalBookedCount = approvedBookingsCount + pendingBookingsCount;
 
                     if (totalBookedCount >= capacity) {
-                        dayDiv.classList.add('full'); // Case 1: Completely full
+                        dayDiv.classList.add('full');
                         dayDiv.innerHTML += '<br><small>مكتمل</small>';
                     } else if (pendingBookingsCount > 0) {
-                        dayDiv.classList.add('pending-bookings'); // Case 2: Has pending bookings
+                        dayDiv.classList.add('pending-bookings');
                         const availableCount = capacity - totalBookedCount;
                         let displayMessage = `<small>متاح: ${availableCount}</small>`;
                         displayMessage += `<br><small style="font-weight: bold;">(${pendingBookingsCount} قيد التأكيد)</small>`;
                         dayDiv.innerHTML += `<br>${displayMessage}`;
                     } else {
-                        dayDiv.classList.add('available'); // Case 3: Fully available
+                        dayDiv.classList.add('available');
                         const availableCount = capacity - totalBookedCount;
                          dayDiv.innerHTML += `<br><small>متاح: ${availableCount}</small>`;
                     }
@@ -229,8 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         confirmationModal.style.display = 'block';
     }
-
-    const toYYYYMMDD = (date) => date.toISOString().split('T')[0];
 
     if(calendarView) {
         calendarView.addEventListener('click', (e) => {
