@@ -196,16 +196,31 @@ function renderCalendar() {
         slotsModal.style.display = 'block';
     }
     
-    function openBookingModal(date, time = null) {
-        if(!hiddenDateInput || !hiddenTimeInput || !selectedSlotDisplay || !slotsModal || !bookingModal) return;
-        hiddenDateInput.value = date;
-        hiddenTimeInput.value = time;
-        let display = `يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
-        if(time) display += ` - الساعة ${formatTo12Hour(time)}`;
-        selectedSlotDisplay.textContent = display;
-        slotsModal.style.display = 'none';
-        bookingModal.style.display = 'block';
+    // =========================================================
+// ▼▼▼ هذا هو الكود الجديد الكامل لدالة openBookingModal ▼▼▼
+// =========================================================
+function openBookingModal(date, time = null) {
+    if(!hiddenDateInput || !hiddenTimeInput || !selectedSlotDisplay || !slotsModal || !bookingModal) return;
+    
+    hiddenDateInput.value = date;
+    hiddenTimeInput.value = time;
+
+    // --- بداية التعديل المطلوب ---
+    // بناء كود HTML لعرض التاريخ والوقت بشكل منظم
+    let dateHTML = `<div><span class="icon">📅</span> يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}</div>`;
+    let timeHTML = '';
+    // إضافة الوقت فقط إذا كان موجودًا (في نظام المواعيد)
+    if (time) {
+        timeHTML = `<div><span class="icon">⏰</span> الساعة ${formatTo12Hour(time)}</div>`;
     }
+
+    // وضع الكود الجديد داخل صندوق العرض
+    selectedSlotDisplay.innerHTML = dateHTML + timeHTML;
+    // --- نهاية التعديل المطلوب ---
+
+    slotsModal.style.display = 'none';
+    bookingModal.style.display = 'block';
+}
     
     function showConfirmationModal(code, paymentMethod) {
         if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
