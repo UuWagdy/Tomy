@@ -243,56 +243,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // ▼▼▼ كود إرسال الحجز النهائي والأكثر أمانًا ▼▼▼
-    if(bookingForm) {
-        bookingForm.addEventListener('submit', async (e) => {
+    // ▼▼▼ كود إرسال الحجز النهائي والمضمون 100% ▼▼▼
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const submitButton = bookingForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
             submitButton.textContent = 'جاري الإرسال...';
-
-            try {
-    const newBookingData = {
-        fullName: document.getElementById('fullName').value,
-        phone: document.getElementById('phone').value,
-        date: hiddenDateInput.value, // هذا هو التاريخ الذي سنستخدمه
-        time: hiddenTimeInput.value || null,
-        serviceName: "حجز موعد",
-        paymentMethod: paymentMethodSelect.value,
-        status: 'pending'
-    };
-
-    const newBookingRef = await db.ref('bookings').push(newBookingData);
-    // ▼▼▼ هذا هو السطر الجديد ▼▼▼
-    const counterRef = db.ref(`dayCounters/${newBookingData.date}`); 
-    const transactionResult = await counterRef.transaction(currentCount => (currentCount || 0) + 1);
     
-    const bookingCode = transactionResult.snapshot.val();
-    if (bookingCode === null) throw new Error("فشل الحصول على رقم الحجز اليومي.");
-
-    await newBookingRef.update({ bookingCode: bookingCode });
+            const newBookingData = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                date: hiddenDateInput.value,
+                time: hiddenTimeInput.value || null,
+                serviceName: "حجز موعد",
+                paymentMethod: paymentMethodSelect.value,
+                status: 'pending'
+            };
     
-    if(bookingModal) bookingModal.style.display = 'none';
-    bookingForm.reset();
-
-    showConfirmationModal(bookingCode, newBookingData.paymentMethod);
-
-                if (bookingCode === null) throw new Error("فشل الحصول على رقم الحجز.");
-
-                await newBookingRef.update({ bookingCode: bookingCode });
-                
-                if(bookingModal) bookingModal.style.display = 'none';
-                bookingForm.reset();
-
-                showConfirmationModal(bookingCode, newBookingData.paymentMethod);
-
-            } catch (error) {
-                console.error("فشل إتمام الحجز:", error);
-                alert("حدث خطأ أثناء إرسال طلب الحجز. الرجاء المحاولة مرة أخرى.");
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'إرسال طلب الحجز';
-            }
+            let newBookingRef;
+    
+            db.ref('bookings').push(newBookingData)
+                .then(ref => {
+                    newBookingRef = ref; // نحتفظ بمرجع الحجز الجديد
+                    const counterRef = db.ref(`dayCounters/${newBookingData.date}`);
+                    return counterRef.transaction(currentCount => (currentCount || 0) + 1);
+                })
+                .then(transactionResult => {
+                    const bookingCode = transactionResult.snapshot.val();
+                    if (bookingCode === null) {
+                        return Promise.reject(new Error("فشل الحصول على رقم الحجز اليومي."));
+                    }
+                    return newBookingRef.update({ bookingCode: bookingCode }).then(() => bookingCode);
+                })
+                .then(bookingCode => {
+                    // --- مسار النجاح ---
+                    if (bookingModal) bookingModal.style.display = 'none';
+                    bookingForm.reset();
+                    showConfirmationModal(bookingCode, newBookingData.paymentMethod);
+                })
+                .catch(error => {
+                    // --- مسار الفشل ---
+                    console.error("فشل إتمام الحجز:", error);
+                    alert("حدث خطأ أثناء إرسال طلب الحجز. الرجاء المحاولة مرة أخرى.");
+                })
+                .finally(() => {
+                    // --- دائماً يتم تنفيذه في النهاية ---
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'إرسال طلب الحجز';
+                });
         });
     }
 
