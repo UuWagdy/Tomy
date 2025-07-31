@@ -1,0 +1,26 @@
+// =========================================================
+// ▼▼▼ القواعد النهائية والصحيحة للعد اليومي - انسخ هذا ▼▼▼
+// =========================================================
+{
+  "rules": {
+    "settings": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "bookings": {
+      ".read": true,
+      "$bookingId": {
+        ".write": "(auth != null) || (!data.exists() && newData.exists()) || (!data.child('bookingCode').exists() && newData.child('bookingCode').exists())",
+        ".validate": "newData.hasChildren(['fullName', 'phone', 'date', 'status'])"
+      }
+    },
+    // حذفنا العداد العام وأضفنا العدادات اليومية
+    "dayCounters": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
+// =========================================================
+// ▲▲▲ نهاية القواعد النهائية ▲▲▲
+// =========================================================
