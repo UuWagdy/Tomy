@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - Tomy Barber Shop</title>
     <link rel="icon" type="image/png" href="logo.png">
-    <link rel="stylesheet" href="css/admin-style.css">
+    <!-- تم تحديث الإصدار لتحديث الستايل -->
+    <link rel="stylesheet" href="css/admin-style.css?v=1.1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
@@ -40,10 +41,18 @@
         <!-- قسم الحجوزات القادمة (30 يوم) -->
         <section id="upcoming-bookings-section">
             <h2>الحجوزات القادمة (30 يوم)</h2>
-            <div id="upcoming-bookings-list">
-                <!-- الحجوزات القادمة ستظهر هنا -->
+            <div id="upcoming-bookings-list"></div>
+        </section>
+        
+        <!-- === بداية الإضافة: قسم الحجوزات السابقة === -->
+        <section id="past-bookings-section">
+            <h2>الحجوزات السابقة المؤكدة</h2>
+            <p class="note">هنا تظهر الحجوزات المؤكدة للأيام الماضية بغرض مراجعتها أو حذفها لتخفيف البيانات.</p>
+            <div id="past-bookings-list">
+                <!-- الحجوزات السابقة ستظهر هنا -->
             </div>
         </section>
+        <!-- === نهاية الإضافة === -->
 
         <!-- قسم البحث في الحجوزات -->
         <section id="booking-viewer-section">
@@ -150,6 +159,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/admin.js"></script>
+    <!-- تم تحديث إصدار الجافاسكريبت -->
+    <script src="js/admin.js?v=1.1"></script>
 </body>
 </html>
