@@ -4,7 +4,6 @@
 body {
     font-family: 'Tajawal', sans-serif;
     margin: 0;
-    /* تغيير الخلفية واللون الأساسي */
     background-color: #112A2A;
     color: #f0f0f0;
     direction: rtl;
@@ -17,7 +16,7 @@ body {
 }
 .page-padding { padding-top: 2rem; padding-bottom: 2rem; }
 
-/* Header - تعديل الهيدر ليتناسب مع السمة الداكنة */
+/* Header */
 header {
     background: #1d1d1d;
     color: #fff;
@@ -32,6 +31,7 @@ header nav { display: flex; justify-content: space-between; align-items: center;
 header h2 {
     font-family: 'Cairo', sans-serif;
     margin: 0;
+    font-size: 1.5rem; /* تعديل حجم الخط ليكون مناسبًا دائمًا */
 }
 header a {
     color: #fff; text-decoration: none; font-size: 1.1rem; font-weight: 700; padding: 5px 10px;
@@ -43,17 +43,15 @@ header a {
 }
 .btn:hover { transform: translateY(-2px); }
 .btn-primary { background: #d4af37; color: #111; font-weight: bold; }
-/* زر تسجيل الخروج */
 #logout-btn { background-color: #333; color: #fff; border: 1px solid #555; }
 #logout-btn:hover { background-color: #444; }
 
-
-/* Sections - البطاقات البيضاء فوق الخلفية الداكنة */
+/* Sections */
 section {
     margin-top: 2rem;
-    padding: 2rem;
-    background: #fff; /* خلفية بيضاء للوضوح */
-    color: #333;    /* لون النص داكن داخل البطاقات */
+    padding: 1.5rem; /* تقليل الحشو قليلًا ليكون مناسبًا للشاشات الأصغر */
+    background: #fff;
+    color: #333;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
@@ -63,9 +61,8 @@ section h2 {
     font-size: 1.8rem;
     margin-top: 0;
     margin-bottom: 1.5rem;
-    color: #d4af37; /* لون العنوان ذهبي */
+    color: #d4af37;
 }
-/* ستايل خاص بعناوين التواريخ في قائمة الحجوزات القادمة */
 .date-header {
     background-color: #f0f0f0;
     padding: 8px 15px;
@@ -88,7 +85,7 @@ section h2 {
     gap: 25px;
 }
 .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.management-grid { grid-template-columns: 1fr 1fr; }
+.management-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); } /* تعديل هنا ليكون متجاوبًا تلقائيًا */
 .schedule-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 
 /* Cards & Items */
@@ -96,7 +93,7 @@ section h2 {
 .stat-card h3 { margin: 0 0 10px; font-size: 1.1rem; color: #555; font-weight: 700; }
 .stat-card p { margin: 0; font-size: 2.8rem; font-weight: 700; color: #d4af37; }
 .booking-item {
-    border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; border-right-width: 5px;
+    border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; flex-wrap: wrap; /* السماح بالتفاف العناصر */ justify-content: space-between; align-items: center; border-right-width: 5px; gap: 10px; /* إضافة مسافة بين العناصر */
 }
 .booking-item strong { font-size: 1.1rem; }
 .booking-item.pending { background-color: #fffde7; border-right-color: #fdd835; }
@@ -113,57 +110,50 @@ form input, form select {
 }
 form button { margin-top: 25px; }
 
-/* Footer */
-footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #111; color: #888; }
-
-@media (max-width: 900px) { .management-grid { grid-template-columns: 1fr; } }
-/* ==================================== */
-/* === ستايلات قسم البحث في الحجوزات === */
-/* ==================================== */
-
+/* Viewer Controls */
 .viewer-controls {
     display: grid;
-    grid-template-columns: 1fr 1fr 200px; /* عمودين للفلاتر وعمود للعداد */
-    gap: 25px;
-    align-items: end; /* لمحاذاة العناصر للأسفل */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* تعديل ليكون متجاوبًا */
+    gap: 20px;
+    align-items: end;
     padding-bottom: 2rem;
     border-bottom: 2px solid #eee;
     margin-bottom: 2rem;
 }
+.count-display { text-align: center; background-color: #f9f9f9; border-radius: 8px; padding: 10px; }
+.count-display h3 { margin: 0 0 10px; font-size: 1.1rem; color: #555; font-weight: 700; }
+.count-display p { margin: 0; font-size: 2.8rem; font-weight: 700; color: #d4af37; }
 
-.count-display {
-    text-align: center;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 10px;
-}
+/* Footer */
+footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #111; color: #888; }
 
-.count-display h3 {
-    margin: 0 0 10px;
-    font-size: 1.1rem;
-    color: #555;
-    font-weight: 700;
-}
 
-.count-display p {
-    margin: 0;
-    font-size: 2.8rem;
-    font-weight: 700;
-    color: #d4af37;
-}
+/* ======================================= */
+/* === التعديلات الخاصة بالشاشات الصغيرة === */
+/* ======================================= */
 
-#viewer-results-container .booking-item {
-    animation: fadeIn 0.5s ease-out;
-}
-
-/* تعديل للعمل على الشاشات الصغيرة */
 @media (max-width: 768px) {
-    .viewer-controls {
-        grid-template-columns: 1fr; /* عمود واحد فقط */
+    header nav {
+        flex-direction: column; /* جعل الشعار والعنوان تحت بعض */
+        gap: 15px; /* إضافة مسافة بينهم */
     }
-}
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    section h2 {
+        font-size: 1.5rem; /* تصغير حجم العناوين الرئيسية */
+    }
+
+    .booking-item {
+        flex-direction: column; /* جعل بيانات الحجز والأزرار تحت بعض */
+        align-items: flex-start; /* محاذاة كل شيء للبداية */
+    }
+
+    .booking-item > div:last-child {
+        width: 100%; /* جعل حاوية الأزرار بعرض كامل */
+        display: flex;
+        gap: 10px;
+    }
+
+    .booking-item > div:last-child button {
+        flex-grow: 1; /* جعل الأزرار تملأ المساحة المتاحة */
+    }
 }
