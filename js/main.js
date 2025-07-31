@@ -100,46 +100,66 @@ document.addEventListener('DOMContentLoaded', () => {
         return settings.schedule ? (settings.schedule[dayName] || { active: false }) : { active: false };
     }
 
-    function renderCalendar() {
-        if (!calendarView || !currentWeekDisplay || !prevWeekBtn) return;
-        calendarView.innerHTML = '';
-        const weekStart = new Date(currentDate);
-        weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
-        currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        prevWeekBtn.disabled = weekStart < today;
-        for (let i = 0; i < 7; i++) {
-            const dayDate = new Date(weekStart);
-            dayDate.setDate(weekStart.getDate() + i);
-            const dayString = toYYYYMMDD(dayDate);
-            const schedule = getDaySchedule(dayDate);
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'day-slot';
-            dayDiv.dataset.date = dayString;
-            const dayBookings = bookings ? Object.values(bookings).filter(b => b.date === dayString) : [];
-            dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
-            if (dayDate < today || !schedule.active) {
-                dayDiv.classList.add('disabled');
-                if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
-            } else {
-                if(settings.bookingModel === 'capacity') {
-                    const capacity = settings.dailyCapacity || 10;
-                    const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
-                    if (approvedBookingsCount >= capacity) {
-                        dayDiv.classList.add('full');
-                        dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
-                    } else {
-                         const availableCount = capacity - approvedBookingsCount;
-                         dayDiv.innerHTML += `<br><small>متاح: ${availableCount}</small>`;
-                    }
+    // =========================================================
+// ▼▼▼ هذا هو الكود الجديد الكامل لدالة renderCalendar ▼▼▼
+// =========================================================
+function renderCalendar() {
+    if (!calendarView || !currentWeekDisplay || !prevWeekBtn) return;
+    calendarView.innerHTML = '';
+    const weekStart = new Date(currentDate);
+    weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
+    currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    prevWeekBtn.disabled = weekStart < today;
+
+    for (let i = 0; i < 7; i++) {
+        const dayDate = new Date(weekStart);
+        dayDate.setDate(weekStart.getDate() + i);
+        const dayString = toYYYYMMDD(dayDate);
+        const schedule = getDaySchedule(dayDate);
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day-slot';
+        dayDiv.dataset.date = dayString;
+        const dayBookings = bookings ? Object.values(bookings).filter(b => b.date === dayString) : [];
+        dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
+
+        if (dayDate < today || !schedule.active) {
+            dayDiv.classList.add('disabled');
+            if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
+        } else {
+            // --- بداية التعديل المطلوب ---
+            if (settings.bookingModel === 'capacity') {
+                const capacity = settings.dailyCapacity || 10;
+                
+                // الخطوة 1: حساب الحجوزات المؤكدة والمعلقة
+                const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
+                const pendingBookingsCount = dayBookings.filter(b => b.status === 'pending').length;
+                const totalBookedCount = approvedBookingsCount + pendingBookingsCount;
+
+                if (totalBookedCount >= capacity) {
+                    dayDiv.classList.add('full');
+                    dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
                 } else {
-                    dayDiv.classList.add('available');
+                     // الخطوة 2: حساب الأماكن المتاحة فعلًا
+                     const availableCount = capacity - totalBookedCount;
+                     
+                     // الخطوة 3: بناء الرسالة الديناميكية
+                     let displayMessage = `<small>متاح: ${availableCount}</small>`;
+                     if (pendingBookingsCount > 0) {
+                         // إضافة رسالة "قيد التأكيد" إذا كان هناك حجوزات معلقة
+                         displayMessage += `<br><small style="color: #c62828; font-weight: bold;">(${pendingBookingsCount} قيد التأكيد)</small>`;
+                     }
+                     dayDiv.innerHTML += `<br>${displayMessage}`;
                 }
+            // --- نهاية التعديل المطلوب ---
+            } else {
+                dayDiv.classList.add('available');
             }
-            calendarView.appendChild(dayDiv);
         }
+        calendarView.appendChild(dayDiv);
     }
+}
 
      function renderTimeSlots(dateString) {
         if (!slotsContainer || !slotsModal) return;
