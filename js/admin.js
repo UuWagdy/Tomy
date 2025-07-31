@@ -359,12 +359,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        window.handleBooking = (id, action) => {
-            if (action === 'approve') {
-                db.ref(`bookings/${id}`).update({ status: 'approved' }).then(() => showNotification('تم قبول الحجز.', 'success'));
-            } else { // هذا الإجراء 'reject' سيقوم بالرفض أو الإلغاء أو الحذف النهائي
-                db.ref(`bookings/${id}`).remove().then(() => showNotification('تم تنفيذ الإجراء بنجاح.', 'success'));
-            }
-        };
+        // استبدل الدالة القديمة بهذه الدالة المعدّلة
+window.handleBooking = (id, action) => {
+    const bookingRef = db.ref(`bookings/${id}`);
+
+    if (action === 'approve') {
+        bookingRef.update({ status: 'approved' }).then(() => {
+            showNotification('تم قبول الحجز بنجاح.', 'success');
+        });
+    } else if (action === 'reject') { // هذا الإجراء للرفض أو الإلغاء
+         bookingRef.remove().then(() => {
+            showNotification('تم رفض/إلغاء الحجز بنجاح.', 'success');
+        });
+    } else if (action === 'delete_past') { // إجراء جديد للحذف النهائي
+        if (confirm('هل أنت متأكد من حذف هذا الحجز نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) {
+            bookingRef.remove().then(() => {
+                showNotification('تم حذف الحجز السابق نهائياً.', 'success');
+            });
+        }
     }
-});
+};
