@@ -44,27 +44,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
-    function startBookingSystem() {
-        const settingsRef = db.ref('settings').once('value');
-        const servicesRef = db.ref('services').once('value');
-        Promise.all([settingsRef, servicesRef]).then(([settingsSnap, servicesSnap]) => {
-            settings = settingsSnap.val() || {};
-            services = servicesSnap.val() || {};
-            if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
-            populatePaymentMethods();
-            setupUIForBookingModel(); 
-            db.ref('bookings').on('value', snap => {
-                bookings = snap.val() || {};
-                renderCalendar(); 
-            });
-            loader.style.display = 'none';
-            bookingContainer.style.display = 'block';
-        }).catch(err => {
-            console.error("خطأ في تحميل الإعدادات الأولية:", err);
-            loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
-        });
-    }
+    // --- الكود الجديد الصحيح ---
+function startBookingSystem() {
+    const settingsRef = db.ref('settings').once('value');
     
+    settingsRef.then((settingsSnap) => { // تم التعديل هنا ليطلب الإعدادات فقط
+        settings = settingsSnap.val() || {};
+        // services لم نعد بحاجة إليها
+        if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
+        populatePaymentMethods();
+        setupUIForBookingModel(); 
+        db.ref('bookings').on('value', snap => {
+            bookings = snap.val() || {};
+            renderCalendar(); 
+        });
+        loader.style.display = 'none';
+        bookingContainer.style.display = 'block';
+    }).catch(err => {
+        console.error("خطأ في تحميل الإعدادات الأولية:", err);
+        loader.innerHTML = "حدث خطأ في تحميل الإعدادات. الرجاء المحاولة مرة أخرى.";
+    });
+}
     function formatTo12Hour(timeString) {
         if (!timeString) return '';
         const [hour, minute] = timeString.split(':').map(Number);
@@ -187,24 +187,43 @@ document.addEventListener('DOMContentLoaded', () => {
         bookingModal.style.display = 'block';
     }
     
-    function showConfirmationModal(code, paymentMethod) {
-        if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
-        bookingCodeDisplay.textContent = code;
-        paymentInfoDisplay.innerHTML = '';
-        if(paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash') {
-            const details = settings.paymentDetails;
-            let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
-            if (details && details.instapayName) html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
-            if (details && details.vodafoneCash) html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
-            if (details && details.contactInfo) {
-                let platform = details.contactPlatform === 'other' ? details.contactOther : (details.contactPlatform || 'واتساب');
-                platform = platform.charAt(0).toUpperCase() + platform.slice(1);
-                html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
-            }
-            paymentInfoDisplay.innerHTML = html;
+    // --- الكود الجديد والمحسن ---
+function showConfirmationModal(code, paymentMethod) {
+    if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
+    
+    bookingCodeDisplay.textContent = code; // عرض رقم الحجز
+    paymentInfoDisplay.innerHTML = ''; // إفراغ أي تعليمات قديمة
+    paymentInfoDisplay.style.display = 'none'; // إخفاء قسم التعليمات مبدئيًا
+
+    const details = settings.paymentDetails;
+
+    // التحقق مما إذا كان يجب عرض تعليمات الدفع
+    if (details && (paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash')) {
+        let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
+
+        // عرض بيانات انستا باي فقط إذا اختاره العميل
+        if (paymentMethod === 'InstaPay' && details.instapayName) {
+            html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
         }
-        confirmationModal.style.display = 'block';
+
+        // عرض بيانات فودافون كاش فقط إذا اختاره العميل
+        if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) {
+            html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
+        }
+
+        // عرض وسيلة التواصل المطلوبة لإرسال الإثبات
+        if (details.contactInfo) {
+            let platform = details.contactPlatform === 'other' ? (details.contactOther || 'الوسيلة المحددة') : (details.contactPlatform || 'واتساب');
+            platform = platform.charAt(0).toUpperCase() + platform.slice(1); // لجعل أول حرف كبير
+            html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
+        }
+
+        paymentInfoDisplay.innerHTML = html;
+        paymentInfoDisplay.style.display = 'block'; // إظهار قسم التعليمات
     }
+    
+    confirmationModal.style.display = 'block'; // إظهار نافذة التأكيد النهائية
+}
 
     const toYYYYMMDD = (date) => date.toISOString().split('T')[0];
 
