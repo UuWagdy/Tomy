@@ -57,40 +57,36 @@ h2, h3 { font-family: 'Cairo', sans-serif; }
 .time-slot.approved { background-color: #ffebee; color: #c62828; cursor: not-allowed; text-decoration: line-through; border: 1px solid #ef9a9a; }
 form label { display: block; margin-top: 15px; font-weight: 700; font-size: 1.1rem; }
 form input, form select { width: 100%; padding: 12px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-/* --- هذا هو إصلاح مشكلة تداخل النص (النسخة النهائية) --- */
+/* --- هذا هو إصلاح مشكلة تداخل النص (النسخة النهائية 2.0) --- */
 #booking-form p:first-of-type {
     margin-bottom: 5px; 
     font-weight: 700;
 }
 #selected-slot-display { 
-    display: block; 
+    display: flex; /* أهم خاصية: لجعل العناصر مرنة وتقف جنب بعضها */
+    flex-wrap: wrap; /* السماح للعناصر بالنزول لسطر جديد إذا لم توجد مساحة */
+    justify-content: center; /* توسيط العناصر في الصندوق */
+    align-items: center; /* محاذاة العناصر عموديًا في المنتصف */
+    gap: 15px; /* إضافة مسافة فاصلة بين التاريخ والوقت */
     width: 100%;
     box-sizing: border-box;
-    /* تعديل الخلفية والحدود ليكون شكلها احترافي */
-    background-color: #fff9e8; /* لون كريمي فاتح متناسق مع الذهبي */
-    border: 2px dashed #d4af37; /* حد ذهبي متقطع */
-    color: #333; /* لون الخط داكن للوضوح */
+    background-color: #fff9e8;
+    border: 2px dashed #d4af37;
+    color: #333;
     padding: 15px; 
     border-radius: 8px; 
     margin-bottom: 1rem; 
     font-size: 1.1rem; 
     font-weight: 700; 
-    text-align: right; /* محاذاة لليمين لتكون متناسقة مع الأيقونات */
 }
-/* تنسيق الأسطر الداخلية (التاريخ والوقت) */
+/* إزالة أي هوامش إضافية من الأسطر الداخلية */
 #selected-slot-display div {
-    margin-bottom: 5px;
-}
-#selected-slot-display div:last-child {
     margin-bottom: 0;
 }
 /* تنسيق الأيقونات (شكل الساعة والتقويم) */
 #selected-slot-display .icon {
     margin-left: 8px;
-    display: inline-block;
-    width: 20px; /* لضمان محاذاة النصوص فوق بعضها */
 }
-/* --- نهاية الإصلاح --- */
 /* --- نهاية الإصلاح --- */
 .booking-code { font-size: 2.5rem; font-weight: 700; color: #d4af37; background: #333; padding: 10px 20px; border-radius: 8px; border: 2px dashed #d4af37; word-break: break-all; }
 #payment-info-display { margin-top: 1rem; padding: 15px; background: #fffde7; border: 1px solid #fff59d; border-radius: 5px; color: #5d4037; }
