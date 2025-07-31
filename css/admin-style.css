@@ -105,9 +105,23 @@ section h2 {
 form label {
     display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 700; font-size: 1.1rem;
 }
+/* --- بداية التعديل المطلوب --- */
 form input, form select {
     width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;
+    font-family: 'Cairo', sans-serif; font-weight: 700; /* تطبيق الفونت البولد على كل المدخلات */
 }
+.day-schedule-item > label { /* تنسيق خاص بليبل "يوم عمل" وعلامة الصح */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700; /* إبقاء الخط عريضاً */
+}
+.day-inputs label { /* جعل "من:" و "إلى:" أكثر بروزًا */
+    font-weight: 900;
+    color: #000;
+}
+/* --- نهاية التعديل المطلوب --- */
+
 form button { margin-top: 25px; }
 
 /* Viewer Controls */
