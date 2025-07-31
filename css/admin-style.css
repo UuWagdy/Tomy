@@ -31,7 +31,7 @@ header nav { display: flex; justify-content: space-between; align-items: center;
 header h2 {
     font-family: 'Cairo', sans-serif;
     margin: 0;
-    font-size: 1.5rem; /* تعديل حجم الخط ليكون مناسبًا دائمًا */
+    font-size: 1.5rem;
 }
 header a {
     color: #fff; text-decoration: none; font-size: 1.1rem; font-weight: 700; padding: 5px 10px;
@@ -49,7 +49,7 @@ header a {
 /* Sections */
 section {
     margin-top: 2rem;
-    padding: 1.5rem; /* تقليل الحشو قليلًا ليكون مناسبًا للشاشات الأصغر */
+    padding: 1.5rem;
     background: #fff;
     color: #333;
     border-radius: 8px;
@@ -73,12 +73,8 @@ section h2 {
     border-right: 5px solid #d4af37;
     font-size: 1.2rem;
 }
+.note { color: #777; font-size: 0.9rem; text-align: center; }
 
-.booking-item .note {
-    color: #777;
-    font-size: 0.9rem;
-    text-align: center;
-}
 /* Grids */
 .dashboard-grid, .management-grid, .schedule-grid {
     display: grid;
@@ -92,78 +88,77 @@ section h2 {
 .stat-card { padding: 20px; text-align: center; background-color: #f9f9f9; border-radius: 8px; }
 .stat-card h3 { margin: 0 0 10px; font-size: 1.1rem; color: #555; font-weight: 700; }
 .stat-card p { margin: 0; font-size: 2.8rem; font-weight: 700; color: #d4af37; }
+
 .booking-item {
-    border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; flex-wrap: wrap; /* السماح بالتفاف العناصر */ justify-content: space-between; align-items: center; border-right-width: 5px; gap: 10px; /* إضافة مسافة بين العناصر */
+    border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-right-width: 5px; gap: 10px;
 }
 .booking-item strong { font-size: 1.1rem; }
 .booking-item.pending { background-color: #fffde7; border-right-color: #fdd835; }
 .booking-item.approved { background-color: #e8f5e9; border-right-color: #66bb6a; }
-.note { color: #777; font-size: 0.9rem; text-align: center; }
 
-
-/* Forms */
+/* Forms Styling */
 form label {
     display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 700; font-size: 1.1rem;
 }
+form button { margin-top: 25px; }
 
-form input, form select {
+/* General styling for text/select inputs */
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="tel"],
+form input[type="url"],
+form input[type="number"],
+form select {
     width: 100%;
     padding: 12px;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 1.1rem;
     font-family: 'Cairo', sans-serif;
     font-weight: 700;
-    color: #000;
+    font-size: 1.1rem;
+    color: #333;
 }
-.day-inputs label { /* جعل "من:" و "إلى:" أكثر بروزًا */
-    font-weight: 900;
-    color: #000;
-}
-form button { margin-top: 25px; }
 
-
-/* === بداية التعديل المطلوب === */
-/* Schedule Section Item Styling */
-.day-schedule-item {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column; /* جعل العناصر مكدسة عمودياً */
-    align-items: center;   /* محاذاة كل شيء في المنتصف */
-    gap: 15px;             /* إضافة مسافة بين العناصر */
+/* --- بداية التعديل: تصميم خاص وجذاب لحقول التاريخ والوقت --- */
+form input[type="date"],
+form input[type="time"] {
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 900;      /* خط عريض جداً */
+    font-size: 1.5rem;     /* خط كبير وواضح */
+    color: #1d1d1d;          /* لون أسود داكن */
+    text-align: center;
+    padding: 12px;
     background-color: #f9f9f9;
 }
-.day-schedule-item h4 {
-    font-size: 1.5rem;
-    color: #333;
-    margin: 0;
-    font-weight: 900; /* جعل اسم اليوم أكثر بروزًا */
+form input[type="date"]:focus,
+form input[type="time"]:focus {
+    border-color: #d4af37;
+    outline: none;
 }
-.day-schedule-item > label { /* تنسيق خاص بليبل "يوم عمل" وعلامة الصح */
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 1.2rem; /* تكبير خط "يوم عمل" قليلاً */
-}
-.day-inputs {
-    width: 100%; /* جعل حاوية المدخلات بعرض كامل */
-}
-/* === نهاية التعديل المطلوب === */
+/* --- نهاية التعديل --- */
 
+/* Schedule Section Styling */
+.day-schedule-item {
+    border: 1px solid #ddd; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; background-color: #f9f9f9;
+}
+.day-schedule-item h4 {
+    font-size: 1.5rem; color: #333; margin: 0; font-weight: 900;
+}
+.day-schedule-item > label {
+    display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.2rem;
+}
+.day-inputs { width: 100%; }
+.day-inputs label { font-weight: 900; color: #000; }
 
 /* Viewer Controls */
 .viewer-controls {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* تعديل ليكون متجاوبًا */
-    gap: 20px;
-    align-items: end;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid #eee;
-    margin-bottom: 2rem;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end; padding-bottom: 2rem; border-bottom: 2px solid #eee; margin-bottom: 2rem;
 }
 .count-display { text-align: center; background-color: #f9f9f9; border-radius: 8px; padding: 10px; }
 .count-display h3 { margin: 0 0 10px; font-size: 1.1rem; color: #555; font-weight: 700; }
@@ -172,33 +167,11 @@ form button { margin-top: 25px; }
 /* Footer */
 footer { text-align: center; padding: 2rem 0; margin-top: 2rem; background: #111; color: #888; }
 
-
-/* ======================================= */
-/* === التعديلات الخاصة بالشاشات الصغيرة === */
-/* ======================================= */
-
+/* Media Queries for Responsiveness */
 @media (max-width: 768px) {
-    header nav {
-        flex-direction: column; /* جعل الشعار والعنوان تحت بعض */
-        gap: 15px; /* إضافة مسافة بينهم */
-    }
-
-    section h2 {
-        font-size: 1.5rem; /* تصغير حجم العناوين الرئيسية */
-    }
-
-    .booking-item {
-        flex-direction: column; /* جعل بيانات الحجز والأزرار تحت بعض */
-        align-items: flex-start; /* محاذاة كل شيء للبداية */
-    }
-
-    .booking-item > div:last-child {
-        width: 100%; /* جعل حاوية الأزرار بعرض كامل */
-        display: flex;
-        gap: 10px;
-    }
-
-    .booking-item > div:last-child button {
-        flex-grow: 1; /* جعل الأزرار تملأ المساحة المتاحة */
-    }
+    header nav { flex-direction: column; gap: 15px; }
+    section h2 { font-size: 1.5rem; }
+    .booking-item { flex-direction: column; align-items: flex-start; }
+    .booking-item > div:last-child { width: 100%; display: flex; gap: 10px; }
+    .booking-item > div:last-child button { flex-grow: 1; }
 }
