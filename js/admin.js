@@ -113,19 +113,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const bookingDate = new Date(booking.date + 'T00:00:00');
+// ... (الكود السابق للدالة يبقى كما هو)
 
-            if (booking.status === 'pending') {
-                actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
-            } else if (booking.status === 'approved') {
-                if (bookingDate < today) {
-                    // إذا كان الحجز في الماضي، يظهر زر الحذف
-                    actionButtons = `<button class="btn btn-danger" onclick="if(confirm('هل أنت متأكد من حذف هذا الحجز نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')) window.handleBooking('${booking.id}', 'reject')">حذف نهائي</button>`;
-                } else {
-                    // إذا كان الحجز اليوم أو في المستقبل، يظهر زر الإلغاء
-                    actionButtons = `<button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
-                }
-            }
-
+if (booking.status === 'pending') {
+    actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
+} else if (booking.status === 'approved') {
+    if (bookingDate < today) {
+        // إذا كان الحجز في الماضي، يظهر زر الحذف ويستدعي الإجراء الجديد
+        actionButtons = `<button class="btn btn-danger" onclick="window.handleBooking('${booking.id}', 'delete_past')">حذف نهائي</button>`;
+    } else {
+        // إذا كان الحجز اليوم أو في المستقبل، يظهر زر الإلغاء
+        actionButtons = `<button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">إلغاء الحجز</button>`;
+    }
+}
+// ... (باقي كود الدالة يبقى كما هو)
             item.innerHTML = `
                 <div>
                     <strong>${booking.fullName}</strong> (${booking.phone})<br>
