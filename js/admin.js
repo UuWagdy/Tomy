@@ -98,11 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // ===========================================
+        // ▼▼▼ هذا هو الكود بعد التعديل المطلوب ▼▼▼
+        // ===========================================
         function createBookingItem(booking) {
             const item = document.createElement('div');
             item.className = `booking-item ${booking.status}`;
             const timeDisplay = booking.time ? `<strong>${formatTo12Hour(booking.time)}</strong>` : 'غير محدد';
-            const codeDisplay = `<strong>الكود:</strong> ${booking.bookingCode || 'غير محدد'}`;
+            const codeDisplay = `<strong>رقم الحجز:</strong> #${booking.bookingCode || 'غير محدد'}`;
             let actionButtons = '';
             if (booking.status === 'pending') {
                 actionButtons = `<button class="btn btn-primary" onclick="window.handleBooking('${booking.id}', 'approve')">قبول</button> <button class="btn" onclick="window.handleBooking('${booking.id}', 'reject')">رفض</button>`;
@@ -119,6 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>${actionButtons}</div>`;
             return item;
         }
+        // ===========================================
+        // ▲▲▲ نهاية الكود المعدل ▲▲▲
+        // ===========================================
 
         function renderPendingBookings(bookings) {
             if(!pendingList) return;
