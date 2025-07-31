@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingCodeDisplay = document.getElementById('booking-code-display');
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
-    // ▼▼▼ الدالة بعد إصلاح مشكلة التحميل ▼▼▼
     function startBookingSystem() {
         const settingsRef = db.ref('settings').once('value');
         
@@ -188,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
         bookingModal.style.display = 'block';
     }
     
-    // ▼▼▼ الدالة بعد تحسين عرض تعليمات الدفع ▼▼▼
     function showConfirmationModal(code, paymentMethod) {
         if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
         
@@ -245,34 +243,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // ▼▼▼ كود إرسال الحجز بعد إصلاح ترتيب الأوامر ▼▼▼
+    // ▼▼▼ كود إرسال الحجز النهائي والأكثر أمانًا ▼▼▼
     if(bookingForm) {
         bookingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const newBooking = {
-                fullName: document.getElementById('fullName').value,
-                phone: document.getElementById('phone').value,
-                date: hiddenDateInput.value,
-                time: hiddenTimeInput.value || null,
-                serviceName: "حجز موعد",
-                paymentMethod: paymentMethodSelect.value,
-                status: 'pending'
-            };
+            const submitButton = bookingForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'جاري الإرسال...';
 
-            const newBookingRef = await db.ref('bookings').push(newBooking);
-            const globalCounterRef = db.ref('globalBookingCounter');
+            try {
+                const newBookingData = {
+                    fullName: document.getElementById('fullName').value,
+                    phone: document.getElementById('phone').value,
+                    date: hiddenDateInput.value,
+                    time: hiddenTimeInput.value || null,
+                    serviceName: "حجز موعد",
+                    paymentMethod: paymentMethodSelect.value,
+                    status: 'pending'
+                };
 
-            globalCounterRef.transaction((currentCount) => {
-                return (currentCount || 0) + 1;
-            }).then((transactionResult) => {
+                const newBookingRef = await db.ref('bookings').push(newBookingData);
+                const globalCounterRef = db.ref('globalBookingCounter');
+                const transactionResult = await globalCounterRef.transaction(currentCount => (currentCount || 0) + 1);
+                
                 const bookingCode = transactionResult.snapshot.val();
-                newBookingRef.update({ bookingCode: bookingCode });
+                if (bookingCode === null) throw new Error("فشل الحصول على رقم الحجز.");
 
+                await newBookingRef.update({ bookingCode: bookingCode });
+                
                 if(bookingModal) bookingModal.style.display = 'none';
                 bookingForm.reset();
 
-                showConfirmationModal(bookingCode, newBooking.paymentMethod);
-            });
+                showConfirmationModal(bookingCode, newBookingData.paymentMethod);
+
+            } catch (error) {
+                console.error("فشل إتمام الحجز:", error);
+                alert("حدث خطأ أثناء إرسال طلب الحجز. الرجاء المحاولة مرة أخرى.");
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'إرسال طلب الحجز';
+            }
         });
     }
 
