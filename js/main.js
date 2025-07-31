@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-  // --- هذا هو الكود الجديد الذي سيتم وضعه مكانه ---
+// --- هذا هو الكود الجديد الصحيح الذي يجب وضعه ---
 if(bookingForm) {
     bookingForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -243,31 +243,42 @@ if(bookingForm) {
             status: 'pending'
         };
 
-        // أولاً، نقوم بحفظ بيانات الحجز الأساسية
+        // أولاً، نحفظ الحجز في قاعدة البيانات
         const newBookingRef = await db.ref('bookings').push(newBooking);
 
-        // ثانيًا، نقوم بإنشاء عداد عام واحد فقط
+        // ثانيًا، نذهب للعداد العام لزيادته
         const globalCounterRef = db.ref('globalBookingCounter');
 
-        // ثالثًا، نستخدم transaction لزيادة العداد بأمان وضمان عدم تكرار الأرقام
+        // نستخدم transaction لضمان الحصول على رقم فريد
         globalCounterRef.transaction((currentCount) => {
             return (currentCount || 0) + 1;
         }).then((transactionResult) => {
-            // القيمة الجديدة للعداد هي الكود الجديد
+            // عند اكتمال العملية بنجاح، نحصل على الكود
             const bookingCode = transactionResult.snapshot.val();
             
-            // نقوم بتحديث الحجز الذي تم إنشاؤه لإضافة الكود الجديد
+            // نقوم بتحديث الحجز بالكود الجديد
             newBookingRef.update({ bookingCode: bookingCode });
 
-            // نعرض نافذة التأكيد للعميل مع الكود الجديد
+            // ▼▼▼ تم نقل السطرين التاليين إلى هنا لضمان التنفيذ بالترتيب الصحيح ▼▼▼
+            if(bookingModal) bookingModal.style.display = 'none'; // نخفي نافذة الحجز الآن
+            bookingForm.reset(); // نفرغ الحقول الآن
+
+            // أخيرًا، نظهر نافذة التأكيد للعميل مع الكود وبيانات الدفع
             showConfirmationModal(bookingCode, newBooking.paymentMethod);
         });
-
-        if(bookingModal) bookingModal.style.display = 'none';
-        bookingForm.reset();
     });
-}
+}```
 
+### الخلاصة:
+
+كل ما عليك فعله هو استبدال الجزء الخاص بـ `bookingForm.addEventListener` في ملف `js/main.js` بالكود الجديد الصحيح الذي وضعته بالأعلى.
+
+بعد هذا التعديل، ستعود تجربة المستخدم إلى طبيعتها:
+1.  عندما يضغط العميل على "إرسال طلب الحجز".
+2.  ستختفي نافذة الحجز.
+3.  **ستظهر فورًا نافذة التأكيد** وبداخلها رسالة "تم إرسال طلبك بنجاح!".
+4.  سيظهر **رقم الحجز التسلسلي** (مثلاً: 1, 2, 3...).
+5.  إذا اختار الدفع المسبق (فودافون كاش أو انستا باي)، ستظهر له **تعليمات الدفع** كما كانت في السابق.
     if(prevWeekBtn) prevWeekBtn.addEventListener('click', () => { if (!prevWeekBtn.disabled) { currentDate.setDate(currentDate.getDate() - 7); renderCalendar(); }});
     if(nextWeekBtn) nextWeekBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 7); renderCalendar(); });
     if(closeBookingModalBtn) closeBookingModalBtn.onclick = () => { if(bookingModal) bookingModal.style.display = "none"; };
