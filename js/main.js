@@ -98,28 +98,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return settings.schedule ? (settings.schedule[dayName] || { active: false }) : { active: false };
     }
 
-    // =========================================================
-    // ▼▼▼ هذا هو الكود الجديد الكامل والمحدث لدالة renderCalendar ▼▼▼
-    // =========================================================
     function renderCalendar() {
         if (!calendarView || !currentWeekDisplay || !prevWeekBtn) return;
         calendarView.innerHTML = '';
         const weekStart = new Date(currentDate);
-        
-        // --- تعديل بداية الأسبوع ليكون يوم السبت ---
-        const dayOfWeek = weekStart.getDay(); // 0=الأحد, 6=السبت
-        const diff = (dayOfWeek + 1) % 7; // حساب الفرق للوصول إلى آخر يوم سبت
+        const dayOfWeek = weekStart.getDay(); // 0=Sunday, 6=Saturday
+        const diff = (dayOfWeek + 1) % 7; // Calculate difference to get to the last Saturday
         weekStart.setDate(weekStart.getDate() - diff);
-        // --- نهاية التعديل ---
 
         currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
         
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // تعطيل زر الأسبوع السابق إذا كان الأسبوع الحالي هو أسبوع اليوم
         const checkDate = new Date(weekStart);
-        checkDate.setDate(checkDate.getDate() + 6); // نهاية الأسبوع المعروض
+        checkDate.setDate(checkDate.getDate() + 6); // End of the displayed week
         prevWeekBtn.disabled = checkDate < today;
 
         for (let i = 0; i < 7; i++) {
@@ -133,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const dayBookings = bookings ? Object.values(bookings).filter(b => b.date === dayString) : [];
             dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
 
-            // --- بداية المنطق الجديد لتلوين الأيام ---
             if (dayDate < today) {
                 dayDiv.classList.add('disabled');
             } else if (!schedule.active) {
@@ -146,22 +138,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     const totalBookedCount = approvedBookingsCount + pendingBookingsCount;
 
                     if (totalBookedCount >= capacity) {
-                        dayDiv.classList.add('full'); // يوم مكتمل (أحمر)
+                        dayDiv.classList.add('full'); // Case 1: Completely full
                         dayDiv.innerHTML += '<br><small>مكتمل</small>';
+                    } else if (pendingBookingsCount > 0) {
+                        dayDiv.classList.add('pending-bookings'); // Case 2: Has pending bookings
+                        const availableCount = capacity - totalBookedCount;
+                        let displayMessage = `<small>متاح: ${availableCount}</small>`;
+                        displayMessage += `<br><small style="font-weight: bold;">(${pendingBookingsCount} قيد التأكيد)</small>`;
+                        dayDiv.innerHTML += `<br>${displayMessage}`;
                     } else {
-                         dayDiv.classList.add('available'); // يوم متاح
-                         const availableCount = capacity - totalBookedCount;
-                         let displayMessage = `<small>متاح: ${availableCount}</small>`;
-                         if (pendingBookingsCount > 0) {
-                             displayMessage += `<br><small style="color: #c62828; font-weight: bold;">(${pendingBookingsCount} قيد التأكيد)</small>`;
-                         }
-                         dayDiv.innerHTML += `<br>${displayMessage}`;
+                        dayDiv.classList.add('available'); // Case 3: Fully available
+                        const availableCount = capacity - totalBookedCount;
+                         dayDiv.innerHTML += `<br><small>متاح: ${availableCount}</small>`;
                     }
                 } else { // 'slots' model
                     dayDiv.classList.add('available');
                 }
             }
-            // --- نهاية المنطق الجديد ---
             calendarView.appendChild(dayDiv);
         }
     }
