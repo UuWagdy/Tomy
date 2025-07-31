@@ -85,7 +85,7 @@ section h2 {
     gap: 25px;
 }
 .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.management-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); } /* تعديل هنا ليكون متجاوبًا تلقائيًا */
+.management-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .schedule-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 
 /* Cards & Items */
@@ -105,24 +105,55 @@ section h2 {
 form label {
     display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 700; font-size: 1.1rem;
 }
-/* --- بداية التعديل المطلوب --- */
+
 form input, form select {
-    width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;
-    font-family: 'Cairo', sans-serif; font-weight: 700; /* تطبيق الفونت البولد على كل المدخلات */
-}
-.day-schedule-item > label { /* تنسيق خاص بليبل "يوم عمل" وعلامة الصح */
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700; /* إبقاء الخط عريضاً */
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    color: #000;
 }
 .day-inputs label { /* جعل "من:" و "إلى:" أكثر بروزًا */
     font-weight: 900;
     color: #000;
 }
-/* --- نهاية التعديل المطلوب --- */
-
 form button { margin-top: 25px; }
+
+
+/* === بداية التعديل المطلوب === */
+/* Schedule Section Item Styling */
+.day-schedule-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column; /* جعل العناصر مكدسة عمودياً */
+    align-items: center;   /* محاذاة كل شيء في المنتصف */
+    gap: 15px;             /* إضافة مسافة بين العناصر */
+    background-color: #f9f9f9;
+}
+.day-schedule-item h4 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+    font-weight: 900; /* جعل اسم اليوم أكثر بروزًا */
+}
+.day-schedule-item > label { /* تنسيق خاص بليبل "يوم عمل" وعلامة الصح */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1.2rem; /* تكبير خط "يوم عمل" قليلاً */
+}
+.day-inputs {
+    width: 100%; /* جعل حاوية المدخلات بعرض كامل */
+}
+/* === نهاية التعديل المطلوب === */
+
 
 /* Viewer Controls */
 .viewer-controls {
