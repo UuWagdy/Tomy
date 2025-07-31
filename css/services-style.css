@@ -46,7 +46,7 @@ h2, h3 { font-family: 'Cairo', sans-serif; }
 
 /* Modal Styles */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.7); }
-.modal-content { background: #fff; color: #333; margin: 10% auto; padding: 25px; border-radius: 8px; max-width: 550px; width: 90%; /* تعديل مهم */ position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-content { background: #fff; color: #333; margin: 10% auto; padding: 25px; border-radius: 8px; max-width: 550px; width: 90%; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 .modal-content h3 { font-family: 'Cairo', sans-serif; color: #333; }
 .close-button { position: absolute; right: auto; left: 15px; top: 10px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
 #time-slots-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 20px; }
@@ -57,7 +57,13 @@ h2, h3 { font-family: 'Cairo', sans-serif; }
 .time-slot.approved { background-color: #ffebee; color: #c62828; cursor: not-allowed; text-decoration: line-through; border: 1px solid #ef9a9a; }
 form label { display: block; margin-top: 15px; font-weight: 700; font-size: 1.1rem; }
 form input, form select { width: 100%; padding: 12px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-#selected-slot-display { background-color: #eee; padding: 12px; border-radius: 4px; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700; }
+/* --- هذا هو إصلاح مشكلة حرف "ص" --- */
+#selected-slot-display { 
+    background-color: #eee; padding: 12px; border-radius: 4px; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700; 
+    white-space: nowrap; /* لمنع نزول النص لسطر جديد */
+    overflow: hidden; /* لإخفاء أي جزء زائد عن الشاشة */
+    text-overflow: ellipsis; /* لوضع "..." إذا كان النص أطول من اللازم */
+}
 .booking-code { font-size: 2.5rem; font-weight: 700; color: #d4af37; background: #333; padding: 10px 20px; border-radius: 8px; border: 2px dashed #d4af37; word-break: break-all; }
 #payment-info-display { margin-top: 1rem; padding: 15px; background: #fffde7; border: 1px solid #fff59d; border-radius: 5px; color: #5d4037; }
 #payment-info-display h4 { color: #333; }
@@ -71,6 +77,22 @@ footer { text-align: center; padding: 2rem 0; background: #111; color: #888; }
 /* ======================================= */
 
 @media (max-width: 768px) {
+    /* --- هذا هو إصلاح الهيدر المكسور --- */
+    header nav {
+        flex-direction: column; /* جعل الشعار والقوائم تحت بعض */
+        gap: 20px; /* إضافة مسافة بينهم */
+    }
+    header ul {
+        display: flex; /* جعل القوائم مرنة */
+        justify-content: center; /* توسيط القوائم */
+        flex-wrap: wrap; /* السماح للقوائم بالنزول لسطر جديد إذا لزم الأمر */
+        gap: 15px; /* مسافة بين عناصر القائمة */
+    }
+    header ul li {
+        margin: 0; /* إلغاء المسافات القديمة */
+    }
+    /* --- نهاية إصلاح الهيدر --- */
+
     #calendar-title, #slots-modal-title {
         font-size: 1.5rem; /* تصغير حجم العنوان */
     }
