@@ -48,9 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentInfoDisplay = document.getElementById('payment-info-display');
 
     function startBookingSystem() {
-        const settingsRef = db.ref('settings').once('value');
-        
-        settingsRef.then((settingsSnap) => {
+        db.ref('settings').once('value').then((settingsSnap) => {
             settings = settingsSnap.val() || {};
             if (headerLogo) headerLogo.src = settings.logoUrl || 'logo.png';
             populatePaymentMethods();
@@ -101,70 +99,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================
-// ▼▼▼ هذا هو الكود الجديد الكامل لدالة renderCalendar ▼▼▼
-// =========================================================
-function renderCalendar() {
-    if (!calendarView || !currentWeekDisplay || !prevWeekBtn) return;
-    calendarView.innerHTML = '';
-    const weekStart = new Date(currentDate);
-    weekStart.setDate(currentDate.getDate() - (currentDate.getDay() || 7) + 1);
-    currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    prevWeekBtn.disabled = weekStart < today;
+    // ▼▼▼ هذا هو الكود الجديد الكامل والمحدث لدالة renderCalendar ▼▼▼
+    // =========================================================
+    function renderCalendar() {
+        if (!calendarView || !currentWeekDisplay || !prevWeekBtn) return;
+        calendarView.innerHTML = '';
+        const weekStart = new Date(currentDate);
+        
+        // --- تعديل بداية الأسبوع ليكون يوم السبت ---
+        const dayOfWeek = weekStart.getDay(); // 0=الأحد, 6=السبت
+        const diff = (dayOfWeek + 1) % 7; // حساب الفرق للوصول إلى آخر يوم سبت
+        weekStart.setDate(weekStart.getDate() - diff);
+        // --- نهاية التعديل ---
 
-    for (let i = 0; i < 7; i++) {
-        const dayDate = new Date(weekStart);
-        dayDate.setDate(weekStart.getDate() + i);
-        const dayString = toYYYYMMDD(dayDate);
-        const schedule = getDaySchedule(dayDate);
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'day-slot';
-        dayDiv.dataset.date = dayString;
-        const dayBookings = bookings ? Object.values(bookings).filter(b => b.date === dayString) : [];
-        dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
+        currentWeekDisplay.textContent = `الأسبوع من ${weekStart.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' })}`;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        if (dayDate < today || !schedule.active) {
-            dayDiv.classList.add('disabled');
-            if (!schedule.active) dayDiv.innerHTML += '<br><small>(إجازة)</small>';
-        } else {
-            // --- بداية التعديل المطلوب ---
-            if (settings.bookingModel === 'capacity') {
-                const capacity = settings.dailyCapacity || 10;
-                
-                // الخطوة 1: حساب الحجوزات المؤكدة والمعلقة
-                const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
-                const pendingBookingsCount = dayBookings.filter(b => b.status === 'pending').length;
-                const totalBookedCount = approvedBookingsCount + pendingBookingsCount;
+        // تعطيل زر الأسبوع السابق إذا كان الأسبوع الحالي هو أسبوع اليوم
+        const checkDate = new Date(weekStart);
+        checkDate.setDate(checkDate.getDate() + 6); // نهاية الأسبوع المعروض
+        prevWeekBtn.disabled = checkDate < today;
 
-                if (totalBookedCount >= capacity) {
-                    dayDiv.classList.add('full');
-                    dayDiv.innerHTML += '<br><small>مكتمل العدد</small>';
-                } else {
-                     // الخطوة 2: حساب الأماكن المتاحة فعلًا
-                     const availableCount = capacity - totalBookedCount;
-                     
-                     // الخطوة 3: بناء الرسالة الديناميكية
-                     let displayMessage = `<small>متاح: ${availableCount}</small>`;
-                     if (pendingBookingsCount > 0) {
-                         // إضافة رسالة "قيد التأكيد" إذا كان هناك حجوزات معلقة
-                         displayMessage += `<br><small style="color: #c62828; font-weight: bold;">(${pendingBookingsCount} قيد التأكيد)</small>`;
-                     }
-                     dayDiv.innerHTML += `<br>${displayMessage}`;
-                }
-            // --- نهاية التعديل المطلوب ---
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(weekStart);
+            dayDate.setDate(weekStart.getDate() + i);
+            const dayString = toYYYYMMDD(dayDate);
+            const schedule = getDaySchedule(dayDate);
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day-slot';
+            dayDiv.dataset.date = dayString;
+            const dayBookings = bookings ? Object.values(bookings).filter(b => b.date === dayString) : [];
+            dayDiv.innerHTML = `<strong>${dayDate.toLocaleDateString('ar-EG', { weekday: 'long' })}</strong><br>${dayDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}`;
+
+            // --- بداية المنطق الجديد لتلوين الأيام ---
+            if (dayDate < today) {
+                dayDiv.classList.add('disabled');
+            } else if (!schedule.active) {
+                dayDiv.classList.add('off-day');
             } else {
-                dayDiv.classList.add('available');
+                if (settings.bookingModel === 'capacity') {
+                    const capacity = settings.dailyCapacity || 10;
+                    const approvedBookingsCount = dayBookings.filter(b => b.status === 'approved').length;
+                    const pendingBookingsCount = dayBookings.filter(b => b.status === 'pending').length;
+                    const totalBookedCount = approvedBookingsCount + pendingBookingsCount;
+
+                    if (totalBookedCount >= capacity) {
+                        dayDiv.classList.add('full'); // يوم مكتمل (أحمر)
+                        dayDiv.innerHTML += '<br><small>مكتمل</small>';
+                    } else {
+                         dayDiv.classList.add('available'); // يوم متاح
+                         const availableCount = capacity - totalBookedCount;
+                         let displayMessage = `<small>متاح: ${availableCount}</small>`;
+                         if (pendingBookingsCount > 0) {
+                             displayMessage += `<br><small style="color: #c62828; font-weight: bold;">(${pendingBookingsCount} قيد التأكيد)</small>`;
+                         }
+                         dayDiv.innerHTML += `<br>${displayMessage}`;
+                    }
+                } else { // 'slots' model
+                    dayDiv.classList.add('available');
+                }
             }
+            // --- نهاية المنطق الجديد ---
+            calendarView.appendChild(dayDiv);
         }
-        calendarView.appendChild(dayDiv);
     }
-}
 
      function renderTimeSlots(dateString) {
         if (!slotsContainer || !slotsModal) return;
         slotsContainer.innerHTML = '';
-        const schedule = getDaySchedule(new Date(dateString));
+        const schedule = getDaySchedule(new Date(dateString + 'T00:00:00'));
         if (!schedule || !schedule.open || !schedule.close) return;
         const slotDuration = parseInt(settings.slotDuration, 10) || 30;
         const timeToMinutes = (t) => t.split(':').map(Number).reduce((h, m) => h * 60 + m);
@@ -196,67 +201,39 @@ function renderCalendar() {
         slotsModal.style.display = 'block';
     }
     
-    // =========================================================
-// ▼▼▼ هذا هو الكود الجديد الكامل لدالة openBookingModal ▼▼▼
-// =========================================================
-// =========================================================
-// ▼▼▼ هذا هو الكود الجديد الكامل لدالة openBookingModal ▼▼▼
-// =========================================================
-function openBookingModal(date, time = null) {
-    if(!hiddenDateInput || !hiddenTimeInput || !selectedSlotDisplay || !slotsModal || !bookingModal) return;
-    
-    hiddenDateInput.value = date;
-    hiddenTimeInput.value = time;
-
-    // --- بداية التعديل المطلوب ---
-    // بناء كود HTML للتاريخ دائمًا
-    let dateHTML = `<div><span class="icon">📅</span> يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}</div>`;
-    
-    // بناء كود HTML للوقت فقط إذا كان موجودًا
-    let timeHTML = '';
-    if (time) {
-        // إضافة أيقونة الساعة بجانب الوقت
-        timeHTML = `<div><span class="icon">⏰</span> الساعة ${formatTo12Hour(time)}</div>`;
+    function openBookingModal(date, time = null) {
+        if(!hiddenDateInput || !hiddenTimeInput || !selectedSlotDisplay || !slotsModal || !bookingModal) return;
+        hiddenDateInput.value = date;
+        hiddenTimeInput.value = time;
+        let dateHTML = `<div><span class="icon">📅</span> يوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}</div>`;
+        let timeHTML = time ? `<div><span class="icon">⏰</span> الساعة ${formatTo12Hour(time)}</div>` : '';
+        selectedSlotDisplay.innerHTML = dateHTML + timeHTML;
+        slotsModal.style.display = 'none';
+        bookingModal.style.display = 'block';
     }
-
-    // وضع الكود الجديد (التاريخ وبجانبه الوقت إن وجد) داخل صندوق العرض
-    selectedSlotDisplay.innerHTML = dateHTML + timeHTML;
-    // --- نهاية التعديل المطلوب ---
-
-    slotsModal.style.display = 'none';
-    bookingModal.style.display = 'block';
-}
     
     function showConfirmationModal(code, paymentMethod) {
         if(!bookingCodeDisplay || !paymentInfoDisplay || !confirmationModal) return;
-        
         bookingCodeDisplay.textContent = code;
         paymentInfoDisplay.innerHTML = '';
         paymentInfoDisplay.style.display = 'none';
-
         const details = settings.paymentDetails;
-
         if (details && (paymentMethod === 'InstaPay' || paymentMethod === 'Vodafone Cash')) {
             let html = `<h4>الرجاء إتمام الدفع وإرسال إثبات التحويل</h4>`;
-
             if (paymentMethod === 'InstaPay' && details.instapayName) {
                 html += `<p><strong>حساب انستا باي:</strong> ${details.instapayName}</p>`;
             }
-
             if (paymentMethod === 'Vodafone Cash' && details.vodafoneCash) {
                 html += `<p><strong>رقم فودافون كاش:</strong> ${details.vodafoneCash}</p>`;
             }
-
             if (details.contactInfo) {
                 let platform = details.contactPlatform === 'other' ? (details.contactOther || 'الوسيلة المحددة') : (details.contactPlatform || 'واتساب');
                 platform = platform.charAt(0).toUpperCase() + platform.slice(1);
                 html += `<p><strong>أرسل إثبات التحويل إلى ${platform} على:</strong> ${details.contactInfo}</p>`;
             }
-
             paymentInfoDisplay.innerHTML = html;
             paymentInfoDisplay.style.display = 'block';
         }
-        
         confirmationModal.style.display = 'block';
     }
 
@@ -265,7 +242,7 @@ function openBookingModal(date, time = null) {
     if(calendarView) {
         calendarView.addEventListener('click', (e) => {
             const daySlot = e.target.closest('.day-slot');
-            if (!daySlot || daySlot.classList.contains('disabled') || daySlot.classList.contains('full')) return;
+            if (!daySlot || daySlot.classList.contains('disabled') || daySlot.classList.contains('full') || daySlot.classList.contains('off-day')) return;
             const date = daySlot.dataset.date;
             if (settings.bookingModel === 'slots') {
                 if(slotsModalTitle) slotsModalTitle.textContent = `المواعيد المتاحة ليوم ${new Date(date + 'T00:00:00').toLocaleDateString('ar-EG')}`;
@@ -283,7 +260,6 @@ function openBookingModal(date, time = null) {
         });
     }
     
-    // ▼▼▼ كود إرسال الحجز النهائي والمضمون 100% ▼▼▼
     if (bookingForm) {
         bookingForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -305,30 +281,25 @@ function openBookingModal(date, time = null) {
     
             db.ref('bookings').push(newBookingData)
                 .then(ref => {
-                    newBookingRef = ref; // نحتفظ بمرجع الحجز الجديد
+                    newBookingRef = ref;
                     const counterRef = db.ref(`dayCounters/${newBookingData.date}`);
                     return counterRef.transaction(currentCount => (currentCount || 0) + 1);
                 })
                 .then(transactionResult => {
                     const bookingCode = transactionResult.snapshot.val();
-                    if (bookingCode === null) {
-                        return Promise.reject(new Error("فشل الحصول على رقم الحجز اليومي."));
-                    }
+                    if (bookingCode === null) return Promise.reject(new Error("فشل الحصول على رقم الحجز اليومي."));
                     return newBookingRef.update({ bookingCode: bookingCode }).then(() => bookingCode);
                 })
                 .then(bookingCode => {
-                    // --- مسار النجاح ---
                     if (bookingModal) bookingModal.style.display = 'none';
                     bookingForm.reset();
                     showConfirmationModal(bookingCode, newBookingData.paymentMethod);
                 })
                 .catch(error => {
-                    // --- مسار الفشل ---
                     console.error("فشل إتمام الحجز:", error);
                     alert("حدث خطأ أثناء إرسال طلب الحجز. الرجاء المحاولة مرة أخرى.");
                 })
                 .finally(() => {
-                    // --- دائماً يتم تنفيذه في النهاية ---
                     submitButton.disabled = false;
                     submitButton.textContent = 'إرسال طلب الحجز';
                 });
