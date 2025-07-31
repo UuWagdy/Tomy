@@ -252,21 +252,31 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.textContent = 'جاري الإرسال...';
 
             try {
-                const newBookingData = {
-                    fullName: document.getElementById('fullName').value,
-                    phone: document.getElementById('phone').value,
-                    date: hiddenDateInput.value,
-                    time: hiddenTimeInput.value || null,
-                    serviceName: "حجز موعد",
-                    paymentMethod: paymentMethodSelect.value,
-                    status: 'pending'
-                };
+    const newBookingData = {
+        fullName: document.getElementById('fullName').value,
+        phone: document.getElementById('phone').value,
+        date: hiddenDateInput.value, // هذا هو التاريخ الذي سنستخدمه
+        time: hiddenTimeInput.value || null,
+        serviceName: "حجز موعد",
+        paymentMethod: paymentMethodSelect.value,
+        status: 'pending'
+    };
 
-                const newBookingRef = await db.ref('bookings').push(newBookingData);
-                const globalCounterRef = db.ref('globalBookingCounter');
-                const transactionResult = await globalCounterRef.transaction(currentCount => (currentCount || 0) + 1);
-                
-                const bookingCode = transactionResult.snapshot.val();
+    const newBookingRef = await db.ref('bookings').push(newBookingData);
+    // ▼▼▼ هذا هو السطر الجديد ▼▼▼
+    const counterRef = db.ref(`dayCounters/${newBookingData.date}`); 
+    const transactionResult = await counterRef.transaction(currentCount => (currentCount || 0) + 1);
+    
+    const bookingCode = transactionResult.snapshot.val();
+    if (bookingCode === null) throw new Error("فشل الحصول على رقم الحجز اليومي.");
+
+    await newBookingRef.update({ bookingCode: bookingCode });
+    
+    if(bookingModal) bookingModal.style.display = 'none';
+    bookingForm.reset();
+
+    showConfirmationModal(bookingCode, newBookingData.paymentMethod);
+
                 if (bookingCode === null) throw new Error("فشل الحصول على رقم الحجز.");
 
                 await newBookingRef.update({ bookingCode: bookingCode });
