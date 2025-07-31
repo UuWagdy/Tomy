@@ -34,7 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${adjustedHour}:${String(minute).padStart(2, '0')} ${period}`;
     }
     
-    const toYYYYMMDD = (d) => d.toISOString().split("T")[0];
+    const toYYYYMMDD = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
 
     function initializeAdminPanel(user) {
         let allBookingsData = {};
