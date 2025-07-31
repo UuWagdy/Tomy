@@ -57,13 +57,27 @@ h2, h3 { font-family: 'Cairo', sans-serif; }
 .time-slot.approved { background-color: #ffebee; color: #c62828; cursor: not-allowed; text-decoration: line-through; border: 1px solid #ef9a9a; }
 form label { display: block; margin-top: 15px; font-weight: 700; font-size: 1.1rem; }
 form input, form select { width: 100%; padding: 12px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-/* --- هذا هو إصلاح مشكلة حرف "ص" --- */
-#selected-slot-display { 
-    background-color: #eee; padding: 12px; border-radius: 4px; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 700; 
-    white-space: nowrap; /* لمنع نزول النص لسطر جديد */
-    overflow: hidden; /* لإخفاء أي جزء زائد عن الشاشة */
-    text-overflow: ellipsis; /* لوضع "..." إذا كان النص أطول من اللازم */
+/* --- هذا هو إصلاح مشكلة تداخل النص --- */
+#booking-form p:first-of-type {
+    margin-bottom: 5px; /* تقليل المسافة تحت العنوان */
+    font-weight: 700;
 }
+#selected-slot-display { 
+    display: block; /* أهم سطر: يجبر الصندوق على النزول لسطر جديد */
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #eee; 
+    padding: 12px; 
+    border-radius: 4px; 
+    margin-bottom: 1rem; 
+    font-size: 1.1rem; 
+    font-weight: 700; 
+    text-align: center; /* توسيط النص ليعطي شكلاً أفضل */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* --- نهاية الإصلاح --- */
 .booking-code { font-size: 2.5rem; font-weight: 700; color: #d4af37; background: #333; padding: 10px 20px; border-radius: 8px; border: 2px dashed #d4af37; word-break: break-all; }
 #payment-info-display { margin-top: 1rem; padding: 15px; background: #fffde7; border: 1px solid #fff59d; border-radius: 5px; color: #5d4037; }
 #payment-info-display h4 { color: #333; }
@@ -77,34 +91,31 @@ footer { text-align: center; padding: 2rem 0; background: #111; color: #888; }
 /* ======================================= */
 
 @media (max-width: 768px) {
-    /* --- هذا هو إصلاح الهيدر المكسور --- */
     header nav {
-        flex-direction: column; /* جعل الشعار والقوائم تحت بعض */
-        gap: 20px; /* إضافة مسافة بينهم */
+        flex-direction: column; 
+        gap: 20px;
     }
     header ul {
-        display: flex; /* جعل القوائم مرنة */
-        justify-content: center; /* توسيط القوائم */
-        flex-wrap: wrap; /* السماح للقوائم بالنزول لسطر جديد إذا لزم الأمر */
-        gap: 15px; /* مسافة بين عناصر القائمة */
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
     }
     header ul li {
-        margin: 0; /* إلغاء المسافات القديمة */
+        margin: 0;
     }
-    /* --- نهاية إصلاح الهيدر --- */
 
     #calendar-title, #slots-modal-title {
-        font-size: 1.5rem; /* تصغير حجم العنوان */
+        font-size: 1.5rem;
     }
 
     .calendar-controls {
-        flex-direction: column; /* جعل الأزرار والعنوان تحت بعض */
+        flex-direction: column;
         gap: 15px;
     }
 
-    /* هذا هو أهم تعديل: تحويل التقويم إلى قائمة عمودية */
     .week-view {
-        grid-template-columns: 1fr; /* عمود واحد فقط */
+        grid-template-columns: 1fr;
         gap: 15px;
     }
 }
