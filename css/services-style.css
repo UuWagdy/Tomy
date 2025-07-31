@@ -1,4 +1,4 @@
-/* --- ستايل صفحة الخدمات (تصميم داكن ومحسن + إصلاح الفوتر) --- */
+/* --- ستايل صفحة الخدمات (النسخة النهائية الكاملة) --- */
 
 /* General Body Styles */
 body {
@@ -57,17 +57,17 @@ h2, h3 { font-family: 'Cairo', sans-serif; }
 .time-slot.approved { background-color: #ffebee; color: #c62828; cursor: not-allowed; text-decoration: line-through; border: 1px solid #ef9a9a; }
 form label { display: block; margin-top: 15px; font-weight: 700; font-size: 1.1rem; }
 form input, form select { width: 100%; padding: 12px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-/* --- هذا هو إصلاح مشكلة تداخل النص (النسخة النهائية 2.0) --- */
+/* --- هذا هو الكود النهائي لمربع عرض الموعد --- */
 #booking-form p:first-of-type {
     margin-bottom: 5px; 
     font-weight: 700;
 }
 #selected-slot-display { 
-    display: flex; /* أهم خاصية: لجعل العناصر مرنة وتقف جنب بعضها */
-    flex-wrap: wrap; /* السماح للعناصر بالنزول لسطر جديد إذا لم توجد مساحة */
-    justify-content: center; /* توسيط العناصر في الصندوق */
-    align-items: center; /* محاذاة العناصر عموديًا في المنتصف */
-    gap: 15px; /* إضافة مسافة فاصلة بين التاريخ والوقت */
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center;
+    align-items: center; 
+    gap: 15px; 
     width: 100%;
     box-sizing: border-box;
     background-color: #fff9e8;
@@ -79,15 +79,13 @@ form input, form select { width: 100%; padding: 12px; margin-top: 8px; box-sizin
     font-size: 1.1rem; 
     font-weight: 700; 
 }
-/* إزالة أي هوامش إضافية من الأسطر الداخلية */
 #selected-slot-display div {
     margin-bottom: 0;
 }
-/* تنسيق الأيقونات (شكل الساعة والتقويم) */
 #selected-slot-display .icon {
     margin-left: 8px;
 }
-/* --- نهاية الإصلاح --- */
+/* --- نهاية الكود النهائي --- */
 .booking-code { font-size: 2.5rem; font-weight: 700; color: #d4af37; background: #333; padding: 10px 20px; border-radius: 8px; border: 2px dashed #d4af37; word-break: break-all; }
 #payment-info-display { margin-top: 1rem; padding: 15px; background: #fffde7; border: 1px solid #fff59d; border-radius: 5px; color: #5d4037; }
 #payment-info-display h4 { color: #333; }
